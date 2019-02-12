@@ -4,10 +4,12 @@
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
 ; ---------------------------------------------------------
-; Code: by Leonardo Miliani
+; Code by Leonardo Miliani
+; Compiler: ZASM assembler 4.2.4-macos10.12
 ;
 ; Revisions:
 ; 0.1 - 20190207 - First version - working
+; 1.0 - 20190212 - Code revision - stable version
 ;
 ; ---------------------------------------------------------
 ;
@@ -31,8 +33,7 @@ RAMCELL     equ 0x8000
 #target rom
 
 ; this line instructs the assembler to compile while taking account of
-; the start of the code fixed at 0x0000h and that the file shall be
-; 0xff bytes in size
+; the start of the code that must be set to 0x0000h and that the file has a fixed size
 #code BOOT, 0000h, 00ffh
 
 reset:  ; this corresponds to the RESET vector (the CPU jumps to 0000h after a reset)
@@ -44,26 +45,24 @@ reset:  ; this corresponds to the RESET vector (the CPU jumps to 0000h after a r
 
         call setCtc         ; set CTC
 
-        ;program the PIO
+        ; let's program the PIO
         ld a,11001111b      ; mode 3 (bit control)
         out (CTRLREGB),a
         ld a,00000000b      ; set pins of port B to OUTPUT
         out (CTRLREGB),a
-        ld a, 10101010b     ; write a byte into RAM
+        ld a, 10101010b     ; this is the pattern (starts with all LEDs set to OFF)
         ld (RAMCELL), a
 
 noexit:
         xor a,a             ; clear register A
         ld a,(RAMCELL)      ; load the byte from RAM
-        ; send the pattern to the PIO
-        out (DATAREGB),a
+        out (DATAREGB),a    ; send the pattern to the PIO
         xor a,11111111b     ; invert the bits of the byte
         ld (RAMCELL),a      ; write the new value
 
-        ; a little delay
-        ld d,0x80
+        ld d,0x80           ; a little delay
         call delay
-        jp noexit
+        jp noexit           ; repeat
 
 ;-------------------------------------------------
 setCtc:
@@ -89,7 +88,7 @@ setCtc:
                             ; start upon loading time constant, time constant follows,sw reset, command word
         out (CH1),a
         ld A,0x38           ; time constant 56d
-        out (CH1),a         ; loaded into channel 1                
+        out (CH1),a         ; loaded into channel 1
         ret
 
 ;-------------------------------------------------
