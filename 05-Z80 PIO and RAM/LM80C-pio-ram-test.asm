@@ -4,10 +4,12 @@
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
 ; ---------------------------------------------------------
-; Code: by Leonardo Miliani
+; Code by Leonardo Miliani
+; Compiler: ZASM assembler 4.2.4-macos10.12
 ;
 ; Revisions:
 ; 0.1 - 20190206 - First version - working
+; 1.0 - 20190212 - Code revision - stable version
 ;
 ; ---------------------------------------------------------
 ;
@@ -20,13 +22,12 @@ CTRLREGB    equ 00000011b
 
 RAMCELL     equ 0x8000
 
-; this line instructs the assembler to prepare a file for a ROM target
+; this directive instructs the assembler to prepare a file for a ROM target
 ; meaning that blank cells will be filled up with 0xff
 #target rom
 
-; this line instructs the assembler to compile while taking account of
-; the start of the code fixed at 0x0000h and that the file shall be
-; 0xff bytes in size
+; this directive instructs the assembler to compile while taking account of
+; the start of the code that must be set to 0x0000h and that the file has a fixed size
 #code BOOT, 0000h, 00ffh
 
 reset:  ; this corresponds to the RESET vector (the CPU jumps to 0000h after a reset)
@@ -35,30 +36,28 @@ reset:  ; this corresponds to the RESET vector (the CPU jumps to 0000h after a r
         ld d, 0x80
         call delay          ; little delay
 
-        ;program the PIO
+        ; let's program the PIO
         ld a,11001111b      ; mode 3 (bit control)
         out (CTRLREGB),a
         ld a,00000000b      ; set pins of port B to OUTPUT
         out (CTRLREGB),a
-        ld a, 10101010b     ; write a byte into RAM
+        ld a, 10101010b     ; store the initial pattern into RAM
         ld (RAMCELL), a
 
 noexit:
-        xor a,a             ; clear register A
+        xor a,a             ; clear register A (to be sure that the CPU will read from RAM)
         ld a,(RAMCELL)      ; load the byte from RAM
-        ; send the pattern to the PIO
-        out (DATAREGB),a
+        out (DATAREGB),a    ; send the pattern to the PIO
         xor a,11111111b     ; invert the bits of the byte
         ld (RAMCELL),a      ; write the new value
 
-        ; a little delay
-        ld d,0x80
+        ld d,0x80           ; a little delay
         call delay
-        jp noexit
+        jp noexit           ; repeat
 
 ;-------------------------------------------------------------------
 delay:  ; routine to add a programmable delay
-        ; a little delay
+        ; set by reg. B
         push bc
 loop1:
         ld b,0xff
