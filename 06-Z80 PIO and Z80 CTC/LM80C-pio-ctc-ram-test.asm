@@ -1,26 +1,29 @@
-; ---------------------------------------------------------
-; LM80C - PIO - test
+; ------------------------------------------------------------------------------
+; LM80C - PIO, CTC, & RAM test
+; ------------------------------------------------------------------------------
 ; This code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
-; ---------------------------------------------------------
-; Code by Leonardo Miliani
-; Compiler: ZASM assembler 4.2.4-macos10.12
-;
+; ------------------------------------------------------------------------------
+; Written by Leonardo Miliani
+; Based on code samples from "How To Program the Z80 Periphery Tutorial" by Mario Blunk
+; Edited with Atom Editor
+; Compiled with ZASM assembler 4.2.4 on MacOS
+; ------------------------------------------------------------------------------
+; Released under the terms of GPL v.3 or any successive release
+; ------------------------------------------------------------------------------
 ; Revisions:
 ; 0.1 - 20190207 - First version - working
 ; 1.0 - 20190212 - Code revision - stable version
-;
-; ---------------------------------------------------------
-;
+; ------------------------------------------------------------------------------
 
-; label defining for CTC
+; label definings for CTC
 CH0         equ 00010000b
 CH1         equ 00010001b
 CH2         equ 00010010b
 CH3         equ 00010011b
 
-; labels defining for PIO
+; labels definings for PIO
 DATAREGA    equ 00000000b
 DATAREGB    equ 00000001b
 CTRLREGA    equ 00000010b

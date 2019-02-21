@@ -1,19 +1,22 @@
-; ---------------------------------------------------------
-; LM80C - PIO - test
+; ------------------------------------------------------------------------------
+; LM80C - PIO test
+; ------------------------------------------------------------------------------
 ; This code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
-; ---------------------------------------------------------
-; Code by Leonardo Miliani
-; Compiler: ZASM assembler 4.2.4-macos10.12
-;
+; ------------------------------------------------------------------------------
+; Written by Leonardo Miliani
+; Based on code samples from "How To Program the Z80 Periphery Tutorial" by Mario Blunk
+; Edited with Atom Editor
+; Compiled with ZASM assembler 4.2.4 on MacOS
+; ------------------------------------------------------------------------------
+; Released under the terms of GPL v.3 or any successive release
+; ------------------------------------------------------------------------------
 ; Revisions:
 ; 0.1 - 20190202 - First version - just a test
-; 0.2 - 20190206 - Stable version - working
+; 0.2 - 20190206 - Stable version - working version
 ; 1.0 - 20190212 - Code revision - stable version
-;
-; ---------------------------------------------------------
-;
+; ------------------------------------------------------------------------------
 
 ; labels defining
 DATAREGA    equ 00000000b
@@ -46,7 +49,7 @@ loop4:
         ld a,00000000b      ; set pins of port B to OUTPUT
         out (CTRLREGB),a
 
-        ld e,0x00           ; this is the pattern (starts with all LEDs set to OFF)
+        ld e,0x00           ; this is the pattern start (all LEDs set to OFF)
 
 noexit:
         ; send the pattern to the PIO
@@ -61,7 +64,7 @@ loop2:
         djnz loop2
         dec d
         jp nz, loop1
-        
+
         ; increment the pattern, so that it cycles from 0 to 255 repeatedly
         inc e
         ; sent the new pattern to the PIO
