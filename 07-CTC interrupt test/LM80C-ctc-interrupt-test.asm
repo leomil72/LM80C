@@ -1,18 +1,21 @@
-; ---------------------------------------------------------
-; LM80C - CTC interrupt test
+; ------------------------------------------------------------------------------
+; LM80C - CTC interrupts test
+; ------------------------------------------------------------------------------
 ; This code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
-; ---------------------------------------------------------
-; Code by Leonardo Miliani
-; Compiler: ZASM assembler 4.2.4-macos10.12
-;
+; ------------------------------------------------------------------------------
+; Written by Leonardo Miliani
+; Based on code samples from "How To Program the Z80 Periphery Tutorial" by Mario Blunk
+; Edited with Atom Editor
+; Compiled with ZASM assembler 4.2.4 on MacOS
+; ------------------------------------------------------------------------------
+; Released under the terms of GPL v.3 or any successive release
+; ------------------------------------------------------------------------------
 ; Revisions:
 ; 0.1 - 20190211 - First version
 ; 1.0 - 20190212 - Code revision - stable version
-;
-; ---------------------------------------------------------
-;
+; ------------------------------------------------------------------------------
 
 ; label defining for CTC
 CH0         equ 00010000b
