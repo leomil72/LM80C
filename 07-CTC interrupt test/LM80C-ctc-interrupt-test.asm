@@ -60,9 +60,8 @@ MAIN:
         call SET_PIO        ; set the PIO
         call SET_CTC        ; set the CTC
 
-        ld a,0x00          ; turn off the LEDs
-        out (DATAREGB),a
         xor a,a             ; clear reg. A
+        out (DATAREGB),a    ; turn off the LEDs
         ld i,a              ; set most significant bits of interrupt vector to $0000
         ld (RAMCELL),a      ; reset the seconds' counter into RAM
         im 2                ; interrupt mode 2
