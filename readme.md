@@ -55,7 +55,7 @@ To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPR
 - **How do I burn the binary file into the EEPROM?**
     - You need an (E)EPROM programmer, a device that can be connected to your computer and that can write the data into the memory chip. You can buy a programmer from internet or build your own device like me.
 - **Where can I find the chips you're using in your computer?**
-    - Fortunately, Zilog still sells the Z80 family chips, so you can find them anywhere. Personally I've bought mine from Farnell that you can find them in other resellers' catalogue. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them.
+    - Fortunately, Zilog still sells the Z80 family chips, so you can find them anywhere. Personally I've bought mine from Farnell, but you can find them in other resellers' catalogue. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them.
 
 ---
 
