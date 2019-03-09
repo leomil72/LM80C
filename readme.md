@@ -13,7 +13,7 @@
 
 ## Getting started
 
-- [What you need](#what you need)
+- [What you need](#what%20you%20need)
 - [Clone](#clone)
 - [FAQ](#faq)
 - [Support](#support)
@@ -61,13 +61,13 @@ To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPR
 
 ## Support
 
-You can find more about me on my website at <a href="https://www.leonardomiliani.com/en/" target="_blank">`www.leonardomiliani.com`</a>.
+You can find more about me on my website at <a href="https://www.leonardomiliani.com/en/" target="_blank">www.leonardomiliani.com</a>.
 
 ---
 
 ## Donations
 
-- If you want to help me maintain my site, my projects and keep me rolling on, you can make a small donation with <a href=https://www.paypal.me/LeonardoMiliani" target="_blank">Paypal</a>.
+- If you want to help me maintain my site, my projects and keep me rolling on, you can make a small donation with <a href="https://www.paypal.me/LeonardoMiliani" target="_blank">Paypal</a>.
 
 ---
 
