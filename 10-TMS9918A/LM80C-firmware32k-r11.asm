@@ -36,7 +36,7 @@
 ; www DOT leonardomiliani DOT com
 ; ------------------------------------------------------------------------------
 ; Code Revision:
-; R1.1 - 2019xxxx - Stub
+; R1.1 - 20190409 - Stable version
 ; ------------------------------------------------------------------------------
 ; NASCOM BASIC versions:
 ; 4.7  - original version by NASCOM
@@ -44,37 +44,36 @@
 ; 4.7c - modified by Leonardo Miliani (1/100 secs timer)
 ; -----------------------------------------------------------------------------
 
-; ADDRESS DECODING
-; A4/A5
-; 0000xxxx : PIO
-; 0001xxxx : CTC
-; 0010xxxx : SIO
-; 0011xxxx : VDP
+; ADDRESS DECODING (bits A5/A4)
+; xx00xxxx : PIO
+; xx01xxxx : CTC
+; xx10xxxx : SIO
+; xx11xxxx : VDP
 
-; label defining for CTC
-CTC_CH0     equ 00010000b
-CTC_CH1     equ 00010001b
-CTC_CH2     equ 00010010b
-CTC_CH3     equ 00010011b
-
-; labels defining for PIO
+; labels defining for PIO (Parallel Input/Output)
 PIO_DA      equ 00000000b
 PIO_DB      equ 00000001b
 PIO_CA      equ 00000010b
 PIO_CB      equ 00000011b
 
-;label defining for SIO
+; label defining for CTC (Counter Timer Circuit)
+CTC_CH0     equ 00010000b
+CTC_CH1     equ 00010001b
+CTC_CH2     equ 00010010b
+CTC_CH3     equ 00010011b
+
+;label defining for SIO (Serial Input/Output)
 SIO_CA      equ 00100010b
 SIO_CB      equ 00100011b
 SIO_DA      equ 00100000b
 SIO_DB      equ 00100001b
 
-;label defining for VDP
+;label defining for VDP (Video Display Processor)
 VDP_RAM     equ 00110000b
 VDP_REG     equ 00110010b
 VDP_WREG    equ 10000000b   ; to be added to the REG value
-VDP_RRAM    equ 00000000b   ; to be added to the REG value
-VDP_WRAM    equ 01000000b   ; to be added to the REG value
+VDP_RRAM    equ 00000000b   ; to be added to the ADRS value
+VDP_WRAM    equ 01000000b   ; to be added to the ADRS value
 VDP_R0      equ 00h
 VDP_R1      equ 01h
 VDP_R2      equ 02h
@@ -83,7 +82,6 @@ VDP_R4      equ 04h
 VDP_R5      equ 05h
 VDP_R6      equ 06h
 VDP_R7      equ 07h
-
 
 ; this line instructs the assembler to prepare a file for a ROM target
 ; meaning that blank cells will be filled up with 0xff
@@ -145,10 +143,6 @@ RST10:          jp RXA
                 org $14
                 defw CH2_TIMER
 
-;------------------------------------------------------------------------------
-; interrupt vector for CH3 Timer - this will be used for VDP interrupts
-                org $16
-                defw VDP_INT
 ;------------------------------------------------------------------------------
 ; check serial status
 
@@ -324,12 +318,6 @@ EXCH2T:         pop hl
                 ei                  ; re-enable interrupts
                 reti                ; exit from ISR
 
-; ---------------------------------------------------
-; interrupt service routine (ISR) for CH3 Timer
-; this will be used for VDP interrupts - at the moment it does nothing
-VDP_INT:        ei
-                reti
-
 ;------------------------------------------------------------------------------
 INIT_HW:        ; first run - setup HW & SW
                 ld hl,TEMPSTACK         ; load temp stack pointer
@@ -432,8 +420,8 @@ initCTC:
 ;CH1 & CH3 disabled (they are not used yet in this program)
                 ld a,00000011b      ; interrupt off, timer mode, prescaler=16, don't care ext. TRG edge,
                                     ; start timer on loading constant, no time constant follows, software reset, command word
-                out (CTC_CH1),a     ; CH1 doesn't run
-                out (CTC_CH3),a     ; CH3 doesn't run
+                out (CTC_CH1),a     ; set CH1
+                out (CTC_CH3),a     ; set CH3
 
 ;init CH2
 ;CH2 divides CPU CLK by (144*256) providing an interrupt signal at 100 Hz (1/100 sec).
@@ -458,17 +446,13 @@ RESTMR:         ld (hl),a           ; reset n-cell of TMR
 ;------------------------------------------------------------------------------
 initVDP:        ; set up VDP to work at startup in TEXT MODE
 
-                di                  ; it is a good idea to disable ints during VDP access
-                push af
-                push bc
-                push de
-                push hl
+                di                  ; it is a good idea to disable INTs during VDP access
 
                 ; set up registers for text mode
                 ld b,$08            ; 8 registers
                 ld hl,VDPTXTREG     ; pointer to registers settings
                 ld a,VDP_WREG+$00   ; start with REG0 ($80+register number)
-                ld c,VDP_REG        ; load VDP port for registers access
+                ld c,VDP_REG        ; VDP port for registers access
 LDREGVLS        ld d,(HL)           ; load register's value
                 out (c),d           ; send data to VDP
                 out (c),a           ; indicate the register to send data to
@@ -482,9 +466,11 @@ LDREGVLS        ld d,(HL)           ; load register's value
                 xor a,a
                 out (c),l           ; low byte of address to VDP
                 out (c),h           ; high byte address to VDP
-                ld b,$40            ; $40 pages of RAM
-                ld d,a              ; each with $100 cells (tot. $4000 bytes)
+                ld b,$40            ; $40 pages of RAM...
+                ld d,a              ; ...each one with $100 cells (tot. $4000 bytes)
 EMPTYVRAM:      out (VDP_RAM),a     ; after first byte, the VDP autoincrements VRAM pointer
+                nop
+                nop
                 inc d               ; next cell
                 jr nz,EMPTYVRAM     ; repeat until page is fully cleared
                 djnz EMPTYVRAM      ; repeat for $40 pages
@@ -499,6 +485,8 @@ EMPTYVRAM:      out (VDP_RAM),a     ; after first byte, the VDP autoincrements V
 NXTCHAR:        ld d,$08            ; 8 bytes per pattern char
 SENDCHRPTRNS:   ld a,(hl)           ; load byte to send to VDP
                 out (VDP_RAM),a     ; send byte to VRAM
+                nop
+                nop
                 inc hl              ; inc byte pointer
                 dec d               ; 8 bytes sents (1 char)?
                 jr nz,SENDCHRPTRNS  ; no, continue
@@ -506,7 +494,7 @@ SENDCHRPTRNS:   ld a,(hl)           ; load byte to send to VDP
 
                 ; welcome message
                 ld c,VDP_REG        ; load VPD port value
-                ld hl,$4800         ; position at X,Y 0,0
+                ld hl,$4800         ; position at X,Y 0,0 (MSB must be 1 & 10, resp.)
                 out (c),l           ; low byte of address to VDP
                 out (c),h           ; high byte address to VDP
                 ld hl,WLCMSG        ; load start address of welcome message
@@ -514,19 +502,23 @@ LDWLCMMSG       ld a,(hl)           ; load char
                 cp $00              ; is it the end of message?
                 jr z,ENDVDPINIT     ; yes, exit
                 out (VDP_RAM),a     ; no, print char onto screen
+                nop
+                nop
                 inc hl
                 jr LDWLCMMSG        ; next char
 
-                ; recover register values and return
-ENDVDPINIT      pop hl
-                pop de
-                pop bc
-                pop af
-                ei                  ; re-enable ints
+ENDVDPINIT      ei                  ; re-enable ints
                 ret
 
                 ; VDP registers settings to set up a text mode
-VDPTXTREG       defb $00,$d0,$02,$00,$00,$00,$00,$5f
+VDPTXTREG       defb 00000000b    ; reg.0: external video disabled
+                defb 11010000b    ; reg.1: text mode (40x24), enable display
+                defb $02          ; reg.2: name table set to $800 ($02x$400)
+                defb $00          ; reg.3: not used in text mode
+                defb $00          ; reg.4: pattern table set to $0000
+                defb $00          ; reg.5: not used in text mode
+                defb $00          ; reg.6: not used in text mode
+                defb $5f          ; reg.7: light blue text on white background
 ;------------------------------------------------------------------------------
 MSGTXT1:        defm "Z80 SBC by Grant Searle",CR,LF
                 defm "LM80C bootloader by Leonardo Miliani",CR,LF,0
@@ -4908,46 +4900,46 @@ OUTNCR: call    OUTC            ; Output character in A
 
 ;-------------------------------------------------------------------------------
 ;
-;               C  H  A  R  S  E  T  S
+;               C  H  A  R  S  E  T
 ;
 ;-------------------------------------------------------------------------------
 ;
 ;       6X8 CHARS FOR TEXT MODE
         ; start from $20
 CHARSET equ $
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 0
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 1
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 2
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 3
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 4
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 5
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 6
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 7
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 8
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 9
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 10
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 11
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 12
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 13
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 14
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 15
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 16
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 17
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 18
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 19
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 20
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 21
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 22
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 23
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 24
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 25
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 26
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 27
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 28
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 29
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 30
-        defb 0x00,0xff,0x00,0xff,0x00,0xff,0x00,0x00 ; char 31
-        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; space (ASCII chars start at $20/32d)
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 0
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 1
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 2
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 3
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 4
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 5
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 6
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 7
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 8
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 9
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 10
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 11
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 12
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 13
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 14
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 15
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 16
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 17
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 18
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 19
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 20
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 21
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 22
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 23
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 24
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 25
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 26
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 27
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 28
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 29
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 30
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; char 31
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 ; space
         defb 0x20,0x20,0x20,0x20,0x20,0x00,0x20,0x00 ; !
         defb 0x50,0x50,0x00,0x00,0x00,0x00,0x00,0x00 ; "
         defb 0x50,0x50,0xf8,0x50,0xf8,0x50,0x50,0x00 ; #
@@ -5010,13 +5002,14 @@ CHARSET equ $
         defb 0x00,0x80,0x40,0x20,0x10,0x08,0x00,0x00 ; \
         defb 0x70,0x10,0x10,0x10,0x10,0x10,0x70,0x00 ; ]
         defb 0x20,0x50,0x88,0x00,0x00,0x00,0x00,0x00 ; ^
-        defb 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xf8 ; _
+        defb 0x00,0x00,0x00,0x00,0x00,0x00,0xf8,0x00 ; _
         defb 0x40,0x20,0x10,0x00,0x00,0x00,0x00,0x00 ; `
         defb 0x00,0x00,0x70,0x08,0x78,0x88,0x78,0x00 ; a
         defb 0x00,0x80,0x80,0xb0,0xc8,0x88,0xf0,0x00 ; b
         defb 0x00,0x00,0x70,0x80,0x80,0x88,0x70,0x00 ; c
         defb 0x08,0x08,0x08,0x68,0x98,0x88,0x78,0x00 ; d
-        defb 0x30,0x48,0x40,0xe0,0x40,0x40,0x40,0x00 ; e
+        defb 0x00,0x00,0x70,0x88,0xf8,0x80,0x70,0x00 ; e
+        defb 0x30,0x48,0x40,0xe0,0x40,0x40,0x40,0x00 ; f
         defb 0x00,0x78,0x88,0x88,0x78,0x08,0x70,0x00 ; g
         defb 0x80,0x80,0xb0,0xc8,0x88,0x88,0x88,0x00 ; h
         defb 0x00,0x20,0x00,0x20,0x20,0x20,0x20,0x00 ; i
