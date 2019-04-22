@@ -36,7 +36,8 @@
 ; www DOT leonardomiliani DOT com
 ; ------------------------------------------------------------------------------
 ; Code Revision:
-; R1.1 - 20190409 - Stable version
+; R1.1  - 20190409 - Stable version
+; R1.1a - 20190422 - Bug fixing & code improvements
 ; ------------------------------------------------------------------------------
 ; NASCOM BASIC versions:
 ; 4.7  - original version by NASCOM
@@ -300,7 +301,6 @@ RAWPRINT:       ld a,(hl)           ; load character from memory cell pointed by
 ; Interrupt service routine (ISR) for CH2 timer
 ; this is used to increment the 100ths of a second counter
 CH2_TIMER:
-                di                  ; disable interrupts
                 push af             ; save reg. A
                 push bc
                 push hl             ; save HL
@@ -446,8 +446,6 @@ RESTMR:         ld (hl),a           ; reset n-cell of TMR
 ;------------------------------------------------------------------------------
 initVDP:        ; set up VDP to work at startup in TEXT MODE
 
-                di                  ; it is a good idea to disable INTs during VDP access
-
                 ; set up registers for text mode
                 ld b,$08            ; 8 registers
                 ld hl,VDPTXTREG     ; pointer to registers settings
@@ -486,7 +484,6 @@ NXTCHAR:        ld d,$08            ; 8 bytes per pattern char
 SENDCHRPTRNS:   ld a,(hl)           ; load byte to send to VDP
                 out (VDP_RAM),a     ; send byte to VRAM
                 nop
-                nop
                 inc hl              ; inc byte pointer
                 dec d               ; 8 bytes sents (1 char)?
                 jr nz,SENDCHRPTRNS  ; no, continue
@@ -503,12 +500,10 @@ LDWLCMMSG       ld a,(hl)           ; load char
                 jr z,ENDVDPINIT     ; yes, exit
                 out (VDP_RAM),a     ; no, print char onto screen
                 nop
-                nop
                 inc hl
                 jr LDWLCMMSG        ; next char
 
-ENDVDPINIT      ei                  ; re-enable ints
-                ret
+ENDVDPINIT      ret                 ; return to caller
 
                 ; VDP registers settings to set up a text mode
 VDPTXTREG       defb 00000000b    ; reg.0: external video disabled
@@ -2193,8 +2188,8 @@ DOSPC:  cpl                     ; Number of spaces to print to
         jp      NC,NEXITM       ; TAB < Current POS(X)
 ASPCS:  inc     A               ; Output A spaces
         ld      B,A             ; Save number to print
-        ld      A,$20           ; Space   <-- ''
-SPCLP:  call    OUTC            ; Output character in A
+SPCLP:  ld      A,' '''         ; Space
+        call    OUTC            ; Output character in A
         dec     B               ; Count them
         jp      NZ,SPCLP        ; Repeat if more
 NEXITM: pop     HL              ; Restore code string address

@@ -1,6 +1,4 @@
 # LM80C - A Z80-based homebrew computer
 
-## BTMS9918A
-Actually this step is nothing more than a STUB. The circuit described in this lesson and the corresponding code don't work as expected:
-the video chip is able to generate an image that can be shown by a common LED TV but it's not correct.
-Investigation is under way...  
+## TMS9918A
+This step is now working. The TMS9918A is interfaced with an SRAM chip through 3 latch ICs. The example code show a simple message on the screen, rendered in text mode with a light blue text on a white background.
