@@ -36,8 +36,9 @@
 ; www DOT leonardomiliani DOT com
 ; ------------------------------------------------------------------------------
 ; Code Revision:
-; 0.1 - 20190301 - First draft
-; 1.0 - 20190308 - First stable release
+; 0.1  - 20190301 - First draft
+; 1.0  - 20190308 - First stable release
+; 1.0a - 20190422 - Bug fixing
 ; ------------------------------------------------------------------------------
 ; BASIC version:
 ; 4.7  - original version by NASCOM
@@ -284,7 +285,6 @@ RAWPRINT:       ld a,(hl)           ; load character from memory cell pointed by
 ;-------------------------------------------------
 ; Interrupt service routine (ISR) for CH3 timer
 CH3_TIMER:
-                di                  ; disable interrupts
                 push af             ; save reg. A
                 push bc
                 push hl             ; save HL
@@ -2100,8 +2100,8 @@ DOSPC:  cpl                     ; Number of spaces to print to
         jp      NC,NEXITM       ; TAB < Current POS(X)
 ASPCS:  inc     A               ; Output A spaces
         ld      B,A             ; Save number to print
-        ld      A,$20           ; Space   <-- ''
-SPCLP:  call    OUTC            ; Output character in A
+SPCLP:  ld      A,' '''         ; Space
+        call    OUTC            ; Output character in A
         dec     B               ; Count them
         jp      NZ,SPCLP        ; Repeat if more
 NEXITM: pop     HL              ; Restore code string address
