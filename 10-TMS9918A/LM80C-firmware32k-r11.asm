@@ -2188,7 +2188,7 @@ DOSPC:  cpl                     ; Number of spaces to print to
         jp      NC,NEXITM       ; TAB < Current POS(X)
 ASPCS:  inc     A               ; Output A spaces
         ld      B,A             ; Save number to print
-SPCLP:  ld      A,' '''         ; Space
+SPCLP:  ld      A,' '           ; Space
         call    OUTC            ; Output character in A
         dec     B               ; Count them
         jp      NZ,SPCLP        ; Repeat if more
