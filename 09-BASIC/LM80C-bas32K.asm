@@ -1644,8 +1644,8 @@ DOSPC:  CPL                     ; Number of spaces to print to
         JP      NC,NEXITM       ; TAB < Current POS(X)
 ASPCS:  INC     A               ; Output A spaces
         LD      B,A             ; Save number to print
-        LD      A,' '           ; Space
-SPCLP:  CALL    OUTC            ; Output character in A
+SPCLP:  LD      A,' '           ; Space
+        CALL    OUTC            ; Output character in A
         DEC     B               ; Count them
         JP      NZ,SPCLP        ; Repeat if more
 NEXITM: POP     HL              ; Restore code string address
