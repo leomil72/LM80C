@@ -631,31 +631,6 @@ VDPMODESETMC    ; VDP register settings for a multicolor mode
                 defb $20        ; reg.5: sprite attr. table addr.: $1000
                 defb $00        ; reg.6: sprite pattern table addr.: $0000
                 defb $0F        ; reg.7: backdrop color (white)
-
- ;DEFW 0		; TXTNAM: SCREEN 0 name table
- ;DEFW 0		; TXTCOL: SCREEN 0 color table
- ;DEFW $0800	; TXTCGP: SCREEN 0 character pattern table
- ;DEFW 0		; TXTATR: SCREEN 0 Sprite Attribute Table
- ;DEFW 0		; TXTPAT: SCREEN 0 Sprite Pattern Table
-
- ;DEFW $1800	; T32NAM: SCREEN 1 name table
- ;DEFW $2000	; T32COL: SCREEN 1 color table
-; DEFW 0		; T32CGP: SCREEN 1 character pattern table
-;  DEFW $1B00	; T32ATR: SCREEN 1 Sprite Attribute Table
-;  DEFW $3800	; T32PAT: SCREEN 1 Sprite Pattern Table
-
-;  DEFW $1800	; GRPNAM: SCREEN 2 name table
-;  DEFW $2000	; GRPCOL: SCREEN 2 color table
-;  DEFW 0		; GRPCGP: SCREEN 2 character pattern table
-;  DEFW $1B00	; GRPATR: SCREEN 2 Sprite Attribute Table
-;  DEFW $3800	; GRPPAT: SCREEN 2 Sprite Pattern Table
-
- ; DEFW $0800	; MLTNAM: SCREEN 3 name table
- ; DEFW 0		; MLTCOL: SCREEN 3 color table
- ; DEFW 0		; MLTCGP: SCREEN 3 character pattern table
- ; DEFW $1B00	; MLTATR: SCREEN 3 Sprite Attribute Table
- ; DEFW $3800	; MLTPAT: SCREEN 3 Sprite Pattern Table
-
 ;------------------------------------------------------------------------------
 initSPRITES:    ld c,VDP_RAM        ; load VDP port into C
                 ld hl,SPRITEDEMODATA; load first cell of sprite patterns
