@@ -1117,7 +1117,7 @@ OMMSG:  defb   "Out of Memory",0                ; Out of memory
 ULMSG:  defb   "Undefined Line",0               ; Undefined line
 BSMSG:  defb   "Bad Subscript",0                ; Bad subscript
 DDMSG:  defb   "Re-DIMensioned Array",0         ; Re-DIMensioned array
-DZMSG:  defb   "Division zy Zero",0             ; Division by zero
+DZMSG:  defb   "Division by Zero",0             ; Division by zero
 IDMSG:  defb   "Illegal Direct",0               ; Illegal direct
 TMMSG:  defb   "Type Mis-match",0               ; Type mis-match
 OSMSG:  defb   "Out of String Space",0          ; Out of string space
