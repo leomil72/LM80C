@@ -105,7 +105,7 @@ serRdPtr        equ     serInPtr+2
 serBufUsed      equ     serRdPtr+2
 basicStarted    equ     serBufUsed+1
 bufWrap         equ     (SERBUF_START + SER_BUFSIZE) & $ff
-TEMPSTACK       equ     $80ed ; top of BASIC line input buffer so is "free ram" when BASIC resets
+TEMPSTACK       equ     CURPOS - 3 ; (was $80ED) top of BASIC line input buffer so is "free ram" when BASIC resets
 
 CR              equ     0dh
 LF              equ     0ah
