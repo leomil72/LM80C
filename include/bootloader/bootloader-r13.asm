@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - BOOTLOADER - R1.2
+; LM80C - BOOTLOADER - R1.3
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -8,6 +8,7 @@
 ; Code Revision:
 ; R1.1 - 20190518
 ; R1.2 - 20190521 - Video cursor management - preliminary
+; R1.3 - 20190601 - Cursor management integrated into VDP module
 ; ------------------------------------------------------------------------------
 
 ; ADDRESS DECODING (bits A6/A5/A4)
