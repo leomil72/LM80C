@@ -9,7 +9,7 @@
 ; R1.1 - 20190518
 ; R1.2 - 20190521 - Video cursor management - preliminary
 ; R1.3 - 20190601 - Cursor management integrated into VDP module
-; R1.4 - 2019xxxx
+; R1.4 - 20190606 - Removed messages about wrong HW systems
 ; ------------------------------------------------------------------------------
 
 ; ADDRESS DECODING (bits A6/A5/A4)
@@ -280,7 +280,7 @@ INCTMR3:        inc (hl)            ; increment timer
                 jr nz,CHKCRSR       ; if not zero then exit (finished increment)
                 inc hl              ; if yes, there was an overflow, so increment next byte
                 djnz INCTMR3        ; repeat for 4 bytes
-CHKCRSR:        ld a,(CURSOR_ON)    ; now, check the cursor
+CHKCRSR:        ld a,(CRSR_STATE)   ; now, check the cursor
                 cp $00              ; cursor off?
                 jr z,EXCH3T         ; yes, then exit
                 call FLASHCURSOR    ; flash the cursor
@@ -312,8 +312,9 @@ INIT_HW:        ld hl,TEMPSTACK         ; load temp stack pointer
                 ld i,a                  ; to point to page 0
                 im 2                    ; interrupt mode 2
                 ei                      ; enable interrupts
-                nop                     ; give the SIO a while to..
-                nop                     ; receive spare chars
+                ld b,$00                ; give the SIO...
+WASTETIME       nop                     ; ...some time to...
+                djnz WASTETIME          ; ...receive spare chars
                                         ;
 EMPTY_SER_BUF:  call CKINCHAR           ; check if something has arrived into the serial buffer
                 jr z,PRINTWELCOME       ; no, it's empty: jump over
