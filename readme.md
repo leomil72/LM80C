@@ -1,4 +1,4 @@
-<a href="https://www.leonardomiliani.com/en/lm80c/"><img src="https://github.com/leomil72/LM80C/blob/master/07-CTC%20interrupt%20test/LM80C-CTC-interrupts.jpg?raw=true" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
+<a href="https://www.leonardomiliani.com/en/lm80c/"><img src="https://raw.githubusercontent.com/leomil72/LM80C/master/12-Home%20computer/LM80C.jpg" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
 
 
 # LM80C - A Z80-based homebrew computer
