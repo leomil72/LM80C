@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - VDP ROUTINES - R1.6
+; LM80C - VDP ROUTINES - R1.7
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -225,6 +225,8 @@ CHAR2VID:       push af             ; store AF
                 push bc             ; store BC
                 push de             ; store DE
                 push hl             ; store HL
+                ld a,(CRSR_STATE)   ; store cursor state...
+                push af             ; into stack
                 call CURSOR_OFF     ; cursor off
                 ld a,(CHR4VID)      ; recover char
                 cp $00              ; is it char 0? (null char)?
@@ -273,8 +275,11 @@ SETCSRCOORDS:   ld (SCR_CURS_X),a   ; store current cursor X
                 ld (SCR_CURS_Y),a   ; store current cursor Y
 EXITCHAR2VID:   xor a               ; reset char
                 ld (CHR4VID),a      ; to be sent to screen
-                call CURSOR_ON      ; cursor on
-                pop hl              ; restore HL
+                pop af              ; recover cursor state
+                cp $00              ; was it off?
+                jr z,FINISHCHR2VD   ; yes, so jump over
+                call CURSOR_ON      ; no, reset cursor on
+FINISHCHR2VD:   pop hl              ; restore HL
                 pop de              ; restore DE
                 pop bc              ; restore BC
                 pop af              ; restore AF
