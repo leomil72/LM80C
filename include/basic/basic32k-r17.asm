@@ -825,7 +825,7 @@ INTVAR: ld      (BRKLIN),HL     ; Initialise RUN variables
         ld      (ARREND),HL     ; Clear arrays
 
 CLREG:  pop     BC              ; Save return address
-        ld      HL,(STRSPC)     ; Get end of working RAN
+        ld      HL,(STRSPC)     ; Get end of working RAM
         ld      SP,HL           ; Set stack
         ld      HL,TMSTPL       ; Temporary string pool
         ld      (TMSTPT),HL     ; Reset temporary string ptr
@@ -868,7 +868,7 @@ CRNCLP: ld      A,(HL)          ; Get byte
         ld      A,(HL)          ; Get byte again
         cp      '0'             ; Is it less than '0'
         jp      C,FNDWRD        ; Yes - Look for reserved words
-        cp      60; ";"+1           ; Is it "0123456789:;" ?
+        cp      60; ";"+1       ; Is it "0123456789:;" ?
         jp      C,MOVDIR        ; Yes - copy it direct
 FNDWRD: push    DE              ; Look for reserved words
         ld      DE,WORDS-1      ; Point to table
@@ -1324,7 +1324,7 @@ TSTBRK: rst     18H             ; Check input status
 
 STALL:  rst     10H             ; Wait for key
         cp      CTRLQ           ; Resume scrolling?
-        ret      Z              ; Release the chokehold
+        ret     Z               ; Release the chokehold
         cp      CTRLC           ; Second break?
         jr      Z,STOP          ; Break during hold exits prog
         jr      STALL           ; Loop until <Ctrl-Q> or <brk>
@@ -1334,10 +1334,10 @@ BRK     ld      A,$FF           ; Set BRKFLG
 
 
 STOP:   ret     NZ              ; Exit if anything else
-        defb   0F6H            ; Flag "STOP"
+        defb    0F6H            ; Flag "STOP"
 PEND:   ret     NZ              ; Exit if anything else
         ld      (BRKLIN),HL     ; Save point of break
-        defb   21H             ; Skip "OR 11111111B"
+        defb    21H             ; Skip "OR 11111111B"
 INPBRK: or      11111111B       ; Flag "Break" wanted
         pop     BC              ; Return not needed and more
 ENDPRG: ld      HL,(LINEAT)     ; Get current line number
@@ -1519,10 +1519,10 @@ RETURN: ret     NZ              ; Return if not just RETURN
         jp      NZ,POPNOK       ; Yes - Go to command mode
 RETLIN: ld      HL,RUNCNT       ; Execution driver loop
         ex      (SP),HL         ; Into stack - Code string out
-        defb      3EH             ; Skip "pop HL"
+        defb    3EH             ; Skip "pop HL"
 NXTDTA: pop     HL              ; Restore code string address
 
-DATA:   defb      01H,3AH         ; ':' End of statement
+DATA:   defb    01H,3AH         ; ':' End of statement
 REM:    ld      C,0             ; 00  End of statement
         ld      B,0
 NXTSTL: ld      A,C             ; Statement and byte
@@ -1735,7 +1735,7 @@ INPUT:  call    IDTEST          ; Test for illegal direct
         defb   ';'
         push    HL              ; Save code string address
         call    PRS1            ; Output prompt string
-        defb   3EH             ; Skip "push HL"
+        defb    3EH             ; Skip "push HL"
 NOPMPT: push    HL              ; Save code string address
         call    PROMPT          ; Get input with "? " prompt
         pop     BC              ; Restore code string address
@@ -1751,7 +1751,7 @@ NOPMPT: push    HL              ; Save code string address
 
 READ:   push    HL              ; Save code string address
         ld      HL,(NXTDAT)     ; Next DATA statement
-        defb   0F6H            ; Flag "READ"
+        defb    0F6H            ; Flag "READ"
 NXTITM: xor     A               ; Flag "INPUT"
         ld      (READFG),A      ; Save "READ"/"INPUT" flag
         ex      (SP),HL         ; Get code str' , Save pointer
@@ -1894,7 +1894,7 @@ KILFOR: ld      SP,HL           ; Remove "FOR" block
 ; < will not RETurn to here , Exit to RUNCNT or Loop >
 
 GETNUM: call    EVAL            ; Get a numeric expression
-TSTNUM: defb      0F6H            ; Clear carry (numeric)
+TSTNUM: defb    0F6H            ; Clear carry (numeric)
 TSTSTR: scf                     ; Set carry (string)
 CHKTYP: ld      A,(TYPE)        ; Check types match
         adc     A,A             ; Expected + actual
@@ -4225,7 +4225,6 @@ SETVDP: push    af              ; store A
         ld      e,a             ; move mode into E
         xor     a               ; reset A
         ld      d,a             ; reset D: D is 0 for no powerup msg, and 1 for powerup msg
-        push    bc              ; store BC
         push    de              ; store DE
         push    hl              ; store HL
         di                      ; disable interrupts
@@ -4233,7 +4232,6 @@ SETVDP: push    af              ; store A
         ei                      ; re-enable interrupts
         pop     hl              ; restore HL
         pop     de              ; restore DE
-        pop     bc              ; restore BC
         pop     af              ; restore A
         cp      $00             ; is it text mode?
         jr      z,VID_ON        ; yes, so activate the video text
@@ -4242,7 +4240,6 @@ SETVDP: push    af              ; store A
         ret                     ; nothing more to do, so exit (in graphics 2 and multicolor no print on video)
 VID_ON: ld      a,$01           ; activate the
         ld      (PRNTVIDEO),a   ; buffer video
-        call    CURSOR_ON       ; set cursor on
         ret                     ; finish
 
 ; HEX$(nn) Convert 16 bit number to Hexadecimal string
