@@ -453,6 +453,6 @@ RESTMR:         ld (hl),a           ; reset n-cell of TMR
 
 ;------------------------------------------------------------------------------
 MSGTXT1:        defm "LM80C by Leonardo Miliani",CR,LF
-                defm "Firmware R1.7",CR,LF,0
+                defm "Firmware R1.8",CR,LF,0
 MSGTXT2:        defb CR,LF
                 defm "<C>old or <W>arm start? ",0
