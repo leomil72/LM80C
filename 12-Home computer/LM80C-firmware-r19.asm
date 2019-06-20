@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - FIRMWARE - R1.7
+; LM80C - FIRMWARE - R1.9
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -41,25 +41,32 @@
 ; R1.5 - 20190525 - Added backspace functionality
 ; R1.6 - 20190601 - Fixed scrolling bugs
 ; R1.7 - 20190606 - Added "screen" command; code revision
+; R1.8 - 20190615 - Better cursor integration; added VPOKE & VPEEK statements; 6x8 & 8x8 fonts
+; R1.9 - 20190620 - New VREG, VSTAT, & LOCATE statement; 8x8 pixels font completed
 ; -----------------------------------------------------------------------------
 
 ; this line instructs the assembler to prepare a file for a ROM target
 ; meaning that blank cells will be filled up with 0xff
 #target rom
 
+; this line instructs the assembler to compile taking account that code
+; starts at $0000 (the address reached by Z80 upon reset)
+#code BOOT, 0000h
+
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
 ; configure the hardware, checks if warm or cold startup and loads the BASIC interpreter
-#include "../include/bootloader/bootloader-r14.asm"
+#include "../include/bootloader/bootloader-r19.asm"
 
-; configure the VDP
-#include "../include/vdp/vdp-r17.asm"
+; incude the latest version of the VDP module
+#include "../include/vdp/vdp-r19.asm"
 
-; inclue the latest version of the NASCOM BASIC interpreter
-#include "../include/basic/basic32k-r17.asm"
+; include the latest version of the NASCOM BASIC interpreter
+#include "../include/basic/basic32k-r19.asm"
 
-; include the latest version of the 6x8 fontset
+; include the latest version of the font sets
 #include "../include/vdp/6x8fonts.asm"
+#include "../include/vdp/8x8fonts.asm"
 
 ; END OF ASSEMBLY SOURCE
 #end
