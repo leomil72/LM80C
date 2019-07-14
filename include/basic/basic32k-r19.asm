@@ -11,7 +11,7 @@
 ; R1.6 - 20190524 - Video management
 ; R1.7 - 20190606 - Added "screen" command to change video mode
 ; R1.8 - 20190615 - Better cursor integration; added VPOKE & VPEEK statements; 6x8 & 8x8 fonts
-; R1.9 - 2019xxxx - Default string space set to 100 bytes; added VREG, VSTAT, & LOCATE statements; 8x8 fonts completed 
+; R1.9 - 20190620 - Default string space set to 100 bytes; added VREG, VSTAT, & LOCATE statements; 8x8 fonts completed 
 ; ------------------------------------------------------------------------------
 ; NASCOM BASIC versions:
 ; 4.7  - original version by NASCOM
