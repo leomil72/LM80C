@@ -477,7 +477,8 @@ ZOR     equ     0B6H            ; OR
 ZGTR    equ     0B7H            ; >
 ZEQUAL  equ     0B8H            ; M
 ZLTH    equ     0B9H            ; <
-ZSGN    equ     0BAH            ; SGN        <-- from here, there are the commands
+
+ZSGN    equ     0BAH            ; SGN        <-- from here, there are the functions
 ZPOINT  equ     ZSGN+018H       ; POINT      ; if the user enters a custom function,
 ZLEFT   equ     ZSGN+020H       ; LEFT$      ; he/she must increment these two pointers by 1
                                             ; keeping attention if he/she enters the command between
