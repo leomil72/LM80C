@@ -482,7 +482,7 @@ LOADCHARSET:    ; reg. B containts the # of patterns to be loaded
                 ld c,VDP_SET        ; load VDP address into C
                 out (c),l           ; send low byte of address
                 out (c),h           ; send high byte
-                ld hl,CHARSET       ; address of first byte of first pattern into ROM
+                ld hl,CHRST68       ; address of first byte of first pattern into ROM
 NXTCHAR:        ld d,$08            ; 8 bytes per pattern char
 SENDCHRPTRNS:   ld a,(hl)           ; load byte to send to VDP
                 out (VDP_DAT),a     ; write byte into VRAM
