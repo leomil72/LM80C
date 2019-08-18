@@ -53,13 +53,13 @@
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
 ; configure the hardware, checks if warm or cold startup and loads the BASIC interpreter
-#include "../include/bootloader/bootloader-r13.asm"
+#include "../include/bootloader/bootloader-r12.asm"
 
 ; configure the VDP
-#include "../include/vdp/vdp-r15.asm"
+#include "../include/vdp/vdp-r14.asm"
 
 ; inclue the latest version of the NASCOM BASIC interpreter
-#include "../include/basic/basic32k-r16.asm"
+#include "../include/basic/basic32k-r15.asm"
 
 ; include the latest version of the 6x8 fontset
 #include "../include/vdp/6x8fonts.asm"
