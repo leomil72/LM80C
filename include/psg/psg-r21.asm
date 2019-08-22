@@ -80,28 +80,3 @@ CNTCHKSND:      inc ix              ; set for...
                 pop bc              ; restore BC
                 pop af              ; restore AF
                 ret                 ; return to caller
-;
-;                ld hl,CHASNDDTN+5   ; load address of third channel's duration
-;                ld b,03H            ; 3 channels to check
-;CHKSNDCH:       ld d,(hl)           ; load LSB into D
-;                dec hl              ; decrement HL
-;                ld e,(hl)           ; load MSB into E
-;                ld a,e              ; move E into A
-;                cp 00h              ; is it zero?
-;                jr z,CNTCHKSND      ; yes, jump over
-;                dec a               ; no, decrement A
-;                ld (hl),a           ; store new value of A
-;                ld e,a              ; also in E
-;                cp 00h              ; is it zero?
-;                jr nz,CNTCHKSND     ; no, jump over
-;                ld a,d              ; yes, let's decrement D
-;                cp 00h              ; is it already zero?
-;                jr z,CNTCHKSND      ; yes, jump over
-;                dec a               ; decrement A
-;                ld d,a              ; store value into D
-;                cp 00h              ; is it zero?
-;                jr nz,CNTCHKSND     ; no, let's continue
-;                ld c,PSG_REG        ; yes, the sound has been entirely played, so let's shut down its volume
-;                ld a,b              ; retrive channel number
-;
-;                ret                 ; return to caller

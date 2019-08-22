@@ -1258,7 +1258,7 @@ FORFND: ex      DE,HL           ; Code string address to HL
         ex      (SP),HL         ; Save and restore code string
         call    TSTNUM          ; Make sure it's a number
         call    CHKSYN          ; Make sure "TO" is next
-        defb   ZTO          ; "TO" token
+        defb    ZTO             ; "TO" token
         call    GETNUM          ; Get "TO" expression value
         push    HL              ; Save code string address
         call    BCDEFP          ; Move "TO" value to BCDE
