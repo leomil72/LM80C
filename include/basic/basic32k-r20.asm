@@ -3175,7 +3175,6 @@ LOCATE: call    GETINT          ; get the first param into A
         push    HL              ; store HL
         di                      ; disable INTs
         call    MOVCRS          ; move cursor to new location
-        call    POS_CURSOR      ; position cursor to new location
         ei                      ; re-enable INTs
         pop     HL              ; restore HL
         ret                     ; return to caller
