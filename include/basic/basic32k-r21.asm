@@ -489,8 +489,8 @@ ZEQUAL  equ     0BAH            ; M
 ZLTH    equ     0BBH            ; <
 
 ZSGN    equ     0BCH            ; SGN        <-- from here, there are the functions
-ZPOINT  equ     ZSGN+018H       ; POINT      ; if the user enters a custom function,
-ZLEFT   equ     ZSGN+020H       ; LEFT$      ; he/she must increment these two pointers by 1
+ZPOINT  equ     0D1H            ; POINT      ; if the user enters a custom function,
+ZLEFT   equ     0D9H            ; LEFT$      ; he/she must increment these two pointers by 1
                                             ; keeping attention if he/she enters the command between
                                             ; SGN and POINT (both indexes) or between POINT and LEFT
                                             ; (only the second one)
