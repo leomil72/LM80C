@@ -1,19 +1,20 @@
 ; ------------------------------------------------------------------------------
-; LM80C - BASIC32K - R2.1
+; LM80C - BASIC32K - R2.1a
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
 ; www DOT leonardomiliani DOT com
 ; ------------------------------------------------------------------------------
 ; Code Revision:
-; R1.4 - 20190514
-; R1.5 - 20190521 - Video cursor management - preliminary
-; R1.6 - 20190524 - Video management
-; R1.7 - 20190606 - Added "screen" command to change video mode
-; R1.8 - 20190615 - Better cursor integration; added VPOKE & VPEEK statements; 6x8 & 8x8 fonts
-; R1.9 - 20190620 - Default string space set to 100 bytes; added VREG, VSTAT, & LOCATE statements; 8x8 fonts completed
-; R2.0 - 20190714 - Added SREG & SSTAT to write to/read from PSG
-; R2.1 - 20190818 - Added SOUND command to play simple tones and VOLUME command
+; R1.4  - 20190514
+; R1.5  - 20190521 - Video cursor management - preliminary
+; R1.6  - 20190524 - Video management
+; R1.7  - 20190606 - Added SCREEN command to change video mode
+; R1.8  - 20190615 - Better cursor integration; added VPOKE & VPEEK statements; 6x8 & 8x8 fonts
+; R1.9  - 20190620 - Default string space set to 100 bytes; added VREG, VSTAT, & LOCATE statements; 8x8 fonts completed
+; R2.0  - 20190714 - Added SREG & SSTAT to write to/read from PSG
+; R2.1  - 20190818 - Added SOUND command to play simple tones and VOLUME command
+; R2.1a - 20190908 - Cursor management improvements
 ;
 ; ------------------------------------------------------------------------------
 ; NASCOM BASIC versions:
