@@ -1,0 +1,223 @@
+************************************************************************
+*                                                                      *
+*                      N A S C O M     B A S I C                       *
+*             Additional commands added to take advantage              *
+*             of the features of the LM80C Color Computer              *
+*           and changes made to the original Microsoft BASIC           *
+*                                                                      *
+************************************************************************
+*                                                                      *
+*                             Version  1.0                             *
+*                             (2019/09/17)                             *
+*              This release covers the R2.1a LM80C BASIC               *                
+*                                                                      *
+************************************************************************
+
+                        1. SIGNIFICANT CHANGES
+                        ----------------------
+
+1.1 Video VS Console
+--------------------
+The most significant difference between the original Microsoft BASIC
+released for NASCOM computers is the usage of the screen instead of the
+terminal or console devices. The main output device is the video:
+the console output is at the moment left for compatibility reasons.
+When writing a program of your own or running one such of those found
+anywhere on internet, keep in mind that the LM80C computer will always
+and primarily print output on the screen, so please adapt/modify the
+source to take care of such behaviour.
+
+1.2 Memory
+----------
+NASCOM Basic was originally released for machines that had a limited
+amount of RAM, i.e. 4/8 KB. Surely, they could be expanded and several
+users reached 16/24/32 KB of memory and more but this wasn't the
+standard. The LM80C Color Computer actually comes with 32 KB od SRAM so
+don't hesitate to use all of this room. Just keep in mind that the
+original limit on the lenght of a inputted line is still fixed at 72
+chars. But, apart from that, you can enter bigger programs.
+
+
+                       2. REMOVED STATEMENTS
+                       --------------------
+
+Some statements have been removed from the interpreter due to the fact
+that they laid over the original NASCOM machines. They are:
+CLOAD/CSAVE: they loaded/stored data from/to an external mass storage
+device
+PSET: it set a video pixel on
+POINT: it returned the state of a video pixel
+
+
+                3. STATEMENTS WITH DIFFERENT BEHAVIOUR
+                --------------------------------------
+
+Some statements have been changed from their original behaviour. They
+are:
+
+SCREEN mode
+-----------
+originally, it positioned the cursor at a specific location into the
+terminal screen. Now it changes the screen mode. "mode" is a number
+between 0 and 3:
+0: 40x24 chars text mode (no sprites support)
+1: 32x24 chars text mode or 256x192 pixels graphic mode (sprites supp.)
+2: 256x192 pixels graphic mode (sprites supported, bitmap mode)
+3: 64x48 pixels multicolor graphic mode (sprites suppoted)
+
+SCREEN initializes the screen with default settings. In modes 0 & 1 it
+also loads and configures a charset since these two are also text
+modes: the big difference is that mode 0 is a real text mode, with
+no support for sprites and graphics. In every mode, SCREEN also performs
+a screen clear.
+
+RESET
+-----
+Originally used to reset (set to off) a video pixel, now (without any
+additional paramether) performs a system reset.
+
+
+                        4. NEW STATEMENTS
+                        -----------------
+
+There are a lot of new statements, used to take advantage of the
+different (and much powerful) hardware of the LM80C.
+But, firstly let's start with a big thanks to Grant Searle, from whose
+BASIC comes the LM80C version, that added some useful statements (they
+are marked with a "*GS*").
+
+4.1 New number representations
+------------------------------
+The same number can be represented in several different bases. The
+usual base is the decimal one, where every single can only be the
+usual numerical digits from 0 to 9. LM80C BASIC supports other bases
+for numbers:
+
+&Hxxxx
+------
+Hexadecimal base. It interprets the "xxxx" value as an hexadecimal value
+(signed int). Each "x" can be any number between 0 and 9 and any char
+between A (10) and F (15). *GS*
+
+&Bnnnn
+------
+Binary base. It interprets the "nnnn" value as a binary value (signed
+int). "n" can be made only by "0" or "1" numbers. *GS*
+
+
+4.2 New functions
+-----------------
+A function is a statement that gets an input paramether and returns
+another data, that depends on the way it processed the input.
+
+HEX$(nnnn)
+----------
+It converts a signed integer "nnnn" (-32,768/+32,767) to a string
+containing the HEX value. *GS*
+
+BIN$(nnnn)
+----------
+It converts a signed integer "nnnn" (-32,768/+32,767) to a string
+containing the HEX value. *GS*
+
+TMR(n)
+------
+The LM80C Color Computer has a built-in system tick timer incremented
+every hundred of second that can be used to perform time-based
+operations and also for time keeping. The timer is a 32-bit register
+that can be read as a couple of 16-bit values. "n" specifies which 
+segment has to be read: if "n" is 0 then TMR return the first 2 bytes of
+the timer, otherwise if "n" is 1 it returns the last 2 bytes. If you
+divide 100 the value returned by TMR(0) you get the number of seconds
+since the computer has been powered on.
+
+VPEEK(nnnn)
+---------
+This function is used to read a value from the VRAM (or Video-RAM), the
+memory that is at exclusive use of the VDP (Video Dislay Processor).
+"nnnn" is a value between 0 ($0000) and 16,383 ($3FFF), since the VRAM
+is 16 KB wide. It returns a byte value (0-255).
+
+VSTAT(nnnn)
+-----------
+It is used to read the status register of the VDP. "nnnn" is ignored
+and it can be any signed integer (between -32,768 and +32,767). It
+returns a byte value (0-255).
+
+SSTAT(nn)
+-----------
+Function that reads a PSG (Programmable Sound Generator) register.
+"nnnn" is a number in the range 0-15 (since the PSG has only 16 regs.).
+SSTAT returns a byte value (0255). Remember that in the PSG datasheets
+the registers are divided into 2 sets of 8 registers each, numbered from
+0 to 7 and from 10 to 17, respectively, while for the function they are
+consecutive, so SSTAT(8) is actually reading the register #10.
+
+
+4.3 Added commands
+------------------
+Commands are statements that tell the system to perfom a specific
+operation. Commands can get some paramethers but usually don't return
+any value. Here are the new commands:
+
+VPOKE nnnn,nn
+-------------
+Like its RAM counterpart, VPOKE is used to write a value into a cell of
+the VRAM. "nnnn" is an integer in the range 0-16,383 while "nn" is a
+byte value (0-255).
+
+SREG nn,mm
+----------
+This command writes a byte into a register of the PSG. "nn" indicates
+the register number (0-15) while "mm" the byte to be written (0-255).
+*See SSTA for considerations about the register numbering.
+
+VREG nn,mm
+----------
+VREG writes a value into any of the VDP registers. "nn" must be a
+number between 0 and 7 while "mm" the byte to be written.
+
+LOCATE xx,yy
+------------
+It is used to position the cursor at a specific position over the
+screen. "xx" is a number between 0 and 31/39. The top for the
+horizontal value depends on the screen mode the computer is in: 31 if in
+screen mode 1, or 39 if in screen mode 0. "yy" can be any value
+between 0 and 23. The usage of this command makes no sense in screen
+modes 2 & 3 since they don't have any cursor support.
+
+SOUND ch,tone,dur
+-----------------
+This command instructs the PSG to emit a sound with a particular tone
+for a specific duration on the selected channel.
+"ch" can be 1,2, or 3, and corresponds to the same analog channel of the
+PSG. "tone" can vary between 0 and 4,095 and it is inversely related
+to the real frequency of the emitted tone. The formula to get the
+frequency is below:
+
+Freq = 1,843,200 / 16 / (4,096 - tone)
+
+(where 1,843,200 Hz is the clock of the PSG while "16" is a fixed
+internal prescaler)
+I.e.: if tone is equal to 4,000, the frequency of the sound generated
+by the PSG will be 1,200 Hz. In fact, 1,843,200 / 16 / 96 = 1,200.
+The lower frequency will be 28 Hz while the higher frequency will be
+115,200 Hz (115 KHz). Obviously, anything over 15/20 KHz won’t be
+audible. 
+"dur" is the duration in 100ths of a second and its range is between
+0 and 16,383 (0.0 ~ 163.8 seconds).
+Tips:
+by setting a tone of duration 0 we force the audio to quit
+immediately.
+By setting a tone with no (or 0) duration, the tone will last forever,
+unless you quit the volume off or you set another tone on the same
+channel.
+
+VOLUME ch,vol
+-------------
+VOLUME sets the volume of the selected "ch" channel to "vol".
+"ch" can be 1,2, or 3 and works on the corresponding analog channel. 
+"vol" is an integer between 0 (no audio) and 15 (max volume).
+Tip: if "ch" is set to 0, the command will set the volume of all the
+channels.
+
