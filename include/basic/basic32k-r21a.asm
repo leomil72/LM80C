@@ -3237,9 +3237,9 @@ VOLCH:  ld      C,PSG_REG       ; PSG register port
         out     (C),D           ; send volume level
         ret                     ; return to caller
 
-; SOUND ch,freq,dur
-; sound a tone of "freq" frequency from selected channel "ch" for duration "dur"
-; "ch" is 1~3 / "freq" is 7~11520Hz / "dur" is 1~32767 ms (0.01~327s)
+; SOUND ch,tone,dur
+; sound a tone of "tone" frequency from selected channel "ch" for duration "dur"
+; "ch" is 1~3 / "tone" is 0~4,095 / "dur" is 0~16383 h.o.s. (0.00~163s)
 SOUND:  call    GETINT          ; get integer 0-255 (recover channel)
         ld      (TMPBFR1),A     ; Store A into a temp. buffer
         call    CHKSYN          ; Make sure ',' follows
