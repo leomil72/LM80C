@@ -3322,7 +3322,9 @@ SOUND:  call    GETINT          ; get integer 0-255 (recover channel)
         add     A,A             ; double A to find the correct offset
         ld      HL,CHASNDDTN    ; set duration into...
         add     A,L             ; ...the proper...
-        ld      L,A             ; ...register pair...
+        jr      NC,SNDOVR       ; is there a rest? no, jump over
+        inc     H               ; yes, increment H
+SNDOVR: ld      L,A             ; ...register pair...
         ld      (HL),DE         ; ...and store the value
         pop     HL              ; retrieve HL
         ret                     ; Return to caller
@@ -4495,7 +4497,7 @@ PAUSE:  call    GETNUM          ; Get a number
         ld      B,A             ; move it into B
 RPTPS:  ld      A,(TMRCNT)      ; Load current value of system timer
         cp      B               ; is it the same value?
-        jr      NZ,RPTPS        ; yes, so read again
+        jr      Z,RPTPS         ; yes, so read again
         ld      B,A             ; no, so store the new value
         dec     DE              ; decrement interval
         ld      A,D             ; load D into A
