@@ -252,6 +252,7 @@ SETTOP: dec     HL              ; Back one byte
 
 WARMST: ld      SP,STACK        ; Temporary stack
 BRKRET: call    CLREG           ; Clear registers and stack
+        call    CURSOR_ON       ; enable cursor
         jp      PRNTOK          ; Go to get command line
 
 BFREE:  defb    " Bytes free",CR,LF,0,0

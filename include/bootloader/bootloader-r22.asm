@@ -316,19 +316,18 @@ PRINTWELCOME:   ld a,$01                ; activate the
                 ld (PRNTVIDEO),a        ; buffer video
                 ld hl,MSGTXT1           ; sign-on message
                 call RAWPRINT           ; print message
-                call CURSOR_ON          ; set cursor on
                 ld a,(basicStarted)     ; check if BASIC is already started
                 cp 'Y'                  ; to see if this is a power-up
                 jr nz,COLDSTART         ; if not, then do a COLD start
-                ld hl, MSGTXT2          ; print message to choose start
+                ld hl,MSGTXT2           ; print message to choose start
+                call CURSOR_ON          ; enable cursor
                 call RAWPRINT
-
 CORW:           call RXA                ; wait for a char
                 and 11011111b           ; only UPPERCASE char
                 cp 'C'                  ; cold start?
                 jr nz,CHECKWARM         ; no, let's check for warm start
-COLDSTART:      call ECHOCAR            ; echoes the char
-                ld a,'Y'                ; yes, set the "BASIC started" flag
+                call ECHOCAR            ; echoes the char
+COLDSTART:      ld a,'Y'                ; yes, set the "BASIC started" flag
                 ld (basicStarted),a
                 jp COLD                 ; start BASIC COLD
 CHECKWARM:      cp 'W'
