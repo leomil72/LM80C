@@ -1,0 +1,101 @@
+************************************************************************
+*                                                                      *
+*              L M 8 0 C    C O L O R    C O M P U T E R               *
+*                                                                      *
+*                      Hardware reference manual                       *
+*                                                                      *
+************************************************************************
+*                                                                      *
+*                             Version  1.0                             *
+*                             (2019/09/27)                             *
+*             This release applies to the LM80C CoCo R2.2              *                
+*                                                                      *
+************************************************************************
+
+                              1. Quick view
+                              -------------
+
+1.1 The LM80C Color Computer
+----------------------------
+The LM80C Color Computer is an homebrew computer developed and
+prograammed by Leonardo Miliani (Italy) in an effort to have his own,
+old-stile, 80s' computer. It is built upon the Z80, an 8-bit CPU
+developed in the '70s by Zilog. LM80C derives from "L"eonardo "M"iliani
+(Z)80 "C"olor.
+
+1.2 Main features
+-----------------
+The LM80C might have been a good computer at that time:
+- CPU: Zilog Z80@3.68 MHz
+- RAM: 32 KB SRAM
+- ROM: 32 KB EEPROM with built-in Nascom BASIC from Microsoft
+- Video: TMS9918A with 16 KB VRAM, 256x192 pixels, 15 colors and 32
+         sprites
+- Audio: Yamaha YM2149F (or GI AY-3-8910) with 3 analog channels,
+         2x8-bit I/O ports
+- Serial I/O: 1xZ80 SIO
+- Parallel I/O: 1xZ80 PIO
+- Timer: 1xZ80 CTC
+- Serial line: 19,200 bps
+------------------------------------------------------------------------
+
+                            2. Memory map
+                            -------------
+
+EEPROM occupies the first 32 KB of address space, from $0000 to $7FFF.
+SRAM occupies the last 3 KB, from $8000 to $FFFF. 
+BASIC space starts at $81ED (33.261)
+------------------------------------------------------------------------
+
+                             3. Start-up
+                             -----------
+
+At startup the Z80 loads the address $0000 into the PC (Program Counter)
+and jumps to execute the code stored there. On LM80C this corresponds to
+a jump to the routine that initializes the HW of the computer. After
+each peripheral has been set up, the control passes to the BASIC
+interpreter, that checks if this is a cold start (i.e. after a
+power-up): if this isn't such case, it asks the user if he/she wants to
+perform a cold or warm start: the first one initializes the working
+space like at boot, deleting every possible program still resident in
+RAM and clearing every variable, while the latter preserves both these
+data.
+At the end of the startup process, the control is passed to the BASIC
+interpreter in direct mode: this means that the computer is able to
+execute commands as soon as they are entered.
+------------------------------------------------------------------------
+
+                             4. I/O ports
+                             ------------
+
+Peripheral I/O chips have their I/O channels mapped at the following
+logical ports:
+PIO:
+- PIO data channel A: $00
+- PIO data channel B: $01
+- PIO control channel A: $02
+- PIO control channel B: $03
+
+CTC:
+- CTC channel 0: $10
+- CTC channel 1: $11
+- CTC channel 2: $12
+- CTC channel 3: $13
+
+SIO:
+- SIO data channel A: $20
+- SIO data channel B: $21
+- SIO control channel A: $22
+- SIO control channel B: $23
+
+VDP:
+- VDP data port: $30
+- VDP control port: $32
+
+PSG:
+- PSG register port: $40
+- PSG data port: $42
+
+The user can control these chips by directly read/write from/to the
+ports above.
+------------------------------------------------------------------------ 
