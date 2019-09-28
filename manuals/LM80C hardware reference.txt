@@ -6,9 +6,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.0                             *
-*                             (2019/09/27)                             *
-*             This release applies to the LM80C CoCo R2.2              *                
+*                             Version  1.1                             *
+*                             (2019/09/28)                             *
+*                This release applies to the LM80C R2.2                *
 *                                                                      *
 ************************************************************************
 
@@ -45,6 +45,7 @@ The LM80C might have been a good computer at that time:
 EEPROM occupies the first 32 KB of address space, from $0000 to $7FFF.
 SRAM occupies the last 3 KB, from $8000 to $FFFF. 
 BASIC space starts at $81ED (33.261)
+STACK space starts at $FFFF decreasing.
 ------------------------------------------------------------------------
 
                              3. Start-up
@@ -99,3 +100,111 @@ PSG:
 The user can control these chips by directly read/write from/to the
 ports above.
 ------------------------------------------------------------------------ 
+
+                          5. RAM registers
+
+The LM80C uses some RAM cells to store important informations and data.
+By manually writing into these locations the user can alter the
+functioning of the system, sometimes leading to crashes and/or non-
+predictable functionings.
+
+WRKSPC       8045H              BASIC Work space
+USR          WRKSPC+3H          "USR (x)" jump  <-- in $8049/804A the
+                                user can store the address of a specific
+                                machine language routine
+OUTSUB       WRKSPC+6H          "out p,n"
+OTPORT       WRKSPC+7H          Port (p)
+DIVSUP       WRKSPC+9H          Division support routine
+DIV1         WRKSPC+0AH         <- Values
+DIV2         WRKSPC+0EH         <-   to
+DIV3         WRKSPC+12H         <-   be
+DIV4         WRKSPC+15H         <-inserted
+SEED         WRKSPC+17H         Random number seed  <-- starting address
+                                of a seed table
+LSTRND       WRKSPC+3AH         Last random number
+INPSUB       WRKSPC+3EH         #INP (x)" Routine
+INPORT       WRKSPC+3FH         PORT (x)
+NULLS        WRKSPC+41H         Number of nulls
+LWIDTH       WRKSPC+42H         Terminal width
+COMMAN       WRKSPC+43H         Width for commas
+NULFLG       WRKSPC+44H         Null after input byte flag
+CTLOFG       WRKSPC+45H         Control "O" flag
+LINESC       WRKSPC+46H         Lines counter
+LINESN       WRKSPC+48H         Lines number
+CHKSUM       WRKSPC+4AH         Array load/save check sum
+NMIFLG       WRKSPC+4CH         Flag for NMI break routine
+BRKFLG       WRKSPC+4DH         Break flag
+RINPUT       WRKSPC+4EH         Input reflection
+POINT        WRKSPC+51H         "POINT" reflection (unused)
+PSET         WRKSPC+54H         "SET"   reflection
+RESET        WRKSPC+57H         Reset system (it was a command that
+                                reset a video pixel)
+STRSPC       WRKSPC+5AH         Bottom of string space
+LINEAT       WRKSPC+5CH         Current line number
+BASTXT       WRKSPC+5EH         Pointer to start of program
+                                (actually this is the last value pre-
+                                -filled by the firmware at startup)
+BUFFER       WRKSPC+61H         Input buffer
+STACK        WRKSPC+66H         Initial stack
+CURPOS       WRKSPC+0ABH        Character position on line
+LCRFLG       WRKSPC+0ACH        Locate/Create flag
+TYPE         WRKSPC+0ADH        Data type flag
+DATFLG       WRKSPC+0AEH        Literal statement flag
+LSTRAM       WRKSPC+0AFH        Last available RAM
+TMSTPT       WRKSPC+0B1H        Temporary string pointer
+TMSTPL       WRKSPC+0B3H        Temporary string pool
+TMPSTR       WRKSPC+0BFH        Temporary string
+STRBOT       WRKSPC+0C3H        Bottom of string space
+CUROPR       WRKSPC+0C5H        Current operator in EVAL
+LOOPST       WRKSPC+0C7H        First statement of loop
+BRKLIN       WRKSPC+0CEH        Line of break
+DATLIN       WRKSPC+0C9H        Line of current DATA item
+FORFLG       WRKSPC+0CBH        "FOR" loop flag
+LSTBIN       WRKSPC+0CCH        Last byte entered
+READFG       WRKSPC+0CDH        Read/Input flag
+NXTOPR       WRKSPC+0D0H        Next operator in EVAL
+ERRLIN       WRKSPC+0D2H        Line of error
+CONTAD       WRKSPC+0D4H        Where to CONTinue
+PROGND       WRKSPC+0D6H        End of program
+VAREND       WRKSPC+0D8H        End of variables
+ARREND       WRKSPC+0DAH        End of arrays
+NXTDAT       WRKSPC+0DCH        Next data item
+FNRGNM       WRKSPC+0DEH        Name of FN argument
+FNARG        WRKSPC+0E0H        FN argument value
+FPREG        WRKSPC+0E4H        Floating point register
+FPEXP        FPREG+03H          Floating point exponent
+SGNRES       WRKSPC+0E8H        Sign of result
+TMRCNT       WRKSPC+0E9H        TMR counter for 1/100 seconds
+SCR_SIZE_W   TMRCNT+04H         screen width (it can be either 40 chars
+                                or 32 chars/bytes)
+SCR_SIZE_H   WRKSPC+0EEH        screen height (it can be 24/48/192: 24
+                                for text, 48 for MC, 192 for graphics)
+SCR_SIZE_B   WRKSPC+0EFH        screen size in bytes
+SCR_NAM_TB   WRKSPC+0F1H        video name table address
+SCR_CURS_X   WRKSPC+0F3H        cursor X
+SCR_CURS_Y   WRKSPC+0F4H        cursor Y
+SCR_CUR_NX   WRKSPC+0F5H        new cursor X position
+SCR_CUR_NY   WRKSPC+0F6H        new cursor Y position
+SCR_ORG_CHR  WRKSPC+0F7H        original char positioned under the
+                                cursor
+CRSR_STATE   WRKSPC+0F8H        state of cursor (1=on, 0=off)
+LSTCSRSTA    WRKSPC+0F9H        last cursor state
+PRNTVIDEO    WRKSPC+0FAH        buffer video on/off
+CHR4VID      WRKSPC+0FBH        char for video buffer
+TMPBFR1      WRKSPC+0FCH        word for general purposes use
+                                (temp. buffer for 1 or 2 bytes)
+TMPBFR2      WRKSPC+0FEH        word for general purposes use
+                                (temp. buffer for 1 or 2 bytes)
+TMPBFR3      WRKSPC+100H        word for general purposes use
+                                (temp. buffer for 1 or 2 bytes)
+VIDEOBUFF    WRKSPC+102H        temp video buffer used fro scrolling and
+                                other purposes
+VIDTMP1      VIDEOBUFF+028H     temporary video buffer
+VIDTMP2      VIDTMP1+002H       temporary video buffer
+CHASNDDTN    VIDTMP2+002H       sound Ch.A duration (hds)
+CHBSNDDTN    CHASNDDTN+002H     sound Ch.B duration (hds)
+CHCSNDDTN    CHBSNDDTN+002H     sound Ch.C duration (hds)
+PBUFF        CHCSNDDTN+002H     Number print buffer
+MULVAL       PBUFF+0DH          Multiplier
+PROGST       MULVAL+03H         Start of program text area
+STLOOK       PROGST+064H        (WRKSPC+16CH) Start of memory test
