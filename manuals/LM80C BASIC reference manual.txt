@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.2                             *
-*                             (2019/09/26)                             *
-*              This release covers the LM80C BASIC R2.2                *                
+*                             Version  1.3                             *
+*                             (2019/10/02)                             *
+*          This release covers the LM80C BASIC R2.1 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -795,10 +795,14 @@ Returns a random number between 0 and 1. A negative value of I will
 start a new sequence; if I is greater than zero the function will return
 the next value in the random sequence; a vaue of zero will return the
 last number returned. The same negative number will generate the same
-random sequence. 
+random sequence. See also TMR.
 Example:
 A=RND(1) => returns a random number
 A=INT(RND(1)*6)+1 => rolls a dice: will return a number between 1 and 6.
+
+If you need to create a good random sequence you can use the system
+tick timer used to increment the 100ths of second counter:
+RND(-TMR(0))
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 RUN
