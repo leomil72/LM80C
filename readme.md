@@ -53,8 +53,8 @@ The files in this repo are organized in folders:
 
 ## Compilation
 To compile the firmware, first download or clone the repo on your computer, than go into the "12-Home computer" folder and open a terminal in it, then give this command:
- zasm -uwy --z80 ./LM80C-firmware-rXX.asm
-where "XX" is the release you want to compile. After the compilation you'll find a file with extension '.rom' that you can burn into the EEPROM.
+`zasm -uwy --z80 ./LM80C-firmware-rXX.asm`
+where "XX" is the release you want to compile. After the compilation you'll find a file with extension `.rom` that you can burn into the EEPROM.
 
 ---
 
