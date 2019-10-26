@@ -7,8 +7,8 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.3                             *
-*                             (2019/10/02)                             *
+*                             Version  1.4                             *
+*                             (2019/10/26)                             *
 *          This release covers the LM80C BASIC R2.1 and above          *                
 *                                                                      *
 ************************************************************************
@@ -752,11 +752,13 @@ additional paramether) performs a system reset.
 
 RESTORE
 -------
-Format: RESTORE
+Format: RESTORE [line_num]
 
 After a RESTORE statement the next information read with a READ state-
-ment will be the first value of the first DATA into the program. See
-also DATA and READ.
+ment will be the first value of the first DATA into the program. If
+[line_num] is passed, the next information read will be the one stored
+at such line number: this permits to read the same informations several
+times. See also DATA and READ.
 Example:
 10 DATA 10,20,30
 20 READ A => A will contain 10
