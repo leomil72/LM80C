@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.4                             *
-*                             (2019/10/26)                             *
-*          This release covers the LM80C BASIC R2.1 and above          *                
+*                             Version  1.5                             *
+*                             (2019/11/02)                             *
+*          This release covers the LM80C BASIC R2.6 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -418,6 +418,31 @@ If the expression is true, anything that follows THEN will be executed:
 If there is only a GOTO instruction after the expressio to be evaluated,
 the THEN statement can be omitted:
 10 IF A=1 GOTO 100
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+INKEY
+-----
+Fomart: INKEY(X)
+
+When used inside a program (usage in idrect mode is now allowed), this
+function returns the ASCII code of the code being pressed by the user.
+X can vary between 0 and 1,023 and represents the interval the function
+has to wait for the user's input before return control to the program.
+If X is 0 the function won't wait any time: it will read the input
+buffer and return the code being present, otherwise it will wait for
+the corresponding number of hundredths of seconds before to return.
+The results are 0 for no key being pressed. The key pressed while using
+INKEY won't be inserted into the regular input buffer of the BASIC
+interpreter.
+Example:
+10 A=INKEY(0)
+20 IF A=0 THEN 10:REM REPEAT UNTIL A KEY IS PRESSED
+30 PRINT CHR$(A)
+
+10 A=INKEY(500):REM WAIT A KEY FOR 5 SECONDS
+20 IF A=0 THEN PRINT "NO KEY PRESSED":GOTO 40
+30 PRINT "KEY PRESSED: ";CHR$(A)
+40 END
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 INP
