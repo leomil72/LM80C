@@ -3397,13 +3397,13 @@ CHKINK: ld      A,(TMPKEYBFR)   ; load current value
         or      E               ; by ORing D and E
         jr      NZ,CHKINK       ; if not 0, repeat
 ENDINK: pop     BC              ; restore BC
-        push    AF              ; store AF
+ENDINK2:push    AF              ; store AF
         di                      ; disable INTs
         xor     A               ; set INKEY FLAG...
         ld      (INKEYFLG),A    ; ...off
         ei                      ; re-enable INTs
         pop     AF              ; retrieve AF
-ENDINK2:jp      PASSA           ; return it as ASCII value
+        jp      PASSA           ; return it as ASCII value
 
 ROUND:  ld      HL,HALF         ; Add 0.5 to FPREG
 ADDPHL: call    LOADFP          ; Load FP at (HL) to BCDE
