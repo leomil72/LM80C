@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.5                             *
-*                             (2019/11/02)                             *
-*          This release covers the LM80C BASIC R2.6 and above          *                
+*                             Version  1.6                             *
+*                             (2019/11/25)                             *
+*          This release covers the LM80C BASIC R2.7 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -424,20 +424,26 @@ INKEY
 -----
 Fomart: INKEY(X)
 
-When used inside a program (usage in idrect mode is now allowed), this
+When used inside a program (usage in indrect mode is now allowed), this
 function returns the ASCII code of the code being pressed by the user.
 X can vary between 0 and 1,023 and represents the interval the function
 has to wait for the user's input before return control to the program.
 If X is 0 the function won't wait any time: it will read the input
 buffer and return the code being present, otherwise it will wait for
 the corresponding number of hundredths of seconds before to return.
-The results are 0 for no key being pressed. The key pressed while using
-INKEY won't be inserted into the regular input buffer of the BASIC
-interpreter.
+The results are 0 for no key being pressed. The last key being pressed
+is always inserted into a temp buffer used by INKEY so if the user is
+asked to press a key AFTER a certain moment, it is reccomended to
+make a null read before the real one. Another good way of working is to
+make a little IF..THEN loop and leave it when INKEY returns 0 to be sure
+to read only the requested keys. SInce the function read the keys very
+fast, it is suggested to introduce a delay of at least 5 to let
+the user be able to press a key.
+
 Example:
-10 A=INKEY(0)
-20 IF A=0 THEN 10:REM REPEAT UNTIL A KEY IS PRESSED
-30 PRINT CHR$(A)
+10 INKEY(0):REM EMPTIES THE BUFFER
+20 A=INKEY(10):IFA=0THEN10:REM REPEAT UNTIL A KEY IS PRESSED
+30 PRINT CHR$(A):REM PRINT PRESSED KEY CODE
 
 10 A=INKEY(500):REM WAIT A KEY FOR 5 SECONDS
 20 IF A=0 THEN PRINT "NO KEY PRESSED":GOTO 40
