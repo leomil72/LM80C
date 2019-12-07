@@ -55,7 +55,7 @@
 ; R2.6  - 20191102 - New function INKEY to read a key without a prompt;
 ;                    source code cleaning
 ; R2.7  - 20191116 - Fixed a bug into the INKEY code
-; R2.8  - 2019XXXX - Minor bug fixes; added support for built-in keyboard;
+; R2.8  - 20191207 - Minor bug fixes; added support for built-in keyboard;
 ;                    revision of some char codes;
 ;
 ; -----------------------------------------------------------------------------
