@@ -58,7 +58,8 @@
 ; R2.8   - 20191207 - Minor bug fixes; added support for built-in keyboard;
 ;                     revision of some char codes;
 ; R2.8.1 - 20191208 - Introduced support for SHIFT key for uppercase letters & alternate chars
-; R2.8.2 - 20xxxxxx - Fixed a bug into the system tick counter code;
+; R2.8.2 - 20191215 - Fixed a bug introduced with 2.8.1 that lead to wrong functioning of
+;                     several BASIC statements (system tick counter, Locate, etc..) 
 ;
 ; -----------------------------------------------------------------------------
 
@@ -85,7 +86,7 @@
 #include "../include/basic/basic32k-r282.asm"
 
 ; include the latest version of the font sets
-#include "../include/vdp/6x8fonts.asm"
+#include "../include/vdp/6x8fonts-r12.asm"
 #include "../include/vdp/8x8fonts-r15.asm"
 
 ; END OF ASSEMBLY SOURCE
