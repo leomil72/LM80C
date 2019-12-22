@@ -55,6 +55,7 @@ The files in this repo are organized in folders:
 To compile the firmware, first download or clone the repo on your computer, than go into the "12-Home computer" folder and open a terminal in it, then give this command:
 `zasm -uwy --z80 ./LM80C-firmware-rXX.asm`
 where "XX" is the release you want to compile. After the compilation you'll find a file with extension `.rom` that you can burn into the EEPROM.
+Obviously, you should have downloaded and installed the compiler previously. The compiler I used is ZASM, that you can get from [this site](http://k1.spdns.de/Develop/Projects/zasm/Distributions/). It's available both for Linux and MacOS 8and other BSD related OSs). At the moment there isn't a Windows version, so to compile the source you need a Linux box, a Mac or a Windows computer with a virtual machine running Linux on it.
 
 ---
 
