@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.7                             *
-*                             (2019/12/15)                             *
-*          This release covers the LM80C BASIC R2.7 and above          *                
+*                             Version  1.8                             *
+*                             (2019/12/22)                             *
+*          This release covers the LM80C BASIC R2.9 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -911,13 +911,25 @@ equals to 0, the tone will last forever, unless you quit the volume off
 or you set another tone on the same channel.
 Example:
 SOUND 1,3500,100 => plays a tone of freq. 193 Hz for 1 second.
+
+There is a speciale usage of SOUND. If used with just a 0 as paramether,
+SOUND will reset the PSG registers and shut down every sound generated
+by the audio chip, including the white noise and the envelops activated
+with SREG.
+Example:
+SOUND 0  => shut down every king of sound/tone
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SPC
 ---
 Format: SPC(X)
 
-Prints X spaces on video.
+Prints X spaces on video. It can only be used in conjunction with a
+PRINT statement.
+Please keep in mind that TAB and SPC are similar but have different
+behaviours since the former moves the cursor without altering the chars
+before the position to reach while SPC prints spaces deleting every
+char during the movement.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  
 SQR
@@ -983,8 +995,16 @@ TAB
 ---
 Format: TAB(X)
 
-Spaces the cursor to column X on the terminal. 0 is the leftmost space
-while 71 is the rightmost space. X must be in the range 0~255.
+Moves the cursor to column X on the video. X must be in the range 0~255:
+0 means no movements.
+Example:
+PRINT TAB(5);"*" =>
+     *
+
+Please keep in mind that TAB and SPC are similar but have different
+behaviours since the former moves the cursor without altering the chars
+before the position to reach while SPC prints spaces deleting every
+char during the movement.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 TAN
