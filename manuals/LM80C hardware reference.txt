@@ -230,3 +230,24 @@ PBUFF           CONTROLKEYS+01H Number print buffer
 MULVAL          PBUFF+0DH       Multiplier
 PROGST          MULVAL+03H      Start of program text area
 STLOOK          PROGST+064H     (WRKSPC+16CH) Start of memory test
+------------------------------------------------------------------------ 
+                       7. Serial configuration
+
+If you intend to connect the LM80C to a host computer through the
+serial port A, you have to use am FT232 module to adapt the RS232 serial
+lines of the LM80X to the USB port of moderm systems. Moreover, to avoid
+serial issues during sending data to the LM80C, please configure the
+terminal emulator you are using (i.e. CoolTerm or TeraTherm) with these
+params:
+
+PORT: choose the port your system has mounted the FT232 module to
+BAUDRATE: 19,200 bps
+DATA BITS: 8
+PARITY: none (0)
+STOP BITS: 1
+FLOW CONTROL: CTS
+SOFTWARE SUPPORT FOR FLOW CONTROL: yes
+RTS AT STARTUP: on
+HANDLE BS AND DEL CHARS: yes
+HANDLE FF (FormFeed) CHAR: yes
+USE TX DELAY: min. 5ms (increment it if you experience issues)
