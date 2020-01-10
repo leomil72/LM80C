@@ -6,8 +6,8 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.2                             *
-*                             (2019/12/22)                             *
+*                             Version  1.3                             *
+*                             (2019/12/29)                             *
 *                This release applies to the LM80C R2.2                *
 *                                                                      *
 ************************************************************************
@@ -193,43 +193,50 @@ FPREG           WRKSPC+0E4H     Floating point register
 FPEXP           FPREG+03H       Floating point exponent
 SGNRES          WRKSPC+0E8H     Sign of result
 TMRCNT          WRKSPC+0E9H     TMR counter for 1/100 seconds
+; - VIDEO REGISTERS
 SCR_SIZE_W      TMRCNT+04H      screen width (it can be either 40 chars
                                 or 32 chars/bytes)
-SCR_SIZE_H      WRKSPC+0EEH     screen height (it can be 24/48/192: 24
+SCR_SIZE_H      SCR_SIZE_W+01H  screen height (it can be 24/48/192: 24
                                 for text, 48 for MC, 192 for graphics)
-SCR_SIZE_B      WRKSPC+0EFH     screen size in bytes
-SCR_NAM_TB      WRKSPC+0F1H     video name table address
-SCR_CURS_X      WRKSPC+0F3H     cursor X
-SCR_CURS_Y      WRKSPC+0F4H     cursor Y
-SCR_CUR_NX      WRKSPC+0F5H     new cursor X position
-SCR_CUR_NY      WRKSPC+0F6H     new cursor Y position
-SCR_ORG_CHR     WRKSPC+0F7H     original char positioned under the cursor
-CRSR_STATE      WRKSPC+0F8H     state of cursor (1=on, 0=off)
-LSTCSRSTA       WRKSPC+0F9H     last cursor state
-PRNTVIDEO       WRKSPC+0FAH     buffer video on/off
-CHR4VID         WRKSPC+0FBH     char for video buffer
-TMPBFR1         WRKSPC+0FCH     word for general purposes use (temp.
+SCR_MODE        SCR_SIZE_H+01H  screen mode (0=text, 1=G1, 2=G2, 3=MC,
+                                4=ExG2)
+SCR_SIZE_B      SCR_MODE+01H    screen size in bytes
+SCR_NAM_TB      SCR_SIZE_B+02H  video name table address
+SCR_CURS_X      SCR_NAM_TB+02H  cursor X
+SCR_CURS_Y      SCR_CURS_X+01H  cursor Y
+SCR_CUR_NX      SCR_CURS_Y+01H  new cursor X position
+SCR_CUR_NY      SCR_CUR_NX+01H  new cursor Y position
+SCR_ORG_CHR     SCR_CUR_NY+01H  original char positioned under the
+                                cursor
+CRSR_STATE      SCR_ORG_CHR+01H state of cursor (1=on, 0=off)
+LSTCSRSTA       CRSR_STATE+01H  last cursor state
+PRNTVIDEO       LSTCSRSTA+01H   print on video buffer (1=on / 0=off) set
+                                to off on graphic only modes
+CHR4VID         PRNTVIDEO+01H   char for video buffer
+TMPBFR1         CHR4VID+01H     word for general purposes use (temp.
                                 buffer for 1 or 2 bytes)
-TMPBFR2         WRKSPC+0FEH     word for general purposes use (temp.
+TMPBFR2         TMPBFR1+02H     word for general purposes use (temp.
                                 buffer for 1 or 2 bytes)
-TMPBFR3         WRKSPC+100H     word for general purposes use (temp.
+TMPBFR3         TMPBFR2+02H     word for general purposes use (temp.
                                 buffer for 1 or 2 bytes)
-VIDEOBUFF       WRKSPC+102H     buffer used for video scrolling and
+VIDEOBUFF       TMPBFR3+02H     buffer used for video scrolling and
                                 other purposes
 VIDTMP1         VIDEOBUFF+028H  temporary video word
 VIDTMP2         VIDTMP1+002H    temporary video word
+; - SOUND & KEYBOARD REGISTERS - FROM HERE...
 CHASNDDTN       VIDTMP2+002H    sound Ch.A duration (1/100s)
 CHBSNDDTN       CHASNDDTN+002H  sound Ch.B duration (1/100s)
 CHCSNDDTN       CHBSNDDTN+002H  sound Ch.C duration (1/100s)
-KBTMP           CHCSNDDTN+01H   temp cell used by keyboard scanner
+KBTMP           CHCSNDDTN+002H  temp cell used by keyboard scanner
 TMPKEYBFR       KBTMP+001H      temp buffer for last key pressed
 LASTKEYPRSD     TMPKEYBFR+001H  last key code pressed
 CONTROLKEYS     LASTKEYPRSD+01H flags for control keys (bit#0=SHIFT;
                                 bit#1=CTRL; bit#2=C=)
-PBUFF           CONTROLKEYS+01H Number print buffer
-MULVAL          PBUFF+0DH       Multiplier
-PROGST          MULVAL+03H      Start of program text area
-STLOOK          PROGST+064H     (WRKSPC+16CH) Start of memory test
+; - - - - - - - - - - - - - - -
+PBUFF           CONTROLKEYS+01H ; Number print buffer
+MULVAL          PBUFF+0DH       ; Multiplier
+PROGST          MULVAL+03H      ; Start of program text area
+STLOOK          PROGST+064H     ; (WRKSPC+16DH) Start of memory test
 ------------------------------------------------------------------------ 
                        7. Serial configuration
 

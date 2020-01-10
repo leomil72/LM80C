@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.8                             *
-*                             (2019/12/22)                             *
-*          This release covers the LM80C BASIC R2.9 and above          *                
+*                             Version  1.9                             *
+*                             (2020/01/10)                             *
+*         This release covers the LM80C BASIC R2.11 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -104,7 +104,7 @@ PAUSE: pauses the execution of the code for a certain bit of time
 
 &B
 --
-Format: &Bnnnn
+Syntax: &Bnnnn
 
 Binary base. It interprets the "nnnn" value as a binary value (signed
 int). "n" can be made only by "0" or "1" numbers.
@@ -112,7 +112,7 @@ int). "n" can be made only by "0" or "1" numbers.
 
 &H
 --
-Format: &Hxxxx
+Syntax: &Hxxxx
 
 Hexadecimal base. It interprets the "xxxx" value as an hexadecimal value
 (signed int). Each "x" can be any number between 0 and 9 and any char
@@ -121,7 +121,7 @@ between A (10) and F (15).
 
 ABS
 ------
-Format: ABS(X)
+Syntax: ABS(X)
 
 Returns the absolute value (i.e. with no sign) of the expression "X".
 Example:
@@ -132,7 +132,7 @@ ABS(-75) => 75
 
 AND
 ---
-Format: A AND B
+Syntax: A AND B
 
 Logic operator used in boolean expressions. AND performs a logical
 conjuntion. The interpreter supports 3 boolean operators: AND, OR, and
@@ -156,7 +156,7 @@ A AND B = 0
 
 ASC
 ---
-Format: ASC(X$)
+Syntax: ASC(X$)
 
 Returns the ASCII code of the first character of the string "X".
 Example:
@@ -166,7 +166,7 @@ ASC("AB") => 65
 
 ATN
 ---
-Format: ATN(X)
+Syntax: ATN(X)
 
 Returns the arctangent of "X". The result is in RADIUS in range
 -pi/2 to pi/2
@@ -174,7 +174,7 @@ Returns the arctangent of "X". The result is in RADIUS in range
 
 BIN$
 ----
-Format: BIN$(X)
+Syntax: BIN$(X)
 Converts an expression into a string containing the binary value.
 Example:
 BIN$(12) => "1010"
@@ -182,7 +182,7 @@ BIN$(12) => "1010"
 
 CHR$
 ----
-Format: CHR$(X)
+Syntax: CHR$(X)
 
 Returns a string containing the character whose ASCII code is
 represented by expression X.
@@ -190,9 +190,24 @@ Example:
 CHR$(65) => "A"
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+CIRCLE
+------
+Syntax: CIRCLE x,y,radius[,color]
+
+Draws a circle whose center is at X,Y coordinates. X can range from 0 to
+255, Y can range from 0 to 191. "radius" can range from 0 to 255. If
+"color" is passed, the circle will be drawn with the specified color,
+otherwise the foreground color will be used (see COLOR).
+Points of the circumference that come out of the screen won't be paint-
+ed.
+
+Example:
+CIRCLE128,96,25 => draws a circle centered in the middle of the screen
+                   with a diameter of 50 pixels (radius=25)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 CLEAR
 -----
-Format: CLEAR
+Syntax: CLEAR
         CLEAR X
 
 The call of CLEAR with no paramethers set the contents of all the
@@ -207,18 +222,50 @@ CLEAR 200 => sets the string space to 200 chars
 
 CLS
 ---
-Format: CLS
+Syntax: CLS
 
 Clears the current screen, intializes the pattern cells. The filling
-value is graphic mode dependant: in modes 0 & 1 the video buffer is
+value is graphic mode dependant: in modes 0, 1, & 4 the video buffer is
 filled up with ASCII value 32 (the "space" character) while in modes
 2 & 3 is filled up with 0s. Finally, moves the cursor at coordinates 0,0
 (the top left corner).
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+COLOR
+-----
+Syntax: COLOR foreground[,background][,border]
+
+Sets the colors of the screen. It can have 1 to 3 arguments, depending
+of the current video mode. "Foreground" sets the color of the text or of
+the pixels being printed on screen; "background" sets the color of the
+background parts, while "border" sets the colors of the borders of the
+image (the parts over the top, right, bottom, and left of the display).
+Values range from 1 to 15:
+1: black                        9:  light red
+2: medium green                 10: dark yellow
+3: light green                  11: light yellow
+4: dark blue                    12: dark green
+5: light blue                   13: magenta (purple)
+6: dark red                     14: gray
+7: cyan (aqua blue)             15: white
+8: Medium red
+
+In SCREEN 0 (text mode), only the first 2 are allowed since the
+background and border colors coincide. In SCREEN 3 (multicolor mode)
+only the foreground color is allowed.
+When in graphic mode 2, the color of the pixels painted by PLOT, DRAW,
+and CIRCLE commands, when not specified, is the foreground color set by
+COLOR.
+
+Examples:
+COLOR 1,15,5 => in SCREEN 1 it sets the text in black, the background in
+                white, and the border in light blue
+COLOR 15,5   => in SCREEN 0 it sets the text to white on light blue
+                background (this is the default combination)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 CONT
 ----
-Format: CONT
+Syntax: CONT
 
 Given after an error that halted the execution of a program, forces
 the interpreter to continue with the line after the one that raised
@@ -227,7 +274,7 @@ the error.
 
 COS
 ---
-Format: COS(X)
+Syntax: COS(X)
 
 Returns the cosine of "X". The result is in RADIUS in range
 -pi/2 to pi/2
@@ -235,7 +282,7 @@ Returns the cosine of "X". The result is in RADIUS in range
 
 DATA
 ----
-Format: DATA <list>
+Syntax: DATA <list>
 
 Introduces a list of informations used by the program itself. "list"
 can be a list of numerical or strings separated by commas and read with
@@ -247,7 +294,7 @@ Example:
 
 DEEK
 ----
-Format: DEEK(X)
+Syntax: DEEK(X)
 
 Reads a word from memory cells given by the expression X and X+1. A word
 is a 16-bit value stored in 2 contiguos memory cells: X contains the
@@ -258,7 +305,7 @@ A=DEEK(1000) => reads the word at 1000/1000+1 and stores it into A
 
 DEF
 ---
-Format: DEF FNXXX(Y)=<expression>
+Syntax: DEF FNXXX(Y)=<expression>
 
 Creates an user-defined function that expands the built-in functions of
 the interpreter. XXX is the name of the new function and must follow
@@ -274,7 +321,7 @@ FNRAD(100) => 1.74532
 
 DIM
 ---
-Format DIM <V>(<I>,[J])[,....]
+Syntax DIM <V>(<I>,[J])[,....]
 
 Allocates space for array variables. More than one array can be
 dimensioned with one DIM statement. Array can have one ore two
@@ -289,7 +336,7 @@ DIM B(5,5) => bidimensional array, indexes fro 0 to 5 (36 elements).
 
 DOKE
 ----
-Format: DOKE X,Y
+Syntax: DOKE X,Y
 
 Writes a word value (a 16-bit number) into a couple of contiguos memory
 cells. X and Y must be valid numericals, in any supported format. The
@@ -300,9 +347,30 @@ DOKE &H8100,&HAABB => cell $8100 will contain $00, cell $8101 will
 contain $81
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+DRAW
+----
+Syntax: DRAW X1,Y1,X2,Y2[,color]
+
+Draws a line starting from point with coordinates X1,Y1 to point with
+coordinates X2,Y2. If "color" is specified, the line will be drawn with
+that color (see "COLOR" for color codes), otherwise the foreground
+color will be used. X1 and X2 must be in range 0~255, X1 and Y2 must be
+in range 0~191: 0,0 if the top-left corner while 255,191 is the bottom-
+right corner. Due to hardware limitations of the VDP "Video Display
+Processor", for every single portion of screen of 8x1 pixels there can
+only be 1 primary color: if a line of one color intersects a line of
+another color, the pixels of the crossing byte will get the last color
+used. The direction of drawing is always from X1,Y1 to X2,Y2, regardless
+of which location each pair of coordinates has on the screen. 
+
+Example:
+DRAW0,0,255,191,7 => draw a diagonal from top left to bottom right in
+                     cyan color
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 END
 ---
-Format: END
+Syntax: END
 
 Terminates the execution of a program. Any statements and/or program
 lines after END will be ignored and control will return to the editor.
@@ -310,7 +378,7 @@ lines after END will be ignored and control will return to the editor.
 
 EXP
 ---
-Format: EXP(X)
+Syntax: EXP(X)
 
 Returns e to the power X. X must be lesser or equal to 87.3365.
 Example:
@@ -325,7 +393,7 @@ See "DEF"
 
 FOR
 ---
-Format: FOR <var> = <X> TO <Y> [STEP <Z>] /instructions/ NEXT <X>[,...]
+Syntax: FOR <var> = <X> TO <Y> [STEP <Z>] /instructions/ NEXT <X>[,...]
 
 The FOR..NEXT statements are used to create loops, i.e. a sequence of
 instructions that have to be repeated for a certain number of times.
@@ -357,7 +425,7 @@ NEXT J,I => repeat 2 loops, J is the first because is the most recent
 
 FRE
 ---
-Format: FRE(X)
+Syntax: FRE(X)
 
 If X is a numerical expression, FRE returns the memory available for
 BASIC environments. If the expression is a string, it returns the
@@ -369,7 +437,7 @@ FRE("") => returns the free space in the string space
 
 GOSUB
 -----
-Format: GOSUB <line>
+Syntax: GOSUB <line>
 
 Jumps at <line> to execute a portion of code. When the interpreter
 will encounter the RETURN statement, it will resume the execution at
@@ -383,7 +451,7 @@ Example:
 
 GOTO
 ----
-Format: GOTO <line>
+Syntax: GOTO <line>
 
 Makes an unconditional jump to another point of the program indicated
 by <line>. 
@@ -393,7 +461,7 @@ by <line>.
 
 HEX$
 ----
-Format: HEX$(X)
+Syntax: HEX$(X)
 
 Converts the numerical expression X into a string containing the
 hexadecimal representation of the value of X. X must be a signed integer
@@ -404,7 +472,7 @@ HEX$(1000) => "3E8"
 
 IF
 --
-Format: IF X THEN [...]
+Syntax: IF X THEN [...]
         IF X GOTO <line>
 
 IF is a conditional branch. It serves to change the order of the
@@ -453,7 +521,7 @@ Example:
 
 INP
 ---
-Format: INP(X)
+Syntax: INP(X)
 
 Reads a byte (an 8-bit value) from the I/O port specified by the
 expression X. X must be in range 0-255.
@@ -463,7 +531,7 @@ A=INP(1) => read a byte from port 1 and assign it to A
 
 INPUT
 -----
-Format: INPUT [<prompt text>;]<list of variables>
+Syntax: INPUT [<prompt text>;]<list of variables>
 
 Reads one or more data from the standard input and assign it to the
 same number of variables. The interpreter prompts the user with a 
@@ -488,7 +556,7 @@ INPUT A => wait for a number with just a "?"
 
 INT
 ---
-Format: INT(X)
+Syntax: INT(X)
 
 Returns the integer part of X. X must be a numerical expression. The
 result is obtainded by truncating X to the decimal point. If X is
@@ -500,7 +568,7 @@ INT(-3.14) => -4
 
 LEFT$
 -----
-Format: LEFT$(X,I)
+Syntax: LEFT$(X,I)
 
 Returns a string that contains the I characters to the left of the
 string X. See also RIGHT$ and MID$
@@ -510,7 +578,7 @@ LEFT$("HELLO",2) => "HE"
 
 LEN
 ---
-Format: LEN(X)
+Syntax: LEN(X)
 
 Returns the lenght of the string X.
 Example:
@@ -519,7 +587,7 @@ LEN("HELLO") => 5
 
 LET
 ---
-Format: LET <var>=<val>
+Syntax: LET <var>=<val>
 
 Assigns the value <val> to the variable with name <var>. The use of LET
 is optional and this statement can be omitted.
@@ -529,7 +597,7 @@ LET A=10   is equal to     A=10
 
 LINES
 -----
-Format: LINES <num>
+Syntax: LINES <num>
 
 Sets the number of lines to print before to pause the listing of a
 program made with LIST. See below.
@@ -537,7 +605,7 @@ program made with LIST. See below.
 
 LIST
 ----
-Format: LIST [start]
+Syntax: LIST [start]
 
 Lists a program stored in memory. If <start> is passed, the list will
 start at the line set by <start>, otherwise from the first line of the
@@ -550,7 +618,7 @@ LIST 100  => list from 100 to the end of the program
 
 LOCATE
 ------
-Format: LOCATE X,Y
+Syntax: LOCATE X,Y
 
 Places the cursor on the screen at coordinates X,Y. LOCATE works only
 in graphic modes 0 & 1. Y is in range 0~23 while X is in range 0~31/39,
@@ -565,7 +633,7 @@ LOCATE 0,9 => place the cursor at the first cell of the 10th row
 
 LOG
 ---
-Format: LOG(X)
+Syntax: LOG(X)
 
 Returns the natural logarithm of X. X must be greater than 0.
 Example:
@@ -574,7 +642,7 @@ LOG(10) => 2.30259
 
 MID$
 ----
-Format: MIDS$(X,I[,J])
+Syntax: MIDS$(X,I[,J])
 
 Returns a portion of string X. If J is omitted, it returns the I right-
 most characters of X; if J is passed, it returns the chars between the
@@ -586,7 +654,7 @@ MID$("HELLO",3,2 = > "LL"
 
 MONITOR
 -------
-Format: MONITOR
+Syntax: MONITOR
 
 Used to activate the terminal of the Nascom computers, at the moment
 it resets the system. It will be removed in future releases.
@@ -594,7 +662,7 @@ it resets the system. It will be removed in future releases.
 
 NEW
 ---
-Format: NEW
+Syntax: NEW
 
 Deletes the current program in memory and clears every variable. Used
 before to enter a new program without the need to reset the system.
@@ -604,14 +672,14 @@ NEW
 
 NEXT
 ----
-Format: NEXT <list of variables>
+Syntax: NEXT <list of variables>
 
 Used in FOR loops. See FOR for details.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 NOT
 ---
-Format: NOT X
+Syntax: NOT X
 
 Returns the bit complement of X. The truth table is below:
 NOT 1 => 0
@@ -631,7 +699,7 @@ See also AND for details.
 
 NULL
 ----
-Format: NULL X
+Syntax: NULL X
 
 Sets the null characters to be printed at the end of a printed row.
 The default value is 0. X must be a numeric expression.
@@ -641,7 +709,7 @@ obsolet at the moment and will be removed in future releases.
 
 ON
 --
-Format: ON X GOTO <list of lines>
+Syntax: ON X GOTO <list of lines>
         ON X GOSUB <list of lines>
 
 Used in conjunction with GOTO and GOSUB to introduce a series of
@@ -656,7 +724,7 @@ ON B GOSUB 1000,2000,3000
 
 OR
 --
-Format: X OR Y
+Syntax: X OR Y
 
 Boolean operator used for logical disjunction operations. It returns a
 true value when one or both the expressions are true.  Its truth
@@ -673,7 +741,7 @@ that is 6 in decimal representation)
 
 OUT
 ---
-Format: OUT X,Y
+Syntax: OUT X,Y
 
 Sends Y to the peripherical device connected to output port X. X and Y
 must be expressions with values in range 0~255.
@@ -683,7 +751,7 @@ OUT 1,100
 
 PAUSE
 -----
-Format: PAUSE X
+Syntax: PAUSE X
 
 Forces the system to halt and wait for a specific interval of time set
 by X. X must be a numerical expression in range 0~65,535 that represents
@@ -695,7 +763,7 @@ PAUSE 0 => no wait. this is similar to the assembly instruction NOP
 
 PEEK
 ----
-Format: PEEK(X)
+Syntax: PEEK(X)
 
 Returns the byte stored in RAM at location X. X must be a numerical
 expression in range -32,768 to 32,767 (i.e. a 16-bit signed integer).
@@ -703,9 +771,26 @@ Example:
 PRINT PEEK(8000) => prints the contents of address 8000.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+PLOT
+----
+Syntax: PLOT x,y[,color]
+
+Plots a pixel onto the screen. This command only works in SCREEN mode 2.
+"x" and "y" are the coordinates where to set the pixel. "color" is
+optional: if not passed, the color used is the default one set with the
+COLOR command or, in case you are plotting into an 8x1 pixel area that
+already has a pixel colored with a color different from the foreground
+color set with COLOR, the former will be used.
+"x" must be in range 0~255 while "y" in range 0~191. The coordinates 0,0
+correspond to the pixel in the top left corner of the screen.
+
+Example:
+PLOT 0,255  => plot a pixel into the top right corner of the screen
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 POKE
 ----
-Format: POKE X,Y
+Syntax: POKE X,Y
 Writes the byte Y into the location of RAM whose address is X. X must be
 a numerical expression in range -32,768 to 32,767 (i.e. a 16-bit signed
 integer), Y an expression whose value is in range 0~255.
@@ -717,7 +802,7 @@ remember that numbers are 16-bit signed so everything greater than
 
 POS
 ---
-Format: POS(X)
+Syntax: POS(X)
 
 Returns the current position of the terminal's printer head. Note:
 obsolete, it will be removed in future releases.
@@ -725,7 +810,7 @@ obsolete, it will be removed in future releases.
 
 PRINT
 -----
-Format: PRINT [data|variables|text|operations]
+Syntax: PRINT [data|variables|text|operations]
 
 The PRINT statement prints something on screen. It supports different
 types of expressions: it can print the contents of variables, text
@@ -747,7 +832,7 @@ PRINT A,B => prints the contents of A and B with tabulation
 
 READ
 ----
-Format: READ <list of variables>
+Syntax: READ <list of variables>
 
 Reads the informations stored into the program with DATA statement.
 <list of variables> is a set of variables names separated by commas. The
@@ -765,7 +850,7 @@ Example:
 
 REM
 ---
-Format: REM <comment>
+Syntax: REM <comment>
 
 Used to enter a comment into the program. Everything that follow the REM
 statement will be ignored.
@@ -775,7 +860,7 @@ Example:
 
 RESET
 -----
-Format: RESET
+Syntax: RESET
 
 Originally used to reset (set to off) a video pixel, now (without any
 additional paramether) performs a system reset.
@@ -783,7 +868,7 @@ additional paramether) performs a system reset.
 
 RESTORE
 -------
-Format: RESTORE [line_num]
+Syntax: RESTORE [line_num]
 
 After a RESTORE statement the next information read with a READ state-
 ment will be the first value of the first DATA into the program. If
@@ -798,7 +883,7 @@ Example:
 
 RETURN
 ------
-Format: RETURN
+Syntax: RETURN
 
 Used to leave a sub-routine called by GOSUB. After the RETURN statement,
 the execution of the program will continue with the instruction
@@ -812,7 +897,7 @@ Example:
 
 RIGHT$
 ------
-Format: RIGHT$(X,I)
+Syntax: RIGHT$(X,I)
 
 Returns a string that contains the I characters to the right of the
 string X. See also LEFT$ and MID$
@@ -822,7 +907,7 @@ RIGHT$("HELLO",2) => "LO"
 
 RND
 ---
-Format: RND(I)
+Syntax: RND(I)
 
 Returns a random number between 0 and 1. A negative value of I will
 start a new sequence; if I is greater than zero the function will return
@@ -840,7 +925,7 @@ RND(-ABS(TMR(0)))
 
 RUN
 ---
-Format: RUN [numline]
+Syntax: RUN [numline]
 
 Start the execution of the program currently stored in memory. If
 [numline] is passed, the execution will start from such line, otherwise
@@ -851,26 +936,39 @@ RUN
 
 SCREEN
 ------
-Format: SCREEN mode
+Syntax: SCREEN mode
 
 Originally, it positioned the cursor at a specific location into the
 terminal screen. Now it changes the screen mode. "mode" is a number
-between 0 and 3 and sets the screen as follow:
+between 0 and 4 and sets the screen as follow:
 0: 40x24 chars text mode (no sprites support)
 1: 32x24 chars text mode or 256x192 pixels graphic mode (sprites supp.)
 2: 256x192 pixels graphic mode (sprites supported, bitmap mode)
 3: 64x48 pixels multicolor graphic mode (sprites supported)
+4: 256x192 pixels text/graphics mode (limited sprites support)
 
 SCREEN initializes the screen with default settings. In modes 0 & 1 it
 also loads and configures a charset since these two are also text modes:
 the big difference is that mode 0 is a real text mode, with no support
 for sprites and graphics. In every mode, SCREEN also performs a screen
 clear.
+
+SCREEN 4 is a special, not ufficially supported yet still documented
+mode that is a mix between SCREEN 1 and SCREEN 2. In SCREEN 4 the video
+buffer is divided into 768 cells each of those can be assigned to one
+8x8 pattern, like in mode 1, but where the colors are managed for single
+bytes (8x1 pixels). It lacks in sprite supporting: only 8 sprites can
+be used, if you try to some more they will start to duplicate them-
+selves.
+
+Example:
+SCREEN 0  => sets the 40x24 chars text mode
+SCREEN 2  => sets the bitmap graphic mode
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SGN
 ---
-Format: SGN(X)
+Syntax: SGN(X)
 
 Returns the sign of X: it returns -1 if X is negative, 1 if it is 
 positive, or 0 if it is zero.
@@ -881,14 +979,14 @@ Example:
 
 SIN
 ---
-Format: SIN(X)
+Syntax: SIN(X)
 
 Returns the sine of "X". The result is in RADIUS in range -pi/2 to pi/2.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SOUND
 -----
-Format: SOUND ch,tone,dur
+Syntax: SOUND ch,tone,dur
 
 This command instructs the PSG to emit a sound with a particular tone
 for a specific duration on the selected channel. "ch" can be 1,2, or 3,
@@ -922,7 +1020,7 @@ SOUND 0  => shut down every king of sound/tone
 
 SPC
 ---
-Format: SPC(X)
+Syntax: SPC(X)
 
 Prints X spaces on video. It can only be used in conjunction with a
 PRINT statement.
@@ -934,7 +1032,7 @@ char during the movement.
  
 SQR
 ---
-Format: SQR(X)
+Syntax: SQR(X)
 
 Returns the square root of X X must be greater than zero.
 Example:
@@ -943,7 +1041,7 @@ SQR(9)  => 3
 
 SREG
 ----
-Format: SREG X,Y
+Syntax: SREG X,Y
 
 Writes the byte Y into the register X of the PSG. X must be in the range
 0-15 while Y in the range 0-255. See SSTA for considerations about the
@@ -954,7 +1052,7 @@ SREG 8,15 => set the volume of analog channel 0 to 15
 
 SSTAT
 -----
-Format: SSTAT(X)
+Syntax: SSTAT(X)
 
 Reads the PSG (Programmable Sound Generator) register set by X and
 returns a byte. X must be in the range 0-15. Some words must be spent
@@ -969,7 +1067,7 @@ SSTAT(8) => actually reading the register #10.
 
 STEP
 ----
-Format: STEP <val>
+Syntax: STEP <val>
 
 Used in FOR..NEXT loops to set the increment of the index variable. See
 FOR for more details.
@@ -977,14 +1075,14 @@ FOR for more details.
 
 STOP
 ----
-Format: STOP
+Syntax: STOP
 
 Halts the execution of a program. See CONT on how to resume running.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 STR$
 ----
-Format: STR$(X)
+Syntax: STR$(X)
 
 Converts the string representation of expression X.
 Example:
@@ -993,7 +1091,7 @@ STR$(12) => "12"
 
 TAB
 ---
-Format: TAB(X)
+Syntax: TAB(X)
 
 Moves the cursor to column X on the video. X must be in the range 0~255:
 0 means no movements.
@@ -1009,7 +1107,7 @@ char during the movement.
 
 TAN
 ---
-Format: TAN(X)
+Syntax: TAN(X)
 
 Returns the tangent of X. The result is in radians.
 Example:
@@ -1018,14 +1116,14 @@ TAN(1) => 0.0003
 
 THEN
 ----
-Format: THEN
+Syntax: THEN
 
 Used with IF statement. See IF for more details.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 TMR
 ---
-Format: TMR(X)
+Syntax: TMR(X)
 
 Returns the value of the system tick timer, that is a 32-bit counter
 that is incremented every hundredth of a second. Since the BASIC
@@ -1054,7 +1152,7 @@ PRINT INT((TMR(1)*65536+TMR(0))/100) => 2736  (seconds)
 
 TO
 --
-Format: TO
+Syntax: TO
 
 Used in FOR..NEXT loops to set the range of the index variable. See FOR
 for more informations.
@@ -1062,7 +1160,7 @@ for more informations.
 
 USR
 ---
-Format: USR(X)
+Syntax: USR(X)
 
 Calls an user-defined machine language subroutine with argument X.
 The call of the subroutine is made through an entry point in RAM that
@@ -1079,7 +1177,7 @@ A=USR(0) => call a subrouting with argument 0.
 
 VAL
 ---
-Format: VAL(X$)
+Syntax: VAL(X$)
 
 Returns the numerical value of string X$. If the first character of X$
 isn't a +,&, or a digit then the result will be 0.
@@ -1090,7 +1188,7 @@ A$="a":VAL(A$) => 0, because A$ can not be represented as a number
 
 VOLUME
 ------
-Format: VOLUME X,Y
+Syntax: VOLUME X,Y
 
 Sets the volume of the selected channel X to volue Y. X must be in the
 range 0~3: 1,2, and 3 works on the corresponding analog channel,
@@ -1102,7 +1200,7 @@ VOLUME 0,0 => quits the volume of all the channels.
 
 VPEEK
 -----
-Format: VPEEK(X)
+Syntax: VPEEK(X)
 
 Reads a value from the VRAM (or Video-RAM), the memory that is at
 exclusive use of the VDP (Video Dislay Processor). X is a value between
@@ -1114,7 +1212,7 @@ VPEEK(0)
 
 VPOKE
 -----
-Format: VPOKE X,Y
+Syntax: VPOKE X,Y
 
 Like its RAM counterpart, VPOKE writes Y into the cell of VRAM whose
 address is X. X must be in the range 0~16,383, while Y is a byte value
@@ -1125,7 +1223,7 @@ VPOKE 1000,100
 
 VREG
 ----
-Format: VREG X,Y
+Syntax: VREG X,Y
 
 Writes Y into the VDP register X. X must be a number in the range 0~7,
 while Y is a byte.
@@ -1135,7 +1233,7 @@ VREG 7,15 = writes 15 into register #7
 
 VSTAT
 -----
-Format: VSTAT(X)
+Syntax: VSTAT(X)
 
 Reads the status register of the VDP. X is ignored and it can be any
 signed integer (between -32,768 and +32,767). It returns a byte value
@@ -1146,7 +1244,7 @@ VSTAT(0)
 
 WAIT
 ----
-Format: WAIT X,Y[,Z]
+Syntax: WAIT X,Y[,Z]
 
 Reads the I/O port X and performs and OR between the read byte and Y.
 If Z is passed, the result of the OR operation is ANDed with Z. The
@@ -1158,7 +1256,7 @@ WAIT 0,0,128 => the execution continues only if port 0 returns 128
 
 WIDTH
 -----
-Format: WIDTH X
+Syntax: WIDTH X
 
 Sets the lenght of a lines for inputs or outputs. X must be in the range
 0~255. Default is 255. 
