@@ -13,7 +13,7 @@
 ;
 ; ------------------------------------------------------------------------------
 ; Code Revision:
-; R1.0 - 2020xxxx - First release: 16-bit comparision/multiplication/negation
+; R1.0 - 20200110 - First release: 16-bit comparision/multiplication/negation
 ;
 ; ------------------------------------------------------------------------------
 
