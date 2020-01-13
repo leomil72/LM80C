@@ -8,7 +8,7 @@
 ************************************************************************
 *                                                                      *
 *                             Version  1.9                             *
-*                             (2020/01/10)                             *
+*                             (2020/01/12)                             *
 *         This release covers the LM80C BASIC R2.11 and above          *                
 *                                                                      *
 ************************************************************************
@@ -80,8 +80,10 @@ for numbers:
 -----------------
 A function is a statement that gets an input paramether and returns
 another data, that depends on the way it processed the input.
+
 HEX$: returns the hexadecimal representation of a number. *GS*
 BIN$: returns the binary representation of a number. *GS*
+INKEY: returns the ASCII code of the key being pressed
 TMR: returns the value of the system timer
 VPEEK: reads from VRAM
 VSTAT: returns the value of status register of the VDP
@@ -93,10 +95,19 @@ Commands are statements that tell the system to perfom a specific
 operation. Commands can get some paramethers but usually don't return
 any value. Here are the new commands:
 VPOKE: writes into VRAM
+SREG: writes into a PSG register
+VREG: writes into a VDP register
+SCREEN: changes the display mode
 LOCATE: position the cursor onto the screen
 SOUND: plays a sound tone
 VOLUME: sets the volume of the PSG audio channels
 PAUSE: pauses the execution of the code for a certain bit of time
+COLOR: set the foreground, background, and border colors
+PLOT: draws a pixel point
+DRAW: draws a line
+CIRCLE: draws a circle
+CLS: clears the screen
+RESET: resets the system
 ------------------------------------------------------------------------
 
                         5. LANGUAGE REFERENCE
@@ -108,7 +119,10 @@ Syntax: &Bnnnn
 
 Binary base. It interprets the "nnnn" value as a binary value (signed
 int). "n" can be made only by "0" or "1" numbers.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Example:
+?&B1000  => prints value 8
+------------------------------------------------------------------------
 
 &H
 --
@@ -117,18 +131,21 @@ Syntax: &Hxxxx
 Hexadecimal base. It interprets the "xxxx" value as an hexadecimal value
 (signed int). Each "x" can be any number between 0 and 9 and any char
 between A (10) and F (15).
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Example:
+?&H0F  => prints value 15
+-----------------------------------------------------------------------
 
 ABS
 ------
 Syntax: ABS(X)
 
 Returns the absolute value (i.e. with no sign) of the expression "X".
-Example:
-ABS(12.4) => 12.4
 
+Examples:
+ABS(12.4) => 12.4
 ABS(-75) => 75
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 AND
 ---
@@ -146,23 +163,25 @@ T AND F = F
 T AND T = T
 This means that the result is true only if both expressions A & B are
 true.
-Example:
+
+Examples:
 1 AND 1 => 1
 0 AND 1 => 0
 
 A=0, B=1
 A AND B = 0
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 ASC
 ---
 Syntax: ASC(X$)
 
 Returns the ASCII code of the first character of the string "X".
+
 Example:
 ASC("A") => 65
 ASC("AB") => 65
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 ATN
 ---
@@ -170,15 +189,16 @@ Syntax: ATN(X)
 
 Returns the arctangent of "X". The result is in RADIUS in range
 -pi/2 to pi/2
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 BIN$
 ----
 Syntax: BIN$(X)
 Converts an expression into a string containing the binary value.
+
 Example:
 BIN$(12) => "1010"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 CHR$
 ----
@@ -186,9 +206,10 @@ Syntax: CHR$(X)
 
 Returns a string containing the character whose ASCII code is
 represented by expression X.
+
 Example:
 CHR$(65) => "A"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 CIRCLE
 ------
@@ -204,21 +225,24 @@ ed.
 Example:
 CIRCLE128,96,25 => draws a circle centered in the middle of the screen
                    with a diameter of 50 pixels (radius=25)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
+
 CLEAR
 -----
 Syntax: CLEAR
         CLEAR X
 
 The call of CLEAR with no paramethers set the contents of all the
-variables stored in memory to 0.
+numeric variables stored in memory to 0 and of the string variables to
+"" (empty string).
 If called with a numeric expression, it sets the string space to the
-value of expression X. At startup, the string space is set to 100 by
-default. See the string chapter for more info.
-Example:
+value of expression "X". At startup, the string space is set by default
+to 100. See the string chapter for more info.
+
+Examples:
 CLEAR => clears every variable
 CLEAR 200 => sets the string space to 200 chars
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 CLS
 ---
@@ -227,9 +251,11 @@ Syntax: CLS
 Clears the current screen, intializes the pattern cells. The filling
 value is graphic mode dependant: in modes 0, 1, & 4 the video buffer is
 filled up with ASCII value 32 (the "space" character) while in modes
-2 & 3 is filled up with 0s. Finally, moves the cursor at coordinates 0,0
-(the top left corner).
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2 & 3 is filled up with 0s. Finally, in text modes, it moves the cursor
+at coordinates 0,0 (the top left corner).
+Same behaviour can be obtained in text modes by pressing together the
+SHIFT + CLEAR/HOME keys.
+-----------------------------------------------------------------------
 
 COLOR
 -----
@@ -262,7 +288,8 @@ COLOR 1,15,5 => in SCREEN 1 it sets the text in black, the background in
                 white, and the border in light blue
 COLOR 15,5   => in SCREEN 0 it sets the text to white on light blue
                 background (this is the default combination)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
+
 CONT
 ----
 Syntax: CONT
@@ -270,15 +297,15 @@ Syntax: CONT
 Given after an error that halted the execution of a program, forces
 the interpreter to continue with the line after the one that raised
 the error.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 COS
 ---
 Syntax: COS(X)
 
-Returns the cosine of "X". The result is in RADIUS in range
--pi/2 to pi/2
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Returns the cosine of "X". The result is in RADIUS in range -pi/2 to
+pi/2.
+-----------------------------------------------------------------------
 
 DATA
 ----
@@ -286,11 +313,15 @@ Syntax: DATA <list>
 
 Introduces a list of informations used by the program itself. "list"
 can be a list of numerical or strings separated by commas and read with
-the READ statement. See also RESTORE.
+the READ statement. A string can be inserted without quotation marks
+but, if the string must contain any space, their use is needed.
+See also RESTORE.
+
 Example:
 10 DATA 20,30,40  => numericals
-20 DATA "HELLO",LM80C => strings
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+20 DATA " HELLO ",LM80C => Note the usage of quot.marks to include
+                           space in the first string
+-----------------------------------------------------------------------
 
 DEEK
 ----
@@ -299,9 +330,10 @@ Syntax: DEEK(X)
 Reads a word from memory cells given by the expression X and X+1. A word
 is a 16-bit value stored in 2 contiguos memory cells: X contains the
 low byte while X+1 contains the high byte. 
+
 Example:
 A=DEEK(1000) => reads the word at 1000/1000+1 and stores it into A
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 DEF
 ---
@@ -314,10 +346,11 @@ passed, and it must be a valid variable name too; "expression" is the
 newly defined function. Limits: everything must reside in 72 chars (the
 lenght of a standard line); only one paramether is allowed. To call the
 function just use the FNXXX name.
+
 Example:
-DEF FNRAD(DEG)=3.14159/180*DEG
-FNRAD(100) => 1.74532
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+10 DEF FNRAD(DEG)=3.14159/180*DEG:REM SETS THE FUNCTION
+20 PRINT FNRAD(100):REM FUNCTION CALL (PRINTS 1.74532)
+-----------------------------------------------------------------------
 
 DIM
 ---
@@ -329,10 +362,11 @@ dimensions. If an array is used without being dimensioned, it is
 assumed to have a maimum subscript of 10 (i.e., eleven elements from 0
 to 10). So, for example A(I,J) is assumed to have 121 elements, unless
 otherwise dimensioned.
-Example:
+
+Examples:
 DIM A(10) => monodimensional array, elements numbered from 0 to 10
 DIM B(5,5) => bidimensional array, indexes fro 0 to 5 (36 elements).
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 DOKE
 ----
@@ -342,10 +376,11 @@ Writes a word value (a 16-bit number) into a couple of contiguos memory
 cells. X and Y must be valid numericals, in any supported format. The
 low byte of Y will be written into location X while the high byte of Y
 will be written into location X+1.
+
 Example:
-DOKE &H8100,&HAABB => cell $8100 will contain $00, cell $8101 will
-contain $81
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+DOKE &H8100,&HAABB => cell $8100 will contain $00
+                      cell $8101 will contain $81
+-----------------------------------------------------------------------
 
 DRAW
 ----
@@ -366,30 +401,32 @@ of which location each pair of coordinates has on the screen.
 Example:
 DRAW0,0,255,191,7 => draw a diagonal from top left to bottom right in
                      cyan color
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 END
 ---
 Syntax: END
 
 Terminates the execution of a program. Any statements and/or program
-lines after END will be ignored and control will return to the editor.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+lines following the END statement will be ignored and control will
+return to the editor.
+-----------------------------------------------------------------------
 
 EXP
 ---
 Syntax: EXP(X)
 
 Returns e to the power X. X must be lesser or equal to 87.3365.
+
 Example:
 EXP(2) => 7.38905
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 FN
 --
 
 See "DEF"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 FOR
 ---
@@ -414,14 +451,15 @@ One or more loop variables can follow the NEXT statement, altough the
 first variable must refer to the recent loop, the second of the most
 recent one and so on. If no variable is present, the NEXT statement 
 refers to the most recent FOR statement.
-Example:
+
+Examples:
 FOR I=1 to 10:PRINT I:NEXT I => repeats the loop 10 times (from 1 to 10)
 
-FOR I=1 to 10
-FOR J=1 TO 20
-PRINT A(I,J)
-NEXT J,I => repeat 2 loops, J is the first because is the most recent
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+10 FOR I=1 to 10
+20 FOR J=1 TO 20
+30 PRINT A(I,J)
+40 NEXT J,I => repeat 2 loops, J is the first because is the most recent
+-----------------------------------------------------------------------
 
 FRE
 ---
@@ -430,10 +468,11 @@ Syntax: FRE(X)
 If X is a numerical expression, FRE returns the memory available for
 BASIC environments. If the expression is a string, it returns the
 available space in the string space. See CLEAR for more details. 
-Example:
+
+Examples:
 FRE(0) => returns the memory available for BASIC (programs and vars)
 FRE("") => returns the free space in the string space
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 GOSUB
 -----
@@ -441,13 +480,15 @@ Syntax: GOSUB <line>
 
 Jumps at <line> to execute a portion of code. When the interpreter
 will encounter the RETURN statement, it will resume the execution at
-the instruction following the GOSUB statement. See also RETURN.
-Example:
+the instruction following the GOSUB statement.
+See also RETURN.
+
+Examples:
 10 GOSUB 30 => jumps to 30
 20 END => resumes from here
 30 PRINT "HELLO" 
 40 RETURN => return to caller
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 GOTO
 ----
@@ -456,8 +497,9 @@ Syntax: GOTO <line>
 Makes an unconditional jump to another point of the program indicated
 by <line>. 
 
+Example:
 10 GOTO 100
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 HEX$
 ----
@@ -466,9 +508,10 @@ Syntax: HEX$(X)
 Converts the numerical expression X into a string containing the
 hexadecimal representation of the value of X. X must be a signed integer
 with value in range -32,768/+32,767.
+
 Example:
 HEX$(1000) => "3E8"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 IF
 --
@@ -486,7 +529,7 @@ If the expression is true, anything that follows THEN will be executed:
 If there is only a GOTO instruction after the expressio to be evaluated,
 the THEN statement can be omitted:
 10 IF A=1 GOTO 100
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 INKEY
 -----
@@ -508,7 +551,7 @@ to read only the requested keys. SInce the function read the keys very
 fast, it is suggested to introduce a delay of at least 5 to let
 the user be able to press a key.
 
-Example:
+Examples:
 10 INKEY(0):REM EMPTIES THE BUFFER
 20 A=INKEY(10):IFA=0THEN10:REM REPEAT UNTIL A KEY IS PRESSED
 30 PRINT CHR$(A):REM PRINT PRESSED KEY CODE
@@ -517,7 +560,7 @@ Example:
 20 IF A=0 THEN PRINT "NO KEY PRESSED":GOTO 40
 30 PRINT "KEY PRESSED: ";CHR$(A)
 40 END
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 INP
 ---
@@ -525,9 +568,10 @@ Syntax: INP(X)
 
 Reads a byte (an 8-bit value) from the I/O port specified by the
 expression X. X must be in range 0-255.
+
 Example:
 A=INP(1) => read a byte from port 1 and assign it to A
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 INPUT
 -----
@@ -548,11 +592,12 @@ execution will continue discarding the extra values. If a prompt text
 is passed, it will be printed on screen before the question mark. The
 prompt text must be enclosed in double quotation marks and followed by a
 semicolon. 
-Example:
+
+Examples:
 INPUT "WHAT'S YOUR NAME";NAME$ => waits for a string
 INPUT "NAME,AGE";NAME$,AGE => waits for 2 data (a string and a number)
 INPUT A => wait for a number with just a "?"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 INT
 ---
@@ -561,29 +606,33 @@ Syntax: INT(X)
 Returns the integer part of X. X must be a numerical expression. The
 result is obtainded by truncating X to the decimal point. If X is
 negative, the round is made to the first integer greater than X.
-Example:
+
+Examples:
 INT(3.14) => 3
 INT(-3.14) => -4
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 LEFT$
 -----
 Syntax: LEFT$(X,I)
 
 Returns a string that contains the I characters to the left of the
-string X. See also RIGHT$ and MID$
+string X.
+See also RIGHT$ and MID$.
+
 Example:
 LEFT$("HELLO",2) => "HE"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 LEN
 ---
 Syntax: LEN(X)
 
 Returns the lenght of the string X.
+
 Example:
 LEN("HELLO") => 5
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 LET
 ---
@@ -591,17 +640,18 @@ Syntax: LET <var>=<val>
 
 Assigns the value <val> to the variable with name <var>. The use of LET
 is optional and this statement can be omitted.
+
 Example:
-LET A=10   is equal to     A=10
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LET A=10   is equal to   A=10
+-----------------------------------------------------------------------
 
 LINES
 -----
 Syntax: LINES <num>
 
 Sets the number of lines to print before to pause the listing of a
-program made with LIST. See below.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+program made with LIST: see below.
+-----------------------------------------------------------------------
 
 LIST
 ----
@@ -611,10 +661,11 @@ Lists a program stored in memory. If <start> is passed, the list will
 start at the line set by <start>, otherwise from the first line of the
 program. LIST will print the number of lines set with LINES (see above)
 then will pausing, waiting for the pressing of a key.
-Example:
+
+Examples:
 LIST  => list the whole program
 LIST 100  => list from 100 to the end of the program
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 LOCATE
 ------
@@ -626,19 +677,21 @@ depending on which mode is active at the moment: graphic 1 is 32 chars
 wide while graphic 1 is 40 chars wide. Coordinates 0,0 point to the top
 left corner. The usage of this command makes no sense in screen modes
 2 & 3 since they don't have any cursor support.
-Example:
+
+Examples:
 LOCATE 0,0 => place the cursor in the top left corner
 LOCATE 0,9 => place the cursor at the first cell of the 10th row
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 LOG
 ---
 Syntax: LOG(X)
 
 Returns the natural logarithm of X. X must be greater than 0.
+
 Example:
 LOG(10) => 2.30259
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 MID$
 ----
@@ -647,10 +700,11 @@ Syntax: MIDS$(X,I[,J])
 Returns a portion of string X. If J is omitted, it returns the I right-
 most characters of X; if J is passed, it returns the chars between the
 Ith and the Jth.
-Example:
+
+Examples:
 MID$("HELLO",3) => "LLO"
 MID$("HELLO",3,2 = > "LL"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 MONITOR
 -------
@@ -658,7 +712,7 @@ Syntax: MONITOR
 
 Used to activate the terminal of the Nascom computers, at the moment
 it resets the system. It will be removed in future releases.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 NEW
 ---
@@ -666,16 +720,17 @@ Syntax: NEW
 
 Deletes the current program in memory and clears every variable. Used
 before to enter a new program without the need to reset the system.
+
 Example:
 NEW
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 NEXT
 ----
 Syntax: NEXT <list of variables>
 
 Used in FOR loops. See FOR for details.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 NOT
 ---
@@ -684,10 +739,12 @@ Syntax: NOT X
 Returns the bit complement of X. The truth table is below:
 NOT 1 => 0
 NOT 0 => 1
+
 Since the interpreter works with 16-bit signed numbers, one could think
 that it works in a strange manner:
 NOT 1 => -2
 NOT 0 => -1
+
 Indeed, the results are OK. NOT 0 should return 1 but, since the two's
 complement of sixteen zeros is sixteen ones, which is the two's
 complement representation of -1. Similarly, NOT 1 should be 0 but since
@@ -695,7 +752,7 @@ the 16-bit value of 1 is the binary 0000000000000001, the bit complement
 of it is 1111111111111110 that is the two's complement of -2.
 Eventually, NOT X is equal to -(X+1).
 See also AND for details.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 NULL
 ----
@@ -705,7 +762,7 @@ Sets the null characters to be printed at the end of a printed row.
 The default value is 0. X must be a numeric expression.
 NULL had a meaning when teletypes were used to print text but it is
 obsolet at the moment and will be removed in future releases.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 ON
 --
@@ -717,10 +774,11 @@ unconditional jumps (GOTO) or calls to subroutines (GOSUB). X must be
 a numerical expression: the jump is executed by calling the line whose
 position corresponds to the value of X. The lines must be separated by
 columns.
-Example:
+
+Examples:
 ON A GOTO 100,200,300
 ON B GOSUB 1000,2000,3000
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 OR
 --
@@ -734,10 +792,11 @@ table is the following:
 1 OR 0 = 1
 1 OR 1 = 1
 See also AND and NOT.
+
 Example:
 4 OR 2 => 6 (4 is 100b, 2 is 10b, so 100b or 010b is equal to 110b, 
 that is 6 in decimal representation)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 OUT
 ---
@@ -745,9 +804,10 @@ Syntax: OUT X,Y
 
 Sends Y to the peripherical device connected to output port X. X and Y
 must be expressions with values in range 0~255.
+
 Example:
 OUT 1,100
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 PAUSE
 -----
@@ -756,10 +816,11 @@ Syntax: PAUSE X
 Forces the system to halt and wait for a specific interval of time set
 by X. X must be a numerical expression in range 0~65,535 that represents
 the number of 100ths of a second to wait.
-Example:
+
+Examples:
 PAUSE 1000 => wait for 10 seconds (1,000 x 0.01s)
 PAUSE 0 => no wait. this is similar to the assembly instruction NOP
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 PEEK
 ----
@@ -767,9 +828,10 @@ Syntax: PEEK(X)
 
 Returns the byte stored in RAM at location X. X must be a numerical
 expression in range -32,768 to 32,767 (i.e. a 16-bit signed integer).
+
 Example:
 PRINT PEEK(8000) => prints the contents of address 8000.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 PLOT
 ----
@@ -786,7 +848,7 @@ correspond to the pixel in the top left corner of the screen.
 
 Example:
 PLOT 0,255  => plot a pixel into the top right corner of the screen
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 POKE
 ----
@@ -794,11 +856,12 @@ Syntax: POKE X,Y
 Writes the byte Y into the location of RAM whose address is X. X must be
 a numerical expression in range -32,768 to 32,767 (i.e. a 16-bit signed
 integer), Y an expression whose value is in range 0~255.
+
 Example:
 POKE -28672,128 => writes 128 into memory cell located at 36,864 (just
 remember that numbers are 16-bit signed so everything greater than 
 32,767 must be provided in two's complement)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 POS
 ---
@@ -806,7 +869,7 @@ Syntax: POS(X)
 
 Returns the current position of the terminal's printer head. Note:
 obsolete, it will be removed in future releases.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 PRINT
 -----
@@ -821,14 +884,15 @@ commas the interpreter prints each expression at the beginning of such
 spaces. If a semicolon is used (;) the expressions are printed one after
 another. If neither of them are present, then the interpreter will
 go to the next line after the ending of the print statement.
-Example:
+
+Examples:
 PRINT => just go to next line
 PRINT "HELLO" => prints HELLO and then a carriage return is inserted
 PRINT A => prints the value of variable A
 PRINT "LENGHT:";LN;" METERS" => prints LENGHT followed by the contents
                                 of LN and then by METERS
 PRINT A,B => prints the contents of A and B with tabulation
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 READ
 ----
@@ -842,11 +906,13 @@ informations to be read are less than the variables names an error will
 be raised. If there are more values stored in DATA than are read from
 a READ, the next READ will continue to read from the next unread data.
 Types of variables and informations must be coherents (i.e. a string
-can not be assigned to a numerical variable). See also RESTORE.
+can not be assigned to a numerical variable).
+See also RESTORE.
+
 Example:
 10 DATA 10,20,"HELLO"
 20 READ A,B,C$ => 10 will be written into A, 20 into B, and "HELLO" in C
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 REM
 ---
@@ -854,9 +920,10 @@ Syntax: REM <comment>
 
 Used to enter a comment into the program. Everything that follow the REM
 statement will be ignored.
+
 Example:
 10 X=10:REM SETS HERE THE STARTING VALUE
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RESET
 -----
@@ -864,7 +931,7 @@ Syntax: RESET
 
 Originally used to reset (set to off) a video pixel, now (without any
 additional paramether) performs a system reset.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RESTORE
 -------
@@ -874,12 +941,14 @@ After a RESTORE statement the next information read with a READ state-
 ment will be the first value of the first DATA into the program. If
 [line_num] is passed, the next information read will be the one stored
 at such line number: this permits to read the same informations several
-times. See also DATA and READ.
+times.
+See also DATA and READ.
+
 Example:
 10 DATA 10,20,30
 20 READ A => A will contain 10
 30 RESTORE: READ B => B will also contain 10
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RETURN
 ------
@@ -888,22 +957,25 @@ Syntax: RETURN
 Used to leave a sub-routine called by GOSUB. After the RETURN statement,
 the execution of the program will continue with the instruction
 following the GOSUB statement.
+
 Example:
 10 GOSUB 100
 20 PRINT "FINISH":END
 100 PRINT "START"
 110 RETURN  => the execution will continue from line 20
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RIGHT$
 ------
 Syntax: RIGHT$(X,I)
 
 Returns a string that contains the I characters to the right of the
-string X. See also LEFT$ and MID$
+string X.
+See also LEFT$ and MID$.
+
 Example:
 RIGHT$("HELLO",2) => "LO"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RND
 ---
@@ -913,15 +985,17 @@ Returns a random number between 0 and 1. A negative value of I will
 start a new sequence; if I is greater than zero the function will return
 the next value in the random sequence; a vaue of zero will return the
 last number returned. The same negative number will generate the same
-random sequence. See also TMR.
-Example:
+random sequence.
+See also TMR.
+
+Examples:
 A=RND(1) => returns a random number
 A=INT(RND(1)*6)+1 => rolls a dice: will return a number between 1 and 6.
 
 If you need to create a good random sequence you can use the system
 tick timer used to increment the 100ths of second counter:
 RND(-ABS(TMR(0)))
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 RUN
 ---
@@ -930,9 +1004,11 @@ Syntax: RUN [numline]
 Start the execution of the program currently stored in memory. If
 [numline] is passed, the execution will start from such line, otherwise
 it will start from the first line.
+
 Example:
-RUN
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+RUN  => start the execution of the program from the first line
+RUN 1000 => start the execution of the program from line 1000
+-----------------------------------------------------------------------
 
 SCREEN
 ------
@@ -961,10 +1037,10 @@ bytes (8x1 pixels). It lacks in sprite supporting: only 8 sprites can
 be used, if you try to some more they will start to duplicate them-
 selves.
 
-Example:
+Examples:
 SCREEN 0  => sets the 40x24 chars text mode
 SCREEN 2  => sets the bitmap graphic mode
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 SGN
 ---
@@ -972,17 +1048,18 @@ Syntax: SGN(X)
 
 Returns the sign of X: it returns -1 if X is negative, 1 if it is 
 positive, or 0 if it is zero.
+
 Example:
 10 ON SGN(X)+2 GOSUB 100,200,300 => calls 100 for X<0, 200 for X=0, and
                                     300 for X>0
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 SIN
 ---
 Syntax: SIN(X)
 
 Returns the sine of "X". The result is in RADIUS in range -pi/2 to pi/2.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 SOUND
 -----
@@ -994,7 +1071,7 @@ and corresponds to the same analog channel of the PSG."tone" can vary
 between 0 and 4,095 and it is inversely related to the real frequency of
 the emitted tone. The formula to get the frequency is below:
 
-Freq = 1,843,200 / 16 / (4,096 - tone)
+Freq = 1,843,200 / 16 / (4,096 --tone)
 (where 1,843,200 Hz is the clock of the PSG while "16" is a fixed
 internal prescaler)
 
@@ -1007,6 +1084,7 @@ between 0 and 16,383 (0.0~163.8 seconds). By setting a tone of "tone" 0
 we force the audio to quit immediately. By setting a tone with duration
 equals to 0, the tone will last forever, unless you quit the volume off
 or you set another tone on the same channel.
+
 Example:
 SOUND 1,3500,100 => plays a tone of freq. 193 Hz for 1 second.
 
@@ -1014,9 +1092,10 @@ There is a speciale usage of SOUND. If used with just a 0 as paramether,
 SOUND will reset the PSG registers and shut down every sound generated
 by the audio chip, including the white noise and the envelops activated
 with SREG.
+
 Example:
 SOUND 0  => shut down every king of sound/tone
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 SPC
 ---
@@ -1028,16 +1107,17 @@ Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
 before the position to reach while SPC prints spaces deleting every
 char during the movement.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
  
 SQR
 ---
 Syntax: SQR(X)
 
 Returns the square root of X X must be greater than zero.
+
 Example:
-SQR(9)  => 3
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+SQR(9) => 3
+-----------------------------------------------------------------------
 
 SREG
 ----
@@ -1046,9 +1126,10 @@ Syntax: SREG X,Y
 Writes the byte Y into the register X of the PSG. X must be in the range
 0-15 while Y in the range 0-255. See SSTA for considerations about the
 register numbering.
+
 Example:
-SREG 8,15 => set the volume of analog channel 0 to 15
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+SREG 8,15 => set the volume of analog channel A to 15
+-----------------------------------------------------------------------
 
 SSTAT
 -----
@@ -1061,33 +1142,35 @@ are divided into 2 sets of 8 elements each, numbered from 0 to 7 and
 from 10 to 17, resepectively. Despite this, the chip is connected in a
 way so that the registers appear consecutive, so the 9th register is
 addressed as register 8 instead of 10.
+
 Example:
 SSTAT(8) => actually reading the register #10.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 STEP
 ----
 Syntax: STEP <val>
 
-Used in FOR..NEXT loops to set the increment of the index variable. See
-FOR for more details.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Used in FOR..NEXT loops to set the increment of the index variable.
+See FOR for more details.
+-----------------------------------------------------------------------
 
 STOP
 ----
 Syntax: STOP
 
 Halts the execution of a program. See CONT on how to resume running.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 STR$
 ----
 Syntax: STR$(X)
 
 Converts the string representation of expression X.
+
 Example:
 STR$(12) => "12"
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 TAB
 ---
@@ -1095,31 +1178,33 @@ Syntax: TAB(X)
 
 Moves the cursor to column X on the video. X must be in the range 0~255:
 0 means no movements.
+
 Example:
 PRINT TAB(5);"*" =>
      *
 
 Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
-before the position to reach while SPC prints spaces deleting every
+before the position to reach, while SPC prints spaces deleting every
 char during the movement.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 TAN
 ---
 Syntax: TAN(X)
 
 Returns the tangent of X. The result is in radians.
+
 Example:
 TAN(1) => 0.0003
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 THEN
 ----
 Syntax: THEN
 
 Used with IF statement. See IF for more details.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 TMR
 ---
@@ -1132,6 +1217,7 @@ read by considering it divided into 2 halves: if X is 0 than the
 function will return the first two less significant bytes of the
 counter. If X is 1, than the two most significant bytes will be returned
 instead. 
+
 Example:
 TMR(0) => 3456
 
@@ -1139,6 +1225,7 @@ Since the BASIC operates with signed integers, values returned by TMR()
 go from -32768 to +32767. To get the unsigned counterpart, if the value
 returned is negative, you can add it to 65536 to get a value in the
 range 0 ~ 65535.
+
 Example:
 10 A=TMR(0):IF A<0 THEN A=65536+A
 
@@ -1146,9 +1233,11 @@ The system counter can be used to measure the passing of time by using
 the whole 32-bit value of the system tick timer. Also, if you divide 
 this value by 100 you get the numbers of seconds elapsed since the
 computer has been powered on.
+
+Examples:
 PRINT (TMR(1)*65536+TMR(0)) => 273636  (100dths of seconds)
 PRINT INT((TMR(1)*65536+TMR(0))/100) => 2736  (seconds)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 TO
 --
@@ -1156,7 +1245,7 @@ Syntax: TO
 
 Used in FOR..NEXT loops to set the range of the index variable. See FOR
 for more informations.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 USR
 ---
@@ -1171,9 +1260,10 @@ meaning that the first byte must be filled up with the less significant
 byte while the second one by the most significant byte. Suppose that
 a subroutine has been stored in RAM from address $B0A0. Then the byte
 $A0 will be stored at $8049 while byte $B0 will be stored at $804A.
+
 Example:
 A=USR(0) => call a subrouting with argument 0.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VAL
 ---
@@ -1181,10 +1271,11 @@ Syntax: VAL(X$)
 
 Returns the numerical value of string X$. If the first character of X$
 isn't a +,&, or a digit then the result will be 0.
-Example:
+
+Examples:
 VAL("12") => 12
 A$="a":VAL(A$) => 0, because A$ can not be represented as a number
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VOLUME
 ------
@@ -1194,9 +1285,10 @@ Sets the volume of the selected channel X to volue Y. X must be in the
 range 0~3: 1,2, and 3 works on the corresponding analog channel,
 resepectively. If X is 0, the statement will apply to all the channels.
 Y must be a numerical value between 0 (no audio) and 15 (max volume).
+
 Example:
 VOLUME 0,0 => quits the volume of all the channels.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VPEEK
 -----
@@ -1206,9 +1298,10 @@ Reads a value from the VRAM (or Video-RAM), the memory that is at
 exclusive use of the VDP (Video Dislay Processor). X is a value between
 0 ($0000) and 16,383 ($3FFF), since the VRAM is 16 KB wide. It returns
 a byte value (0-255).
+
 Example:
 VPEEK(0)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VPOKE
 -----
@@ -1217,9 +1310,10 @@ Syntax: VPOKE X,Y
 Like its RAM counterpart, VPOKE writes Y into the cell of VRAM whose
 address is X. X must be in the range 0~16,383, while Y is a byte value
 (0-255).
+
 Example:
 VPOKE 1000,100
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VREG
 ----
@@ -1227,9 +1321,10 @@ Syntax: VREG X,Y
 
 Writes Y into the VDP register X. X must be a number in the range 0~7,
 while Y is a byte.
+
 Example:
 VREG 7,15 = writes 15 into register #7
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 VSTAT
 -----
@@ -1238,9 +1333,10 @@ Syntax: VSTAT(X)
 Reads the status register of the VDP. X is ignored and it can be any
 signed integer (between -32,768 and +32,767). It returns a byte value
 (0-255).
+
 Example:
 VSTAT(0)
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 WAIT
 ----
@@ -1249,10 +1345,11 @@ Syntax: WAIT X,Y[,Z]
 Reads the I/O port X and performs and OR between the read byte and Y.
 If Z is passed, the result of the OR operation is ANDed with Z. The
 excution continues with a non-zero result.
+
 Example:
 WAIT 0,0,128 => the execution continues only if port 0 returns 128
                 because 128 OR 0 = 128 and 128 AND 128 = 128.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-----------------------------------------------------------------------
 
 WIDTH
 -----
