@@ -12,7 +12,7 @@
 ; R1.3 - 20191015 - More graphic chars
 ; R1.4 - 20191202 - Fixed char 11/12, added new special chars
 ; R1.5 - 20191210 - Changed several graphic chars
-; R1.6 - 20xxxxxx - Removed double chars, changed with new ones
+; R1.6 - 20200125 - Removed double chars, changed with new ones
 ; ------------------------------------------------------------------------------
 ;
 ;-------------------------------------------------------------------------------
