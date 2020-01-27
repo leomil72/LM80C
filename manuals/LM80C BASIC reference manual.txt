@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.9                             *
-*                             (2020/01/12)                             *
-*         This release covers the LM80C BASIC R2.11 and above          *                
+*                             Version  2.0                             *
+*                             (2020/01/25)                             *
+*         This release covers the LM80C BASIC R2.13 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -1071,7 +1071,7 @@ and corresponds to the same analog channel of the PSG."tone" can vary
 between 0 and 4,095 and it is inversely related to the real frequency of
 the emitted tone. The formula to get the frequency is below:
 
-Freq = 1,843,200 / 16 / (4,096 --tone)
+Freq = 1,843,200 / 16 / (4,096 - tone)
 (where 1,843,200 Hz is the clock of the PSG while "16" is a fixed
 internal prescaler)
 
@@ -1084,6 +1084,17 @@ between 0 and 16,383 (0.0~163.8 seconds). By setting a tone of "tone" 0
 we force the audio to quit immediately. By setting a tone with duration
 equals to 0, the tone will last forever, unless you quit the volume off
 or you set another tone on the same channel.
+
+The inverse formula to calculate the value "dur" to pass to SOUND to
+generate a tone of freqyency "freq" is:
+dur = 4,096 - (1,843,299 / 16 / (freq))
+I.e.: if a tone with a frequency of 2,000 Hz (2 KHz) is required, "dur"
+equals to 
+dur = 4,096 - (1,843,200 / 16 / 2,000)) = 4,096 - 57.6 => 4,038(.4)
+In fact, if we use the previous formula, we get:
+Freq = 1,843,200 / 16 / (4,096 - 4,038) = 115,200 / 58 = 1,986 Hz
+(due to integer truncatings, the frequency is a little bit smaller than
+needed)
 
 Example:
 SOUND 1,3500,100 => plays a tone of freq. 193 Hz for 1 second.
