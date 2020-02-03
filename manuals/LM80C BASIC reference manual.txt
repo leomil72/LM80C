@@ -8,8 +8,8 @@
 ************************************************************************
 *                                                                      *
 *                             Version  2.0                             *
-*                             (2020/01/25)                             *
-*         This release covers the LM80C BASIC R2.13 and above          *                
+*                             (2020/02/02)                             *
+*         This release covers the LM80C BASIC R2.14 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -189,6 +189,9 @@ Syntax: ATN(X)
 
 Returns the arctangent of "X". The result is in RADIUS in range
 -pi/2 to pi/2
+
+Example:
+ATN(2) => 1.10715
 -----------------------------------------------------------------------
 
 BIN$
@@ -251,8 +254,10 @@ Syntax: CLS
 Clears the current screen, intializes the pattern cells. The filling
 value is graphic mode dependant: in modes 0, 1, & 4 the video buffer is
 filled up with ASCII value 32 (the "space" character) while in modes
-2 & 3 is filled up with 0s. Finally, in text modes, it moves the cursor
-at coordinates 0,0 (the top left corner).
+2 & 3 the command simply resets the pixels of the screen. Finally, in
+text modes, it moves the cursor at coordinates 0,0 (the top left
+corner). CLS clears the screen by using the background color set with
+COLOR statement.
 Same behaviour can be obtained in text modes by pressing together the
 SHIFT + CLEAR/HOME keys.
 -----------------------------------------------------------------------
@@ -276,9 +281,9 @@ Values range from 1 to 15:
 7: cyan (aqua blue)             15: white
 8: Medium red
 
-In SCREEN 0 (text mode), only the first 2 are allowed since the
+In SCREEN 0 (text mode), only the first 2 params are allowed since the
 background and border colors coincide. In SCREEN 3 (multicolor mode)
-only the foreground color is allowed.
+only the background color is allowed.
 When in graphic mode 2, the color of the pixels painted by PLOT, DRAW,
 and CIRCLE commands, when not specified, is the foreground color set by
 COLOR.
@@ -288,6 +293,7 @@ COLOR 1,15,5 => in SCREEN 1 it sets the text in black, the background in
                 white, and the border in light blue
 COLOR 15,5   => in SCREEN 0 it sets the text to white on light blue
                 background (this is the default combination)
+COLOR 3      => in SCREEN 3 sets the border color to light green
 -----------------------------------------------------------------------
 
 CONT
@@ -305,6 +311,9 @@ Syntax: COS(X)
 
 Returns the cosine of "X". The result is in RADIUS in range -pi/2 to
 pi/2.
+
+Example:
+COS(10) => -0.839072
 -----------------------------------------------------------------------
 
 DATA
@@ -515,20 +524,28 @@ HEX$(1000) => "3E8"
 
 IF
 --
-Syntax: IF X THEN [...]
-        IF X GOTO <line>
+Syntax: IF cond THEN [...]
+        IF cond GOTO <line>
+        IF cond THEN <line>
 
 IF is a conditional branch. It serves to change the order of the
 execution of the instructions of a programs instead of the ordinary
-sequential flow. X can be any valid arithmetic, relational, or logical
-expression: if it is evaulated true (i.e. non-zero), the statements
-after IF are executed. There are some formats of the statement.
-If the expression is true, anything that follows THEN will be executed:
+sequential flow. "cond" can be any valid arithmetic, relational, or
+logical expression: if it is evaulated true (i.e. non-zero), the
+statements after IF are executed.
+
+There are several allowed formats of the statement. If the expression is
+true, anything that follows THEN will be executed:
 10 IF A=1 THEN PRINT "A IS EQUAL TO 1":GOTO 100
 
 If there is only a GOTO instruction after the expressio to be evaluated,
 the THEN statement can be omitted:
 10 IF A=1 GOTO 100
+
+If there is only a jump instruction (GOTO) after the IF, another form
+can be used where GOTO is omitted and THEN is followed by the line
+number:
+10 IF A=1 THEN 100
 -----------------------------------------------------------------------
 
 INKEY
@@ -981,9 +998,9 @@ RND
 ---
 Syntax: RND(I)
 
-Returns a random number between 0 and 1. A negative value of I will
-start a new sequence; if I is greater than zero the function will return
-the next value in the random sequence; a vaue of zero will return the
+Returns a random number between 0 and 1. A negative value of X will
+start a new sequence; if X is greater than zero the function will return
+the next value in the random sequence; a value of zero will return the
 last number returned. The same negative number will generate the same
 random sequence.
 See also TMR.
@@ -1040,6 +1057,10 @@ selves.
 Examples:
 SCREEN 0  => sets the 40x24 chars text mode
 SCREEN 2  => sets the bitmap graphic mode
+
+Further reading: to better know the video capabilities of the VDP the
+reading of its reference guide is reccomended. A copy can be found here:
+https://github.com/leomil72/LM80C/tree/master/manuals
 -----------------------------------------------------------------------
 
 SGN
@@ -1059,6 +1080,9 @@ SIN
 Syntax: SIN(X)
 
 Returns the sine of "X". The result is in RADIUS in range -pi/2 to pi/2.
+
+Example:
+SIN(5) => -0.958924
 -----------------------------------------------------------------------
 
 SOUND
@@ -1118,6 +1142,12 @@ Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
 before the position to reach while SPC prints spaces deleting every
 char during the movement.
+
+Example:
+PRINT "A";SPC(5);"B"
+A     B
+
+See also: TAB
 -----------------------------------------------------------------------
  
 SQR
@@ -1183,6 +1213,19 @@ Example:
 STR$(12) => "12"
 -----------------------------------------------------------------------
 
+SYS
+---
+Syntax: SYS address[,value]
+
+Calls a machine language routine starting at "address". "address" must
+be a signed integer (i.e. in range -32,768 to +32,767). If "value" is
+present, it will be passed to the routine into the Accumulator register.
+"value" must be a byte value (0~255). SYS differs from USR in the way
+that it's a command so there is no return value to be collected.
+
+See also: USR
+-----------------------------------------------------------------------
+
 TAB
 ---
 Syntax: TAB(X)
@@ -1198,6 +1241,8 @@ Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
 before the position to reach, while SPC prints spaces deleting every
 char during the movement.
+
+See also: SPC
 -----------------------------------------------------------------------
 
 TAN
@@ -1207,7 +1252,7 @@ Syntax: TAN(X)
 Returns the tangent of X. The result is in radians.
 
 Example:
-TAN(1) => 0.0003
+TAN(1) => 1.55741
 -----------------------------------------------------------------------
 
 THEN
@@ -1262,18 +1307,24 @@ USR
 ---
 Syntax: USR(X)
 
-Calls an user-defined machine language subroutine with argument X.
+Calls an user-defined machine language subroutine with argument "X".
+"X" is mandatory: even if it's not used, it must be passed to USR.
 The call of the subroutine is made through an entry point in RAM that
 must be initialized with the address of the first cell where the
 user code is stored in RAM. The entry point is located at locations 
-$8049 and 804A: the address must be set using the little-endian order,
-meaning that the first byte must be filled up with the less significant
-byte while the second one by the most significant byte. Suppose that
+$8049 and $804A: the address must be set using the little-endian order,
+meaning that the less significant byte must be stored into $8049 while
+the most significant byte must be stored into $804A. Suppose that
 a subroutine has been stored in RAM from address $B0A0. Then the byte
 $A0 will be stored at $8049 while byte $B0 will be stored at $804A.
+USR is a function, so it must be called in a way that can collect the
+possible returned value.
 
 Example:
-A=USR(0) => call a subrouting with argument 0.
+A=USR(0) => call a subroutine with argument 0 and assign its returned
+value to A.
+
+See also: SYS
 -----------------------------------------------------------------------
 
 VAL
@@ -1285,7 +1336,7 @@ isn't a +,&, or a digit then the result will be 0.
 
 Examples:
 VAL("12") => 12
-A$="a":VAL(A$) => 0, because A$ can not be represented as a number
+A$="a":PRINT VAL(A$) => 0, because A$ can not be represented as a number
 -----------------------------------------------------------------------
 
 VOLUME
@@ -1311,7 +1362,7 @@ exclusive use of the VDP (Video Dislay Processor). X is a value between
 a byte value (0-255).
 
 Example:
-VPEEK(0)
+A=VPEEK(0)
 -----------------------------------------------------------------------
 
 VPOKE
@@ -1328,10 +1379,10 @@ VPOKE 1000,100
 
 VREG
 ----
-Syntax: VREG X,Y
+Syntax: VREG reg,value
 
-Writes Y into the VDP register X. X must be a number in the range 0~7,
-while Y is a byte.
+Writes "value" into the VDP register "reg". "reg" must be a number in
+the range 0~7, while "value" is a byte (0~255).
 
 Example:
 VREG 7,15 = writes 15 into register #7
@@ -1341,7 +1392,7 @@ VSTAT
 -----
 Syntax: VSTAT(X)
 
-Reads the status register of the VDP. X is ignored and it can be any
+Reads the status register of the VDP. "X" is ignored and it can be any
 signed integer (between -32,768 and +32,767). It returns a byte value
 (0-255).
 
