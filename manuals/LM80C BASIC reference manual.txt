@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  2.0                             *
-*                             (2020/02/02)                             *
-*         This release covers the LM80C BASIC R2.14 and above          *                
+*                            Version  2.15                             *
+*                             (2020/02/25)                             *
+*       This release covers the LM80C FIRMWARE R2.15 and above         *                
 *                                                                      *
 ************************************************************************
 
@@ -47,6 +47,8 @@ CLOAD/CSAVE: they loaded/stored data from/to an external mass storage
 device
 PSET: it set a video pixel on
 POINT: it returned the state of a video pixel
+MONITOR: in original NASCOM system it launched the MONITOR program,
+then in Grant's reinterpretation it reset the computer.
 ------------------------------------------------------------------------
 
                 3. STATEMENTS WITH DIFFERENT BEHAVIOUR
@@ -112,6 +114,30 @@ RESET: resets the system
 
                         5. LANGUAGE REFERENCE
                         ---------------------
+
+[nnnn] statements
+-----
+Syntax: [nnnn] [list of statements]
+
+A number before a single statement or a list of them introduces a
+program line that, when RETURN is pressed, is stored into memory. If the
+line doesn't exist, the new line is saved as it, otherwise if the line
+is already present it will be replaced byt the current one. Any line
+starting with a number is interpreted as a program line: if nothing
+follows the number the BASIC interpreter first will look for a stored
+line with the same number. If found, it will be deleted from memory.
+If no program lines corresponds, an error of "Undefined line number"
+will be raised. The maximum allowed value for a line number is 65,529.
+
+Examples:
+
+10 PRINT "HELLO"  -> when RETURN is pressed, the line is stored into
+                     memory
+10 PRINT "WORLD"  -> when RETURN is pressed, this line will substitute
+                     for the current line into memory
+10                -> when RETURN is pressed, the line whose number is
+                     10 will be deleted from memory
+------------------------------------------------------------------------
 
 &B
 --
@@ -723,14 +749,6 @@ MID$("HELLO",3) => "LLO"
 MID$("HELLO",3,2 = > "LL"
 -----------------------------------------------------------------------
 
-MONITOR
--------
-Syntax: MONITOR
-
-Used to activate the terminal of the Nascom computers, at the moment
-it resets the system. It will be removed in future releases.
------------------------------------------------------------------------
-
 NEW
 ---
 Syntax: NEW
@@ -1063,6 +1081,42 @@ reading of its reference guide is reccomended. A copy can be found here:
 https://github.com/leomil72/LM80C/tree/master/manuals
 -----------------------------------------------------------------------
 
+SERIAL
+------
+Syntax: SERIAL ch,bps[,data,par,stop]
+
+Opens a serial connection between the computer and an external device.
+"ch" can be 1 or 2: 1 corresponds to SIO channel A, while 2 to SIO
+channel B. In LM80C computer the channel A is connected to a USB-to-
+-serial converter so that serial port 1 works only as a char device,
+while channel B (port 2) is configured as a block device. "bps"
+indicates the bauds per second, i.e. the speed of the serial line. "bps"
+can assume one of the following values:
+57600,38400,28800,19200,14400,9600,4800,3600,2400,1200,0
+If 0 is entered, the other params are ignored and the command closes
+the connection opened on channel "ch". Otherwise, the serial line will
+be set to run at the selected speed. "data" represents the number of
+bits that compose the data to be sent: allowed values are 5/6/7/8. 5 is
+used to instructs the SIO to work with a number of 5 bits (or less) per
+single char. "par" is the parity bit: it can be 0/1/2. 0 means no parity
+bit; 1 means an odd parity; 2 means an even parity. "stop" sets the
+number of bits sent after the data bits. Its value must be: 0, for no
+stop bits; 1, for 1 stop bit; 2, for 1.5 stop bits; 3, for 2 stop bits.
+Opening a serial line leads to the corresponding status LED to be turned
+on.
+
+Example:
+SERIAL 1,19200,8,0,1  => normal settings to open a serial line with
+                         19,200 bps, 8 data bits, no parity bits,1 stop
+                         bit
+SERIAL 1,0 => closes the serial port 1, resetting the SIO channel A.
+
+Further reading: to better know the serial capabilities of the SIO chip,
+the reading of the Z80 peripherals' user manual is reccomended. A copy
+can be found here:
+https://github.com/leomil72/LM80C/tree/master/manuals
+-----------------------------------------------------------------------
+
 SGN
 ---
 Syntax: SGN(X)
@@ -1071,8 +1125,17 @@ Returns the sign of X: it returns -1 if X is negative, 1 if it is
 positive, or 0 if it is zero.
 
 Example:
-10 ON SGN(X)+2 GOSUB 100,200,300 => calls 100 for X<0, 200 for X=0, and
-                                    300 for X>0
+PRINT SGN(-345) => -1
+
+An interesting usage of SGN is in combination with conditional jumps
+where a specific set of istructions can be executed depending of the
+sign of a variable being checked:
+
+Example:
+10 ON SGN(X)+2 GOSUB 100,200,300
+
+In this example, the program will continue from line 100 if X<0, from
+line 200 is X=0, and from line 300 if X>0.
 -----------------------------------------------------------------------
 
 SIN

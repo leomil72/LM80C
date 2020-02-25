@@ -20,7 +20,7 @@
 ; compare two 16-bit registers, HL (minuend) and DE (subtrahend)
 ; values can be both signed or unsigned words
 ; inputs: HL, DE
-; destroys: A,F
+; destroys: A,F,HL
 ; returns: if both registers are 2's complement, use Z and S flags;
 ; otherwise:
 ; if HL=DE: Z,P,NC  - Z=1, S=0; C=0
@@ -29,11 +29,11 @@
 ; Source: ALS
 
 CMP16:  or      A           ; clear CARRY
-        sbc     HL,DE       ; subract DE from HL
+        sbc     HL,DE       ; subtract DE from HL
         ret     PO          ; return if no overflow
         ld      A,H         ; overflow - invert SIGN flag
         rra                 ; save CARRY flag in bit 7
-        xor     01000000b   ; complement bit 6 (SIGN bit)
+        xor     %01000000   ; complement bit 6 (SIGN bit)
         scf                 ; ensure a Non-Zero result
         adc     A,A         ; restore CARRY, complemented SIGN
                             ; ZERO flag = 0 for sure
@@ -41,8 +41,8 @@ CMP16:  or      A           ; clear CARRY
 
 ; ----------------------------------------------------------------------
 
-; multiply 2 signed or unsigned 16-bit wors and return a 
-; 16-bit signed or unsigned product
+; multiply 2 signed/unsigned 16-bit words and return a 16-bit
+; signed/unsigned product
 ; inputs: HL (multiplicand); DE (multiplier)
 ; destroys: A,F
 ; returns: HL (product)
@@ -53,7 +53,7 @@ MUL16:  push    BC
         ld      C,L         ; BC = multiplier
         ld      B,H
         ld      HL,0        ; product = 0
-        ld      A,15        ; count = bit lenght - 1
+        ld      A,$0F       ; count = bit lenght - 1 (16-1)
         ; shift-and-add algorithm
         ; if MSB of multiplier is 1, add multiplicand to partial product
         ; shift partial product, multiplier left 1 bit

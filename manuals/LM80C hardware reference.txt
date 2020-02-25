@@ -261,3 +261,60 @@ RTS AT STARTUP: on
 HANDLE BS AND DEL CHARS: yes
 HANDLE FF (FormFeed) CHAR: yes
 USE TX DELAY: min. 5ms (increment it if you experience issues)
+
+------------------------------------------------------------------------
+                            8. VDP settings
+
+The VDP, aka Video Display Processor, is the video chip of the LM80C
+computer. It is a TMS9918A from Texas Instruments. It can visualize a
+video image of 256x192 pixels with 15 colors and 32 sprites. It has
+several graphics modes, each of them configured to store video datas in
+particular areas of the VRAM. These are the main settings for the 
+modes supported by LM80C. Before to proceed, a little explanation of the
+meaning of different areas:
+* pattern table: it's the area where the patterns that compose the chars
+are stored.
+* name table: this is a sort of look-up table. This area maps what's is
+shown by the VDP in each cell of the video. The VDP reads the byte
+stored into a particular cell and then looks into the pattern table to
+find the data needed to draw the corresponding char.
+* color table: some graphics modes store the color of a particular cell
+into this table.
+* sprite pattern table:  similarly to the pattern table, this area
+stores the data needed to draw the sprites
+* sprite attribute table: this area contains the info needed by the VDP
+to locate and color the sprites.
+N.B: the addresses below are referred to Video RAM, so to access it you
+must use the VPOKE and VPEEK statements.
+
+TEXT MODE (screen 0):
+pattern table: $0000-$07FF
+name table: $0800-$0BBF
+
+GRAPHICS 1 MODE (screen 1):
+pattern table: $0000-$07FF
+name table: $1800-$1AFF
+sprite attribute table: $1B00-$1B7F
+color table: $2000-$201F
+sprite pattern table: $3800-$3FFF
+
+GRAPHICS 2 MODE (screen 2):
+pattern table: $0000-$17FF
+name table: $1800-$1AFF
+sprite attribute table: $1B00-$1B7F
+color table: $2000-$37FF
+sprite pattern table: $3800-$3FFF
+
+MULTICOLOR MODE (screen 3):
+pattern table: $0000-$07FF
+name table: $0800-$0AFF
+sprite attribute table: $1B00-$1B7F
+sprite pattern table: $3800-$3FFF
+
+EXTENDED GRAPHICS 2 MODE (screen 4):
+pattern table: $0000-$07FF
+sprite pattern table: $1800-$1FFF
+color table: $2000-$27FF
+name table: $3800-$3AFF
+sprite attribute table: $3B00-$3B7F
+
