@@ -91,9 +91,10 @@
 ; R2.14  - 20200203 - Better CLS code (no more color flashes in graphics modes); added SYS command
 ; R2.15  - 20200225 - Now the computer starts as a stand-alone system, with serial disabled;
 ;                     new SERIAL command
-; R3.0   - 2020xxxx - Major changes to kernel, now the computer has a full-screen inline editor:
+; R3.0   - 20200228 - Major changes to kernel, now the computer has a full-screen inline editor:
 ;                     it now acts as an old home computer of the '80s, getting statements from
-;                     anywhere the cursor is; removed MONITOR statement; code cleaning & optimization.
+;                     anywhere the cursor is; removed MONITOR statement; code cleaning & optimization;
+;                     adopted usual hexadecimal & binary prefixes
 ;
 ; -----------------------------------------------------------------------------
 
@@ -103,7 +104,7 @@
 
 ; this line instructs the assembler to compile taking account that code
 ; starts at $0000 (the address reached by Z80 upon reset)
-#code BOOT, 0000h
+#code BOOT, $0000
 
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
