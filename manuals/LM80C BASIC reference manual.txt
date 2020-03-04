@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                            Version  2.15                             *
-*                             (2020/02/25)                             *
-*       This release covers the LM80C FIRMWARE R2.15 and above         *                
+*                             Version  3.1                             *
+*                             (2020/03/04)                             *
+*       This release covers the LM80C FIRMWARE R3.1 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -45,10 +45,11 @@ Some statements have been removed from the interpreter due to the fact
 that they laid over the original NASCOM machines. They are:
 CLOAD/CSAVE: they loaded/stored data from/to an external mass storage
 device
+MONITOR: it launched the MONITOR program
+NULL: it set the number of null chars to be printed after a carriage
+return
 PSET: it set a video pixel on
 POINT: it returned the state of a video pixel
-MONITOR: in original NASCOM system it launched the MONITOR program,
-then in Grant's reinterpretation it reset the computer.
 ------------------------------------------------------------------------
 
                 3. STATEMENTS WITH DIFFERENT BEHAVIOUR
@@ -83,33 +84,38 @@ for numbers:
 A function is a statement that gets an input paramether and returns
 another data, that depends on the way it processed the input.
 
-HEX$: returns the hexadecimal representation of a number. *GS*
 BIN$: returns the binary representation of a number. *GS*
+HEX$: returns the hexadecimal representation of a number. *GS*
 INKEY: returns the ASCII code of the key being pressed
+SSTAT: reads the registers of the PSG
 TMR: returns the value of the system timer
 VPEEK: reads from VRAM
 VSTAT: returns the value of status register of the VDP
-SSTAT: reads the registers of the PSG
 
 4.3 New commands
 ----------------
 Commands are statements that tell the system to perfom a specific
 operation. Commands can get some paramethers but usually don't return
 any value. Here are the new commands:
-VPOKE: writes into VRAM
-SREG: writes into a PSG register
-VREG: writes into a VDP register
-SCREEN: changes the display mode
-LOCATE: position the cursor onto the screen
-SOUND: plays a sound tone
-VOLUME: sets the volume of the PSG audio channels
-PAUSE: pauses the execution of the code for a certain bit of time
-COLOR: set the foreground, background, and border colors
-PLOT: draws a pixel point
-DRAW: draws a line
+
 CIRCLE: draws a circle
+COLOR: set the foreground, background, and border colors
 CLS: clears the screen
+DRAW: draws a line
+LOCATE: position the cursor onto the screen
+PAUSE: pauses the execution of the code for a certain bit of time
+PLOT: draws a pixel point
 RESET: resets the system
+SCREEN: changes the display mode
+SERIAL: open a serial communication line
+SOUND: plays a sound tone
+SREG: writes into a PSG register
+SYS: executes an assembly routine
+VOLUME: sets the volume of the PSG audio channels
+VPOKE: writes into VRAM
+VREG: writes into a VDP register
+XOR: make a XOR between operators
+
 ------------------------------------------------------------------------
 
                         5. LANGUAGE REFERENCE
@@ -178,24 +184,21 @@ AND
 Syntax: A AND B
 
 Logic operator used in boolean expressions. AND performs a logical
-conjuntion. The interpreter supports 3 boolean operators: AND, OR, and
-NOT, each of them work with 16-bit signed integers. They convert their
-inputs in 16-bit integers and return a value in such format.
-The result of an AND operation follows the truth table below (T=true,
-F=false):
-F AND F = F
-F AND T = F
-T AND F = F
-T AND T = T
-This means that the result is true only if both expressions A & B are
-true.
+conjuntion. The interpreter supports 4 boolean operators: AND, OR, XOR,
+and NOT, each of them work with 16-bit signed integers. They convert
+their inputs in 16-bit integers and return a value in such format. This
+means that the result is true only if both expressions A and B are true.
+The result of an AND operation follows the truth table below (1=T=true,
+0=F=false):
+0 AND 0 = 0
+0 AND 1 = 0
+1 AND 0 = 0
+1 AND 1 = 1
+See also NOT, OR, and XOR.
 
 Examples:
-1 AND 1 => 1
-0 AND 1 => 0
-
-A=0, B=1
-A AND B = 0
+10 AND 1 => 0 (because 10=1010b so 1010 AND 0001 = 0000)
+11 AND 1 => 1 (because 11=1011b so 1011 AND 0001 = 0001)
 -----------------------------------------------------------------------
 
 ASC
@@ -413,8 +416,8 @@ low byte of Y will be written into location X while the high byte of Y
 will be written into location X+1.
 
 Example:
-DOKE &H8100,&HAABB => cell $8100 will contain $00
-                      cell $8101 will contain $81
+DOKE &H8100,&HAABB => cell $8100 will contain $BB
+                      cell $8101 will contain $AA
 -----------------------------------------------------------------------
 
 DRAW
@@ -444,7 +447,13 @@ Syntax: END
 
 Terminates the execution of a program. Any statements and/or program
 lines following the END statement will be ignored and control will
-return to the editor.
+return to the editor. There is another instruction to halt the execution
+of the program, STOP: the difference is that the latter interrupts the
+code flow with a "BREAK" message (as if the RUN STOP key would have been
+pressed) while END behaves has the interpreter would have reached the
+last line of the program.
+
+See also: STOP
 -----------------------------------------------------------------------
 
 EXP
@@ -771,12 +780,20 @@ NOT
 ---
 Syntax: NOT X
 
-Returns the bit complement of X. The truth table is below:
+Logic operator used in boolean expressions. NOT performs a logical
+negation, or bitwise complement, of X. The interpreter supports 4
+boolean operators: AND, OR, XOR, and NOT, each of them work with 16-bit
+signed integers. They convert their inputs in 16-bit integers and return
+a value in such format. NOT returns the complement of value X, meaning
+that the result is true when X is false and vice-versa. The truth table
+of NOT operator is shown below (1=T=true, 0=F=false):
 NOT 1 => 0
 NOT 0 => 1
+See also AND, OR, and XOR.
 
+Note:
 Since the interpreter works with 16-bit signed numbers, one could think
-that it works in a strange manner:
+that in some cases it works in a strange manner:
 NOT 1 => -2
 NOT 0 => -1
 
@@ -786,17 +803,6 @@ complement representation of -1. Similarly, NOT 1 should be 0 but since
 the 16-bit value of 1 is the binary 0000000000000001, the bit complement
 of it is 1111111111111110 that is the two's complement of -2.
 Eventually, NOT X is equal to -(X+1).
-See also AND for details.
------------------------------------------------------------------------
-
-NULL
-----
-Syntax: NULL X
-
-Sets the null characters to be printed at the end of a printed row.
-The default value is 0. X must be a numeric expression.
-NULL had a meaning when teletypes were used to print text but it is
-obsolet at the moment and will be removed in future releases.
 -----------------------------------------------------------------------
 
 ON
@@ -819,18 +825,22 @@ OR
 --
 Syntax: X OR Y
 
-Boolean operator used for logical disjunction operations. It returns a
-true value when one or both the expressions are true.  Its truth
-table is the following:
+Logic operator used in boolean expressions and bitwise operations. OR
+performs a logical disjunction operation. It returns a true value when
+one or both the expressions are true. The interpreter supports 4 boolean
+operators: AND, OR, XOR, and NOT, each of them work with 16-bit signed
+integers. They convert their inputs in 16-bit integers and return a
+value in such format. Its truth table is the following (1=T=true,
+0=F=false):
 0 OR 0 = 0
 0 OR 1 = 1
 1 OR 0 = 1
 1 OR 1 = 1
-See also AND and NOT.
+See also AND, NOT, and XOR.
 
 Example:
-4 OR 2 => 6 (4 is 100b, 2 is 10b, so 100b or 010b is equal to 110b, 
-that is 6 in decimal representation)
+4 OR 2 => 6 (4 is 100b, 2 is 10b, so 100b OR 010b = 110b, that is 6 in
+            decimal representation)
 -----------------------------------------------------------------------
 
 OUT
@@ -902,8 +912,10 @@ POS
 ---
 Syntax: POS(X)
 
-Returns the current position of the terminal's printer head. Note:
-obsolete, it will be removed in future releases.
+In origin it returned the current position of the terminal's printer
+head. Now it returns the horizontal position of the cursor during a
+print on video. Note: it doesn't return the X position of the cursor on
+the screen, and its behaviour may change in future releases.
 -----------------------------------------------------------------------
 
 PRINT
@@ -1058,11 +1070,18 @@ between 0 and 4 and sets the screen as follow:
 3: 64x48 pixels multicolor graphic mode (sprites supported)
 4: 256x192 pixels text/graphics mode (limited sprites support)
 
-SCREEN initializes the screen with default settings. In modes 0 & 1 it
-also loads and configures a charset since these two are also text modes:
+SCREEN initializes the screen with default settings, meaning that it
+sets for each mode specific foreground, background, and border colors:
+in modes 0, 1, & 4, the default settings include background and border
+colors set to light blue while text set to white; in modes 2 the back-
+ground is white, the foreground is black and the border is light blue;
+in mode 3 the background is white and the border is light blue, while no
+specific foreground is set. In modes 0 & 1 it also loads and configures
+a complet charset with 256 chars, since these two are also text modes:
 the big difference is that mode 0 is a real text mode, with no support
-for sprites and graphics. In every mode, SCREEN also performs a screen
-clear.
+for sprites and graphics, while mode 1 is a graphics mode where each
+char is in reality a tile. In every mode, SCREEN also performs a screen
+clear. 
 
 SCREEN 4 is a special, not ufficially supported yet still documented
 mode that is a mix between SCREEN 1 and SCREEN 2. In SCREEN 4 the video
@@ -1079,6 +1098,8 @@ SCREEN 2  => sets the bitmap graphic mode
 Further reading: to better know the video capabilities of the VDP the
 reading of its reference guide is reccomended. A copy can be found here:
 https://github.com/leomil72/LM80C/tree/master/manuals
+
+See also: CLS and COLOR
 -----------------------------------------------------------------------
 
 SERIAL
@@ -1173,7 +1194,7 @@ equals to 0, the tone will last forever, unless you quit the volume off
 or you set another tone on the same channel.
 
 The inverse formula to calculate the value "dur" to pass to SOUND to
-generate a tone of freqyency "freq" is:
+generate a tone of frequency "freq" is:
 dur = 4,096 - (1,843,299 / 16 / (freq))
 I.e.: if a tone with a frequency of 2,000 Hz (2 KHz) is required, "dur"
 equals to 
@@ -1199,11 +1220,11 @@ SPC
 ---
 Syntax: SPC(X)
 
-Prints X spaces on video. It can only be used in conjunction with a
+Prints X empty chars on video. It can only be used in conjunction with a
 PRINT statement.
 Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
-before the position to reach while SPC prints spaces deleting every
+before the position to reach while SPC prints empty chars deleting every
 char during the movement.
 
 Example:
@@ -1229,7 +1250,8 @@ Syntax: SREG X,Y
 
 Writes the byte Y into the register X of the PSG. X must be in the range
 0-15 while Y in the range 0-255. See SSTA for considerations about the
-register numbering.
+register numbering. Please remember that registers #14 and #15 are used
+to read the keyboard so they shouldn't be used.
 
 Example:
 SREG 8,15 => set the volume of analog channel A to 15
@@ -1242,13 +1264,12 @@ Syntax: SSTAT(X)
 Reads the PSG (Programmable Sound Generator) register set by X and
 returns a byte. X must be in the range 0-15. Some words must be spent
 about the register numbering. The PSG datasheet reports that registers
-are divided into 2 sets of 8 elements each, numbered from 0 to 7 and
-from 10 to 17, resepectively. Despite this, the chip is connected in a
-way so that the registers appear consecutive, so the 9th register is
-addressed as register 8 instead of 10.
+are divided into 2 sets of 8 elements each, numbered from 0 to 15, resp.
+Please remember that registers #14 and #15 are used to read the keyboard
+so they shouldn't be used.
 
 Example:
-SSTAT(8) => actually reading the register #10.
+SSTAT(8) => actually reading the register #8.
 -----------------------------------------------------------------------
 
 STEP
@@ -1264,6 +1285,8 @@ STOP
 Syntax: STOP
 
 Halts the execution of a program. See CONT on how to resume running.
+
+See also: END
 -----------------------------------------------------------------------
 
 STR$
@@ -1302,8 +1325,8 @@ PRINT TAB(5);"*" =>
 
 Please keep in mind that TAB and SPC are similar but have different
 behaviours since the former moves the cursor without altering the chars
-before the position to reach, while SPC prints spaces deleting every
-char during the movement.
+before the position to reach, while SPC prints empty chars deleting
+every char under the cursor during its movement.
 
 See also: SPC
 -----------------------------------------------------------------------
@@ -1482,4 +1505,41 @@ Syntax: WIDTH X
 
 Sets the lenght of a lines for inputs or outputs. X must be in the range
 0~255. Default is 255. 
+------------------------------------------------------------------------
+
+XOR
+---
+Syntax: X XOR Y
+
+Logic operator used in boolean expressions and bitwise operations. It
+performs a logical exclusive disjunction between expression X and Y. The
+interpreter supports 4 boolean operators: AND, OR, XOR, and NOT, each of
+them work with 16-bit signed integers. They convert their inputs in
+16-bit integers and return a value in such format. It returns a true
+value only when an odd number of inputs are true, meaning that its
+results are true only when its operators are one false and one true, and
+it returns a false value when its operators have the same value. Its
+truth table is the following:
+0 XOR 0 = 0
+0 XOR 1 = 1
+1 XOR 0 = 1
+1 XOR 1 = 0
+See also: AND, OR, and NOT.
+
+Example:
+11 XOR 2 => 9 (11 is 1011b, 2 is 0010b, so 1011b XOR 0010b is equal to
+              1001b, that is 9 in decimal representation)
+
+XOR is commonly used in cryptographic algorithms since one of its
+features is to revert a XORed bit to its original value when it's XORed
+again with the same value: first, we XOR a value with a "key" to get an
+encrypted result, then we revert to the original value the encrypted
+result by XORing it again with the "key". I.e.: 1 XOR 1 = 0 and 0 XOR 1
+= 1. Let say that the "key" is value 167 and let say that we have to
+encrypt the text "A". Since the ASCII code of "A" is 65, the operation
+is:
+65 XOR 167 = 230
+
+Now, to revert to the original text, let's XOR 230 with the same "key":
+230 XOR 167 => 65
 ------------------------------------------------------------------------
