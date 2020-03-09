@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  3.1                             *
-*                             (2020/03/04)                             *
-*       This release covers the LM80C FIRMWARE R3.1 and above          *                
+*                             Version  3.2                             *
+*                             (2020/xx/xx)                             *
+*       This release covers the LM80C FIRMWARE R3.2 and above          *                
 *                                                                      *
 ************************************************************************
 
@@ -1059,11 +1059,10 @@ RUN 1000 => start the execution of the program from line 1000
 
 SCREEN
 ------
-Syntax: SCREEN mode
+Syntax: SCREEN mode[,spriteSize][,[spriteMagn]]
 
-Originally, it positioned the cursor at a specific location into the
-terminal screen. Now it changes the screen mode. "mode" is a number
-between 0 and 4 and sets the screen as follow:
+Change the screen mode. "mode" is a number between 0 and 4 and sets the
+screen as follow:
 0: 40x24 chars text mode (no sprites support)
 1: 32x24 chars text mode or 256x192 pixels graphic mode (sprites supp.)
 2: 256x192 pixels graphic mode (sprites supported, bitmap mode)
@@ -1094,6 +1093,34 @@ selves.
 Examples:
 SCREEN 0  => sets the 40x24 chars text mode
 SCREEN 2  => sets the bitmap graphic mode
+
+If "spriteSize" and "SpriteMagn" are passed, then SCREEN also sets the
+size and magnification attributes for sprites. Arguments can assume
+value of 0 or 1:
+spriteSize: 0=set sprites to 8x8 pixels
+            1=set sprites to 16x16 pixels
+
+spriteMagn: 0=no sprite magnification
+            1=set sprite magnification to ON, so that 8x8 sprites
+            become 16x16 and 16x16 sprites become 32x32
+
+Note the sprite magnification halves their video resolution so that
+when a sprite is magnified each pixel occupies a 2x2 pixels on the video
+grid.
+
+You can just pass one argument of the two, in this case it is assumed
+that it will be interpreted as the sprite size argument.
+
+Examples:
+SCREEN 1,0,0 => this corresponds to SCREEN 1, sprites are set to 8x8
+                pixels and sprite magnification is off
+SCREEN 1,1,0 => screen mode 1 with sprites size set to 16x16 (the last
+                argument can be omitted)
+SCREEN 1,1   => same as above
+SCREEN 1,0,1 => sprites size set to 8x8, sprite magnification on
+
+Obviously, the sprite size and magnification arguments are revelant only
+when used in graphics modes that support the sprite visualization.
 
 Further reading: to better know the video capabilities of the VDP the
 reading of its reference guide is reccomended. A copy can be found here:
