@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - BASIC32K - R3.2
+; LM80C - BASIC32K - R3.3
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -62,6 +62,7 @@
 ;                     removed NULL statement; added compilation date & time into ROM file
 ; R3.2   - 20200309 - Added sprite size and sprite magnification settings to SCREEN statement;
 ;                     fixed a bug in warm/cold reset input routine
+; R3.3   - 20200315 - Code cleaning; improved LIST command
 ;
 ; ------------------------------------------------------------------------------
 ; NASCOM BASIC versions:
@@ -74,7 +75,7 @@
 ;------------------------------------------------------------------------------
 ; GENERAL EQUATES
 
-NLLCR           equ     $00             ; null char (used as SPACE)
+NLLCR           equ     $00             ; null char (used as space/empty char in video prints)
 CTRLC           equ     $03             ; Control "C"
 CTRLG           equ     $07             ; Control "G"
 BKSP            equ     $08             ; Back space
@@ -119,9 +120,7 @@ LWIDTH          equ     INPORT+$02      ; (1) Terminal width
 COMMAN          equ     LWIDTH+$01      ; (1) Width for commas
 NULFLG          equ     COMMAN+$01      ; (1) Null after input byte flag
 CTLOFG          equ     NULFLG+$01      ; (1) Control "O" flag
-LINESC          equ     CTLOFG+$01      ; (2) Lines counter
-LINESN          equ     LINESC+$02      ; (2) Lines number
-CHKSUM          equ     LINESN+$02      ; (2) Array load/save check sum
+CHKSUM          equ     CTLOFG+$01      ; (2) Array load/save check sum
 NMIFLG          equ     CHKSUM+$02      ; (1) Flag for NMI break routine
 BRKFLG          equ     NMIFLG+$01      ; (1) Break flag
 RINPUT          equ     BRKFLG+$01      ; (3) Input reflection
@@ -234,8 +233,7 @@ SC              equ     $2C             ; Serial Configuration
 COLD:   jp      STARTB          ; Jump for cold start
 WARM:   jp      WARMST          ; Jump for warm start
 
-STARTB: ld      IX,$00          ; Flag cold start
-        jp      CSTART          ; Jump to initialise
+STARTB: jp      CSTART          ; Jump to initialise
         defw    DEINT           ; Get integer -32768 to 32767
         defw    ABPASS          ; Return integer in AB
 CSTART: ld      HL,WRKSPC       ; Start of workspace RAM
@@ -517,7 +515,7 @@ WORDTB: defw    PEND
         defw    DRAW        ; added by Leonardo Miliani
         defw    CIRCLE      ; added by Leonardo Miliani
         defw    SERIAL      ; added by Leonardo Miliani
-        defw    LINES
+        defw    REM         ; removed - was LINES
         defw    CLS
         defw    WIDTH
         defw    SYS
@@ -685,8 +683,6 @@ INITAB: jp      WARMST          ; Warm start jump
         defb    $1C             ; Width for commas (3 columns)
         defb    $00             ; No nulls after input bytes
         defb    $00             ; Output enabled (^O off)
-        defw    $14             ; Initial lines counter
-        defw    $14             ; Initial lines number
         defw    $00             ; Array load/save check sum
         defb    $00             ; Break not by NMI
         defb    $00             ; Break flag
@@ -972,7 +968,7 @@ DOAGN:  ld      HL,(BRKLIN)     ; Get address of code to RUN
 
 PROMPT: ld      A,'?'           ; '?'
         call    OUTC            ; Output character
-        ld      A,NLLCR         ; null char (was: ld      A,SPC           ; Space)
+        ld      A,NLLCR         ; null char
         call    OUTC            ; Output character
         call    CURSOR_ON       ; enable cursor
         jp      RINPUT          ; Get input line
@@ -1238,12 +1234,56 @@ CLOTST: call    GETINP          ; Get input character
         xor     A               ; Null character
         ret
 
-LIST:   call    ATOH            ; ASCII number to DE
-        ret     NZ              ; Return if anything extra
-        pop     BC              ; Rubbish - Not needed
-        call    SRCHLN          ; Search for line number in DE
-        push    BC              ; Save address of line
-        call    SETLIN          ; Set up lines counter
+; LIST: list the program stored into memory
+LIST:   pop     BC              ; rubbish - not needed (legacy from original call of LIST)
+        dec     HL              ; dec 'cos GETCHR INCs
+        call    GETCHR          ; Get next character
+        jp      Z,LSTALL        ; list all if nothing follows
+        cp      ZMINUS          ; is it '-'?
+        jr      NZ,LST01        ; no, look for a line number
+        ld      DE,$0000        ; yes, set search from 0
+        call    SRCHLIN         ; find address of line number
+        ld      (TMPBFR1),BC    ; store address of starting line
+        call    CHKSYN          ; skip '-'
+        defb    ZMINUS
+        call    ATOH            ; now, look for another number (ASCII number to DE)
+        call    SRCHLIN         ; find address of line number
+        ld      (TMPBFR2),BC    ; store address of ending line
+        ld      BC,(TMPBFR1)    ; retrieve address of starting line
+        push    BC              ; store address of line for later use
+        jp      LISTLP          ; go listing
+LST01:  call    ATOH            ; get a line number (ASCII number to DE)
+        call    SRCHLIN         ; find address of line number
+        ld      (TMPBFR1),BC    ; store address of starting line
+        ld      (TMPBFR2),BC    ; same address for ending line (we'll change later if needed)
+        dec     HL              ; dec 'cos GETCHR INCs
+        call    GETCHR          ; Get next character
+        jp      Z,LST06         ; nothing follows, so ending & starting lines are the same
+        cp      ZMINUS          ; is it '-'?
+        jp      Z,LST03         ; yes, read ending line
+LST04:  call    SRCHLIN         ; find address of line number
+        ld      (TMPBFR2),BC    ; set address of ending line
+LST06:  push    BC              ; store address for later use
+        jp      LISTLP          ; jump to list
+LSTALL  ld      DE,65529/10     ; set ending line to max. allowed line number
+        call    SRCHLIN         ; get address of last line
+        ld      (TMPBFR2),BC    ; store it
+        ld      DE,$0000        ; set start to first line in memory
+        call    SRCHLIN         ; get address of first line
+        ld      (TMPBFR1),BC    ; store it
+        push    BC              ; store address of starting line for later use
+        jp      LISTLP          ; start printing
+LST03:  call    CHKSYN          ; skip '-'
+        defb    ZMINUS
+        call    ATOH            ; look for another number (return into DE)
+        ld      A,D
+        or      E               ; is line=0?
+        jr      NZ,LST05        ; no, jump over
+        ld      DE,65529/10     ; yes set last valid line number
+LST05:  call    SRCHLIN         ; find address of line number
+        ld      (TMPBFR2),BC    ; store address of ending line
+        ld      BC,(TMPBFR1)    ; retrieve address of starting line
+        push    BC              ; store it for later use
 LISTLP: pop     HL              ; Restore address of line
         ld      C,(HL)          ; Get LSB of next line
         inc     HL
@@ -1252,8 +1292,8 @@ LISTLP: pop     HL              ; Restore address of line
         ld      A,B             ; BC = 0 (End of program)?
         or      C
         jp      Z,PRNTOK        ; Yes - Go to command mode
-        call    COUNT           ; Count lines
         call    TSTBRK          ; Test for break key
+        call    TSTSPC          ; test for space
         push    BC              ; Save address of next line
         call    PRNTCRLF        ; Output CRLF
         ld      E,(HL)          ; Get LSB of line number
@@ -1269,7 +1309,7 @@ LSTLP2: call    OUTC            ; Output character in A
 LSTLP3: ld      A,(HL)          ; Get next byte in line
         or      A               ; End of line?
         inc     HL              ; To next byte in line
-        jp      Z,LISTLP        ; Yes - get next line
+        jp      Z,NXTLN         ; Yes - check next line
         jp      P,LSTLP2        ; No token - output it
         sub     ZEND-1          ; Find and output word
         ld      C,A             ; Token offset+1 to C
@@ -1287,35 +1327,32 @@ OUTWRD: and     %01111111       ; Strip bit 7
         or      A               ; Is it end of word?
         jp      P,OUTWRD        ; No - output the rest
         jp      LSTLP3          ; Next byte in line
+NXTLN:  pop     DE              ; recover address of current line
+        ld      HL,(TMPBFR2)    ; address of last line to print
+        call    CMP16           ; check if current line is over last printable line
+        jp      C,PRNTOK        ; finish - leave & print OK
+        push    DE              ; store address of current line
+        jp      LISTLP          ; continue listing
+SRCHLIN:push    HL              ; store HL (this is needed because HL store the pointer to the input buffer)
+        call    SRCHLN          ; search for line number in DE
+        pop     HL              ; retrieve HL
+        ret                     ; return to caller
 
-SETLIN: push    HL              ; Set up LINES counter
-        ld      HL,(LINESN)     ; Get LINES number
-        ld      (LINESC),HL     ; Save in LINES counter
-        pop     HL
-        ret
+; during LISTing, check if PAUSE is pressed, then pause listing and
+; wait for another pressing of PAUSE to continue or CTRL-C/BREAK to exit
+TSTSPC: ld      A,(TMPKEYBFR)   ; Get input character
+        cp      SPC             ; Is it SPACE?
+        ret     NZ              ; No, return
+WTSPC   call    GETINP          ; Yes, stop listing and wait for another space or BREAK
+        cp      SPC             ; is it SPACE?
+        jr      NZ,CNTWTSP      ; no, continue
+        xor     A
+        ld      (TMPKEYBFR),A   ; reset key
+        ret                     ; return to caller
+CNTWTSP:cp      CTRLC           ; is it CTRL-C/BREAK?
+        jr      NZ,WTSPC        ; no, loop
+        jp      BRKRET          ; exit and output "Ok"
 
-; during LISTing, count the lines and pause listing if reached
-; the max. number of printed lines
-COUNT:  push    HL              ; Save code string address
-        push    DE
-        ld      HL,(LINESC)     ; Get LINES counter
-        ld      DE,-1
-        adc     HL,DE           ; Decrement
-        ld      (LINESC),HL     ; Put it back
-        pop     DE
-        pop     HL              ; Restore code string address
-        ret     P               ; Return if more lines to go
-        push    HL              ; Save code string address
-        ld      HL,(LINESN)     ; Get LINES number
-        ld      (LINESC),HL     ; Reset LINES counter
-        call    GETINP          ; Get input character
-        cp      CTRLC           ; Is it control "C"?
-        jp      Z,RSLNBK        ; Yes - Reset LINES and break
-        pop     HL              ; Restore code string address
-        jp      COUNT           ; Keep on counting
-RSLNBK: ld      HL,(LINESN)     ; Get LINES number
-        ld      (LINESC),HL     ; Reset LINES counter
-        jp      BRKRET          ; Go and output "Break"
 
 FOR:    ld      A,$64           ; Flag "FOR" assignment
         ld      (FORFLG),A      ; Save "FOR" flag
@@ -1427,13 +1464,15 @@ ONJMP:  sub     ZEND            ; Is it a token?
         push    BC              ; Save routine address
         ex      DE,HL           ; Restore code string address
 
+; get a char from input buffer: exit with NC if character found is
+; not a number; exit with Z if nothing found; char is into A
 GETCHR: inc     HL              ; Point to next character
         ld      A,(HL)          ; Get next code string byte
-        cp      ':'             ; check if under ':' (it means '9' or less)
-        ret     NC              ; NC if > '9'
+        cp      ':'             ; Z if ':'
+        ret     NC              ; NC if > "9"
         cp      SPC
         jp      Z,GETCHR        ; Skip over spaces
-        cp      '0'             ; check if >= '0'
+        cp      '0'
         ccf                     ; NC if < '0'
         inc     A               ; Test for zero - Leave carry
         dec     A               ; Z if Null
@@ -1474,7 +1513,7 @@ STALL:  rst     $10             ; Wait for key
         jr      Z,STOP          ; Break during hold exits prog
         jr      STALL           ; Loop until <Ctrl-Q> or <brk>
 
-BRK     ld      A,$FF           ; Set BRKFLG
+BRK:    ld      A,$FF           ; Set BRKFLG
         ld      (BRKFLG),A      ; Store it
 
 STOP:   ret     NZ              ; Exit if anything else
@@ -1822,7 +1861,7 @@ DOCOM:  ld      A,(COMMAN)      ; Get comma width
         jp      NC,NEXITM       ; Get next item
 ZONELP: sub     $0E             ; Next zone of 14 characters
         jp      NC,ZONELP       ; Repeat if more zones
-        cpl                     ; Number of spaces to output
+        cpl                     ; Number of null chars to output
         ld      C,NLLCR         ; null char
         jp      ASPCS           ; Output them
 
@@ -4630,11 +4669,6 @@ WIDTH:  call    GETINT          ; Get integer 0-255
         ld      (LWIDTH),A      ; Set width
         ret
 
-LINES:  call    GETNUM          ; Get a number
-        call    DEINT           ; Get integer -32768 to 32767
-        ld      (LINESC),DE     ; Set lines counter
-        ld      (LINESN),DE     ; Set lines number
-        ret
 
 DEEK:   call    DEINT           ; Get integer -32768 to 32767
         push    DE              ; Save number
@@ -5276,7 +5310,7 @@ CNTVALY:ld      A,L
         ret                     ; return to caller
 
 
-; clear VIDEOBUFF before usint it as temp buffer
+; clear VIDEOBUFF before using it as temp buffer
 CLRVDBF:xor     A               ; clear A
         push    BC              ; store BC
         push    HL              ; store HL
@@ -5681,9 +5715,6 @@ CHKBIN: inc     DE
 BINERR: ld      E,BN            ; ?BIN Error
         jp      ERROR
 
-
-JJUMP1: ld      IX,-1           ; Flag cold start
-        jp      CSTART          ; Go and initialise
 
 MONOUT: jp      $0008           ; output a char
 

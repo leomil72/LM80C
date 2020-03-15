@@ -7,9 +7,18 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  3.2                             *
-*                             (2020/xx/xx)                             *
-*       This release covers the LM80C FIRMWARE R3.2 and above          *                
+*                             Version  3.3                             *
+*                             (2020/03/15)                             *
+*       This release covers the LM80C FIRMWARE R3.3 and above          *
+*                                                                      *
+************************************************************************
+*                                                                      *
+*                              N O T I C E                             *
+*                                                                      *
+*        This could be the last release of the current manual          *   
+* in TEXT format. From now on, please download and use the ODT version *
+*   instead, that will be updated regolarly and considered the "main"  *
+*          and "official" reference manual for LM80C BASIC             *
 *                                                                      *
 ************************************************************************
 
@@ -45,6 +54,7 @@ Some statements have been removed from the interpreter due to the fact
 that they laid over the original NASCOM machines. They are:
 CLOAD/CSAVE: they loaded/stored data from/to an external mass storage
 device
+LINES: set the lines to be printed simultaneously
 MONITOR: it launched the MONITOR program
 NULL: it set the number of null chars to be printed after a carriage
 return
@@ -697,26 +707,28 @@ Example:
 LET A=10   is equal to   A=10
 -----------------------------------------------------------------------
 
-LINES
------
-Syntax: LINES <num>
-
-Sets the number of lines to print before to pause the listing of a
-program made with LIST: see below.
------------------------------------------------------------------------
-
 LIST
 ----
-Syntax: LIST [start]
+Syntax: LIST [start][[-][end]]
 
-Lists a program stored in memory. If <start> is passed, the list will
-start at the line set by <start>, otherwise from the first line of the
-program. LIST will print the number of lines set with LINES (see above)
-then will pausing, waiting for the pressing of a key.
+Lists a program stored in memory. LIST without arguments will print
+the whole program. If <start> is passed, only the specified line will be
+printed. <start> followed by "-" will print the line passed as argument
+and all the following ones. If <end> is passed precede by "-", only the
+lines up to <end> will be printed. If both <start> and <end> are passed,
+only the lines included into the two intervals will be printed. If
+<start> isn't present in memory, the next line is considered: same for
+<end>. During the listing, a press of "SPACE" key will pause the
+printing: to resume it, just press the "SPACE" key another time, to halt
+it press the "RUN/STOP" key. Same behavior is obtanied by pressing the
+latter while listing.
 
 Examples:
-LIST  => list the whole program
-LIST 100  => list from 100 to the end of the program
+LIST  => list the whole program stored into memory
+LIST 100  => list line 100
+LIST -100 => list lines from beginning to 100
+LIST 100- => list lines from 100 to end of program
+LIST 50-100 => list lines from 50 to 100
 -----------------------------------------------------------------------
 
 LOCATE
