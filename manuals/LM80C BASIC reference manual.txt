@@ -7,9 +7,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  3.3                             *
-*                             (2020/03/15)                             *
-*       This release covers the LM80C FIRMWARE R3.3 and above          *
+*                             Version  3.4                             *
+*                             (2020/03/29)                             *
+*       This release covers the LM80C FIRMWARE R3.4 and above          *
 *                                                                      *
 ************************************************************************
 *                                                                      *
@@ -1152,24 +1152,50 @@ channel B. In LM80C computer the channel A is connected to a USB-to-
 while channel B (port 2) is configured as a block device. "bps"
 indicates the bauds per second, i.e. the speed of the serial line. "bps"
 can assume one of the following values:
-57600,38400,28800,19200,14400,9600,4800,3600,2400,1200,0
-If 0 is entered, the other params are ignored and the command closes
-the connection opened on channel "ch". Otherwise, the serial line will
-be set to run at the selected speed. "data" represents the number of
-bits that compose the data to be sent: allowed values are 5/6/7/8. 5 is
-used to instructs the SIO to work with a number of 5 bits (or less) per
-single char. "par" is the parity bit: it can be 0/1/2. 0 means no parity
-bit; 1 means an odd parity; 2 means an even parity. "stop" sets the
-number of bits sent after the data bits. Its value must be: 0, for no
-stop bits; 1, for 1 stop bit; 2, for 1.5 stop bits; 3, for 2 stop bits.
-Opening a serial line leads to the corresponding status LED to be turned
-on.
+57600,38400,28800,19200,14400,9600,4800,3600,2400,1200,600,1,0
+
+1 and 0 are special values that will be analized below. If a valid value
+for <bps> is entered, the serial line will be set to run at the selected
+speed. <data> represents the number of bits that compose the data to be
+sent: allowed values are 5/6/7/8. 5 is used to instructs the SIO to work
+with a number of 5 bits (or less) per single char. <par> is the parity
+bit: it can be 0/1/2. 0 means no parity bit; 1 means an odd parity; 2
+means an even parity. <stop> sets the number of bits sent after the data
+bits. Its value must be: 0, for no stop bits; 1, for 1 stop bit; 2, for
+1.5 stop bits; 3, for 2 stop bits. Opening a serial line leads to the
+corresponding status LED to be turned on.
 
 Example:
 SERIAL 1,19200,8,0,1  => normal settings to open a serial line with
                          19,200 bps, 8 data bits, no parity bits,1 stop
                          bit
+
+If the user tries to re-open a serial communication on a port already
+opened, an error will be raised:
+
+SERIAL 1,19200,8,0,1
+Ok
+SERIAL 1,38400,8,0,1
+Serial Port Already Open Error
+Ok
+
+If 0 is entered as <bps>, the other arguments are ignored and the
+command closes the connection opened on channel <ch>:
+
 SERIAL 1,0 => closes the serial port 1, resetting the SIO channel A.
+
+The Z80 SIO peripheral chip has an internal buffer that can stores up to
+3 chars: if fourth char is received while the CPU hasn’t collected one
+of the incoming chars yet, then a buffer overrun occours. The BASIC
+interpreter will disable the serial line functionalities (no incoming
+chars will be accepted, no outgoing chars will be sent, while the line
+will still remain open) and the corresponding status LED will be turned
+on. This condition will remain until the user will call the SERIAL
+command with the special value of 1 for bps, that re-activates the
+normal port operation.
+
+SERIAL 1,1	=> re-activates the RX/TX transmission after a buffer
+               overrun condition
 
 Further reading: to better know the serial capabilities of the SIO chip,
 the reading of the Z80 peripherals' user manual is reccomended. A copy
