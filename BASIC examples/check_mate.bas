@@ -585,8 +585,8 @@
 30100 PRINT:PRINT " Just press RETURN to get help"
 30110 PRINT " during the game."
 30120 GOSUB 13500
-30130 CLS:LOCATE 0,2:D9=1:PRINT "Difficult (1-9, def.1)";
-30140 INPUT D9$:IF VAL(D9$)>0 AND VAL(D9$)<10 THEN D9=VAL(D9$)
+30130 CLS:LOCATE 0,2:D9=1:PRINT "Difficult (1-8, def.1)";
+30140 INPUT D9$:IF VAL(D9$)>0 AND VAL(D9$)<9 THEN D9=VAL(D9$)
 30150 T0=D9:PRINT "Difficult:";T0
 30170 LOCATE 0,5:PRINT "Choose color to play with, white";
 30180 PRINT "moves first (def.). (W/B)";
