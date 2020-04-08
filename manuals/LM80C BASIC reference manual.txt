@@ -322,7 +322,7 @@ Values range from 1 to 15:
 
 In SCREEN 0 (text mode), only the first 2 params are allowed since the
 background and border colors coincide. In SCREEN 3 (multicolor mode)
-only the background color is allowed.
+only the border color is allowed.
 When in graphic mode 2, the color of the pixels painted by PLOT, DRAW,
 and CIRCLE commands, when not specified, is the foreground color set by
 COLOR.
@@ -1094,7 +1094,7 @@ for sprites and graphics, while mode 1 is a graphics mode where each
 char is in reality a tile. In every mode, SCREEN also performs a screen
 clear. 
 
-SCREEN 4 is a special, not ufficially supported yet still documented
+SCREEN 4 is a special, not ufficially supported yet still documented,
 mode that is a mix between SCREEN 1 and SCREEN 2. In SCREEN 4 the video
 buffer is divided into 768 cells each of those can be assigned to one
 8x8 pattern, like in mode 1, but where the colors are managed for single
