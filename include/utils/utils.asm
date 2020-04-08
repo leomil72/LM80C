@@ -86,3 +86,25 @@ negHL:  xor     A
         sub     H
         ld      H,A
         ret
+
+; ----------------------------------------------------------------------
+; divide a 16-bit number by an 8-bit number
+; (16/8 division)
+;
+; inputs: HL (Dividend), C (divisor)
+; destroys: A
+; OPERATION: HL/C
+; returns: HL (quotient), A (remainder)
+; source: WKT
+
+DIV_16_8:   xor     A
+            ld      B,16
+DIV_16_8LP: add     HL,HL
+            rla
+            jr      C,$+5
+            cp      C
+            jr      C,$+4
+            sub     C
+            inc     L
+            djnz    DIV_16_8LP
+            ret
