@@ -6,9 +6,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.4                             *
-*                             (2020/02/01)                             *
-*                This release applies to the LM80C R2.2                *
+*                             Version  1.5                             *
+*                             (2020/04/09)                             *
+*                This release applies to the LM80C R3.5                *
 *                                                                      *
 ************************************************************************
 
@@ -21,7 +21,7 @@ The LM80C Color Computer is an homebrew computer developed and
 prograammed by Leonardo Miliani (Italy) in an effort to have his own,
 old-stile, 80s' computer. It is built upon the Z80, an 8-bit CPU
 developed in the '70s by Zilog. LM80C derives from "L"eonardo "M"iliani
-(Z)80 "C"olor.
+(Z)"80" "C"olor.
 
 1.2 Main features
 -----------------
@@ -36,7 +36,7 @@ The LM80C might have been a good computer at that time:
 - Serial I/O: 1xZ80 SIO
 - Parallel I/O: 1xZ80 PIO
 - Timer: 1xZ80 CTC
-- Serial line: 19,200 bps
+- Serial line: 57,600 bps
 ------------------------------------------------------------------------
 
                             2. Memory map
@@ -127,125 +127,106 @@ By manually writing into these locations the user can alter the
 functioning of the system, sometimes leading to crashes and/or non-
 predictable functionings.
 
-WRKSPC          8045H           BASIC Work space
-USR             WRKSPC+3H       "USR (x)" jump  <-- in $8049/804A the
-                                user can store the address of a specific
-                                machine language routine
-OUTSUB          WRKSPC+6H       "out p,n"
-OTPORT          WRKSPC+7H       Port (p)
-DIVSUP          WRKSPC+9H       Division support routine
-DIV1            WRKSPC+0AH      <- Values
-DIV2            WRKSPC+0EH      <-   to
-DIV3            WRKSPC+12H      <-   be
-DIV4            WRKSPC+15H      <-inserted
-SEED            WRKSPC+17H      Random number seed  <-- starting address
-                                of a seed table
-LSTRND          WRKSPC+3AH      Last random number
-INPSUB          WRKSPC+3EH      #INP (x)" Routine
-INPORT          WRKSPC+3FH      PORT (x)
-NULLS           WRKSPC+41H      Number of nulls
-LWIDTH          WRKSPC+42H      Terminal width
-COMMAN          WRKSPC+43H      Width for commas
-NULFLG          WRKSPC+44H      Null after input byte flag
-CTLOFG          WRKSPC+45H      Control "O" flag
-LINESC          WRKSPC+46H      Lines counter
-LINESN          WRKSPC+48H      Lines number
-CHKSUM          WRKSPC+4AH      Array load/save check sum
-NMIFLG          WRKSPC+4CH      Flag for NMI break routine
-BRKFLG          WRKSPC+4DH      Break flag
-RINPUT          WRKSPC+4EH      Input reflection
-POINT           WRKSPC+51H      "POINT" reflection (unused)
-PSET            WRKSPC+54H      "SET"   reflection
-RESET           WRKSPC+57H      Reset system
-STRSPC          WRKSPC+5AH      Bottom of string space
-LINEAT          WRKSPC+5CH      Current line number
-BASTXT          WRKSPC+5EH      Pointer to start of program
-                                actually this is the last value pre-
-                                filled by the firmware at startup
-BUFFER          WRKSPC+61H      Input buffer
-STACK           WRKSPC+66H      Initial stack
-CURPOS          WRKSPC+0ABH     Character position on line
-LCRFLG          WRKSPC+0ACH     Locate/Create flag
-TYPE            WRKSPC+0ADH     Data type flag
-DATFLG          WRKSPC+0AEH     Literal statement flag
-LSTRAM          WRKSPC+0AFH     Last available RAM
-TMSTPT          WRKSPC+0B1H     Temporary string pointer
-TMSTPL          WRKSPC+0B3H     Temporary string pool
-TMPSTR          WRKSPC+0BFH     Temporary string
-STRBOT          WRKSPC+0C3H     Bottom of string space
-CUROPR          WRKSPC+0C5H     Current operator in EVAL
-LOOPST          WRKSPC+0C7H     First statement of loop
-DATLIN          WRKSPC+0C9H     Line of current DATA item
-FORFLG          WRKSPC+0CBH     "FOR" loop flag
-LSTBIN          WRKSPC+0CCH     Last byte entered
-READFG          WRKSPC+0CDH     Read/Input flag
-BRKLIN          WRKSPC+0CEH     Line of break
-NXTOPR          WRKSPC+0D0H     Next operator in EVAL
-ERRLIN          WRKSPC+0D2H     Line of error
-CONTAD          WRKSPC+0D4H     Where to CONTinue
-PROGND          WRKSPC+0D6H     End of program
-VAREND          WRKSPC+0D8H     End of variables
-ARREND          WRKSPC+0DAH     End of arrays
-NXTDAT          WRKSPC+0DCH     Next data item
-FNRGNM          WRKSPC+0DEH     Name of FN argument
-FNARG           WRKSPC+0E0H     FN argument value
-FPREG           WRKSPC+0E4H     Floating point register
-FPEXP           FPREG+03H       Floating point exponent
-SGNRES          WRKSPC+0E8H     Sign of result
-TMRCNT          WRKSPC+0E9H     TMR counter for 1/100 seconds
-; - VIDEO REGISTERS
-SCR_SIZE_W      TMRCNT+04H      screen width (it can be either 40 chars
-                                or 32 chars/bytes
-SCR_SIZE_H      SCR_SIZE_W+01H  screen height (it can be 24/48/192: 24
-                                for text, 48 for MC, 192 for graphics)
-SCR_MODE        SCR_SIZE_H+01H  screen mode (0=text, 1=G1, 2=G2, 3=MC,
-                                4=ExG2)
-SCR_NAM_TB      SCR_MODE+02H    video name table address
-SCR_CURS_X      SCR_NAM_TB+02H  cursor X
-SCR_CURS_Y      SCR_CURS_X+01H  cursor Y
-SCR_CUR_NX      SCR_CURS_Y+01H  new cursor X position
-SCR_CUR_NY      SCR_CUR_NX+01H  new cursor Y position
-SCR_ORG_CHR     SCR_CUR_NY+01H  original char positioned under the
-                                cursor
-CRSR_STATE      SCR_ORG_CHR+01H state of cursor (1=on, 0=off)
-LSTCSRSTA       CRSR_STATE+01H  last cursor state
-PRNTVIDEO       LSTCSRSTA+01H   print on video buffer (1=on / 0=off) set
-                                to off on graphic only modes
-CHR4VID         PRNTVIDEO+01H   char for video buffer
-FRGNDCLR        CHR4VID+01H     foreground color as set by SCREEN or
-                                COLOR commands
-BKGNDCLR        FRGNDCLR+01H    background color as set by SCREEN or
-                                COLOR commands
-TMPBFR1         BKGNDCLR+01H    word for general purposes use (temp.
-                                buffer for 1 or 2 bytes)
-TMPBFR2         TMPBFR1+02H     word for general purposes use (temp.
-                                buffer for 1 or 2 bytes)
-TMPBFR3         TMPBFR2+02H     word for general purposes use (temp.
-                                buffer for 1 or 2 bytes)
-VIDEOBUFF       TMPBFR3+02H     buffer used for video scrolling and
-                                other purposes (40 bytes)
-VIDTMP1         VIDEOBUFF+028H  temporary video word
-VIDTMP2         VIDTMP1+002H    temporary video word
-; - SOUND & KEYBOARD REGISTERS - FROM HERE...
-CHASNDDTN       VIDTMP2+002H    sound Ch.A duration (1/100s)
-CHBSNDDTN       CHASNDDTN+002H  sound Ch.B duration (1/100s)
-CHCSNDDTN       CHBSNDDTN+002H  sound Ch.C duration (1/100s)
-KBTMP           CHCSNDDTN+002H  temp cell used by keyboard scanner
-TMPKEYBFR       KBTMP+001H      temp buffer for last key pressed
-LASTKEYPRSD     TMPKEYBFR+001H  last key code pressed
-CONTROLKEYS     LASTKEYPRSD+01H flags for control keys (bit#0=SHIFT;
-                                bit#1=CTRL; bit#2=C=)
-; - - - - - - - - - - - - - - -
-PBUFF           CONTROLKEYS+01H ; Number print buffer
-MULVAL          PBUFF+0DH       ; Multiplier
-PROGST          MULVAL+03H      ; Start of program text area
-STLOOK          PROGST+064H     ; (WRKSPC+16DH) Start of memory test
+805E:   WRKSPC          basicStarted+$01; (3) BASIC Work space
+8061:   USR             WRKSPC+$03      ; (3) "USR (x)" jump  <-- in $8062/8063 the user can store the address of a specific machine language routine
+8064:   OUTSUB          USR+$03         ; (1) "out p,n"
+8065:   OTPORT          OUTSUB+$01      ; (2) Port (p)
+8067:   DIVSUP          OTPORT+$02      ; (1) Division support routine
+8068:   DIV1            DIVSUP+$01      ; (4) <- Values
+806C:   DIV2            DIV1+$04        ; (4) <-   to
+8070:   DIV3            DIV2+$04        ; (3) <-   be
+8073:   DIV4            DIV3+$03        ; (2) <-inserted
+8075:   SEED            DIV4+$02        ; (35) Random number seed
+8098:   LSTRND          SEED+$23        ; (4) Last random number
+809C:   INPSUB          LSTRND+$04      ; (1) #INP (x)" Routine
+809D:   INPORT          INPSUB+$01      ; (2) PORT (x)
+809F:   LWIDTH          INPORT+$02      ; (1) Terminal width
+80A0:   COMMAN          LWIDTH+$01      ; (1) Width for commas
+80A1:   NULFLG          COMMAN+$01      ; (1) Null after input byte flag
+80A2:   CTLOFG          NULFLG+$01      ; (1) Control "O" flag
+80A3:   CHKSUM          CTLOFG+$01      ; (2) Array load/save check sum
+80A5:   NMIFLG          CHKSUM+$02      ; (1) Flag for NMI break routine
+80A6:   BRKFLG          NMIFLG+$01      ; (1) Break flag
+80A7:   RINPUT          BRKFLG+$01      ; (3) Input reflection
+80AA:   STRSPC          RINPUT+$03      ; (2) Bottom of string space
+80AC:   LINEAT          STRSPC+$02      ; (2) Current line number
+80AE:   BASTXT          LINEAT+$02      ; (3) Pointer to start of program
+80B1:   BUFFER          BASTXT+$03      ; (5) Input buffer
+80B6:   STACK           BUFFER+$05      ; (85) Initial stack
+810B:   CURPOS          STACK+$55       ; (1) Character position on line
+810C:   LCRFLG          CURPOS+$01      ; (1) Locate/Create flag
+810D:   TYPE            LCRFLG+$01      ; (1) Data type flag
+810E:   DATFLG          TYPE+$01        ; (1) Literal statement flag
+810F:   LSTRAM          DATFLG+$01      ; (2) Last available RAM
+8111:   TMSTPT          LSTRAM+$02      ; (2) Temporary string pointer
+8113:   TMSTPL          TMSTPT+$02      ; (12) Temporary string pool
+811F:   TMPSTR          TMSTPL+$0C      ; (4) Temporary string
+8123:   STRBOT          TMPSTR+$04      ; (2) Bottom of string space
+8125:   CUROPR          STRBOT+$02      ; (2) Current operator in EVAL
+8127:   LOOPST          CUROPR+$02      ; (2) First statement of loop
+8129:   DATLIN          LOOPST+$02      ; (2) Line of current DATA item
+812B:   FORFLG          DATLIN+$02      ; (1) "FOR" loop flag
+812C:   LSTBIN          FORFLG+$01      ; (1) Last byte entered
+812D:   READFG          LSTBIN+$01      ; (1) Read/Input flag
+812E:   BRKLIN          READFG+$01      ; (2) Line of break
+8130:   NXTOPR          BRKLIN+$02      ; (2) Next operator in EVAL
+8132:   ERRLIN          NXTOPR+$02      ; (2) Line of error
+8134:   CONTAD          ERRLIN+$02      ; (2) Where to CONTinue
+8136:   PROGND          CONTAD+$02      ; (2) End of program
+8138:   VAREND          PROGND+$02      ; (2) End of variables
+813A:   ARREND          VAREND+$02      ; (2) End of arrays
+813C:   NXTDAT          ARREND+$02      ; (2) Next data item
+813E:   FNRGNM          NXTDAT+$02      ; (2) Name of FN argument
+8140:   FNARG           FNRGNM+$02      ; (4) FN argument value
+8144:   FPREG           FNARG+$04       ; (3) Floating point register
+8147:   FPEXP           FPREG+$03       ; (1) Floating point exponent
+8148:   SGNRES          FPEXP+$01       ; (1) Sign of result
+8149:   TMRCNT          SGNRES+$01      ; (4) TMR counter for 1/100 seconds
+        VIDEO REGISTERS - FROM HERE...
+814D:   SCR_SIZE_W      TMRCNT+$04      ; (1) screen width (it can be either 40 chars or 32 chars/bytes)
+814E:   SCR_SIZE_H      SCR_SIZE_W+$01  ; (1) screen height (it can be 24/48/192: 24 for text, 48 for MC, 192 for graphics)
+814F:   SCR_MODE        SCR_SIZE_H+$01  ; (1) screen mode (0=text, 1=G1, 2=G2, 3=MC, 4=ExG2)
+8151:   SCR_NAM_TB      SCR_MODE+$02    ; (2) video name table address
+8153:   SCR_CURS_X      SCR_NAM_TB+$02  ; (1) cursor X
+8154:   SCR_CURS_Y      SCR_CURS_X+$01  ; (1) cursor Y
+8155:   SCR_CUR_NX      SCR_CURS_Y+$01  ; (1) new cursor X position
+8156:   SCR_CUR_NY      SCR_CUR_NX+$01  ; (1) new cursor Y position
+8157:   SCR_ORG_CHR     SCR_CUR_NY+$01  ; (1) original char positioned under the cursor
+8158:   CRSR_STATE      SCR_ORG_CHR+$01 ; (1) state of cursor (1=on, 0=off)
+8159:   LSTCSRSTA       CRSR_STATE+$01  ; (1) last cursor state
+815A:   PRNTVIDEO       LSTCSRSTA+$01   ; (1) print on video buffer (1=on / 0=off) set to off on graphic only modes
+815B:   CHR4VID         PRNTVIDEO+$01   ; (1) char for video buffer
+815C:   FRGNDCLR        CHR4VID+$01     ; (1) foreground color as set by SCREEN or COLOR commands
+815D:   BKGNDCLR        FRGNDCLR+$01    ; (1) background color as set by SCREEN or COLOR commands
+815E:   TMPBFR1         BKGNDCLR+$01    ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
+8160:   TMPBFR2         TMPBFR1+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
+8162:   TMPBFR3         TMPBFR2+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
+8164:   TMPBFR4         TMPBFR3+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
+8166:   VIDEOBUFF       TMPBFR4+$02     ; (40) buffer used for video scrolling and other purposes
+818E:   VIDTMP1         VIDEOBUFF+$28   ; (2) temporary video word
+8190:   VIDTMP2         VIDTMP1+$02     ; (2) temporary video word
+        SOUND & KEYBOARD REGISTERS - FROM HERE...
+8192:   CHASNDDTN       VIDTMP2+$02     ; (2) sound Ch.A duration (1/100s)
+8194:   CHBSNDDTN       CHASNDDTN+$02   ; (2) sound Ch.B duration (1/100s)
+8196:   CHCSNDDTN       CHBSNDDTN+$02   ; (2) sound Ch.C duration (1/100s)
+8198:   KBDNPT          CHCSNDDTN+$02   ; (1) temp cell used to flag if input comes from keyboard
+8199:   KBTMP           KBDNPT+$01      ; (1) temp cell used by keyboard scanner
+819A:   TMPKEYBFR       KBTMP+$01       ; (1) temp buffer for last key pressed
+819B:   LASTKEYPRSD     TMPKEYBFR+$01   ; (1) last key code pressed
+819C:   CONTROLKEYS     LASTKEYPRSD+$01  ; (1) flags for control keys (bit#0=SHIFT; bit#1=CTRL; bit#2=C=)
+        
+819D:   SERIALS_EN      CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Port1(A), bit 1 for Port2(B): 0=OFF, 1=ON
+819E:   SERABITS        SERIALS_EN+$01  ; (1) serial port A data bits
+819F:   PBUFF           SERABITS+$01    ; (13) Number print buffer
+81AC:   MULVAL          PBUFF+$0D       ; (3) Multiplier
+81AF:   PROGST          MULVAL+$03      ; (100) Start of program text area
+8213:   STLOOK          PROGST+$64      ; Start of memory test
 ------------------------------------------------------------------------ 
                        7. Serial configuration
 
 If you intend to connect the LM80C to a host computer through the
 serial port A, you have to use am FT232 module to adapt the RS232 serial
-lines of the LM80X to the USB port of moderm systems. Moreover, to avoid
+lines of the LM80C to the USB port of moderm systems. Moreover, to avoid
 serial issues during sending data to the LM80C, please configure the
 terminal emulator you are using (i.e. CoolTerm or TeraTherm) with these
 params:
