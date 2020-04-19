@@ -27,8 +27,7 @@
 
 ## Overview
 
-The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with video and audio capabilities. It's a stand-alone system thanks to its integrated keyboard that permits to use it without the necessity of host computers, usually used as input/output devices in other similar projects. With the LM80C BASIC you can write your own games, like "Lunar Lander" (see picture below):
-<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lunarlander.jpg" title="Lunar Lander on LM80C" alt="Lunar Lander on LM80C">
+The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with video and audio capabilities. It's a stand-alone system thanks to its integrated keyboard that permits to use it without the necessity of host computers, usually used as input/output devices in other similar projects. With the LM80C BASIC you can write your own games, programs and other.
 
 ### Main features
 
@@ -64,6 +63,11 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
   - support for SD memory cards
 
 <img src="https://raw.githubusercontent.com/leomil72/LM80C/master/keyboard.jpg" title="LM80C keyboard" alt="LM80C keyboard">
+
+### BASIC
+
+The **LM80C BASIC** is a versatile and user-friendly programming language, the de-facto standard of the '80s since it was integrated into almost every 8-bit home computer. It derives from Nascom BASIC, that in turn derives from Microsoft Z80 BASIC 4.7. The LM80C is more than just a derivative language: in fact, it has its own set of commands and functions to take advantage of the specific LM80C hardware, like statements to draw point, lines, and circles, change foreground and background colors, move the cursor, play a tone or a noise, open/close the serial port, etc. It lets to write good BASIC games, like "Lunar Lander", see below:
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lunarlander.jpg" title="Lunar Lander on LM80C" alt="Lunar Lander on LM80C">
 
 ---
 
