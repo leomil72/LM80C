@@ -124,7 +124,7 @@ If you need, you can clone this repo to your local machine using `https://github
 - **Where can I find the chips you're using in the LM80C computer?**
   - Unfortunately, Zilog seems that it has stopped manufacturing the Z80 family chips, so currently you can find some remains of the warehouse from big online resellers or new/used parts over online auctions sites. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them. The VDp and PSG chips are only available as used parts from several chinese reseller.
 - **The software seems not to be working/the hardware I built following your schematics doesn't work: where can I find help? Can I write to you?**
-  - The project is released "as it", without any warranty/responsability: despite I've tested it and I'm currently using it, I can not guarantee that it is completely error-free, so please don't write to complain about something not working. Open an "issue" or a "pull request". Thank you.
+  - The project is released "as is", without any warranty/responsability: despite I've tested it and I'm currently using it, I can not guarantee that it is completely error-free, so please don't write to complain about something not working. Open an "issue" or a "pull request". Thank you.
 
 ---
 
