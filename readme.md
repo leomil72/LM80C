@@ -20,6 +20,7 @@
 - [Clone](#clone)
 - [FAQ](#faq)
 - [Support](#support)
+- [Donations](#donations)
 - [License](#license)
 
 ---
@@ -112,14 +113,18 @@ If you need, you can clone this repo to your local machine using `https://github
 ## FAQ
 
 - **How can I clone this repo?**
-    - On your desktop computer, by using a GUI frontend like SmartGit, or by terminal by typing the following command ```git clone https://github.com/leomil72/LM80C```
-    - Online, by clicking on the "Fork" button
+  - On your desktop computer, by using a GUI frontend like SmartGit, or by terminal by typing the following command ```git clone https://github.com/leomil72/LM80C```
+  - Online, by clicking on the "Fork" button
+- **How can I download the files?**
+  - By clicking the green top-right "Clone or Download" and then by clicking on "Download ZIP"
 - **How do I write and compile an ASM source file?**
-    - You need an editor to write the source code and then an 'assembler' to compile the binary file.
+  - You need an editor to write the source code and then an 'assembler' to compile the binary file
 - **How do I burn the binary file into the EEPROM?**
-    - You need an (E)EPROM programmer, a device that can be connected to your computer and that can write the data into the memory chip. You can buy a programmer from internet or build your own device like me.
-- **Where can I find the chips you're using in your computer?**
-    - Fortunately, Zilog still sells the Z80 family chips, so you can find them anywhere. Personally I've bought mine from Farnell, but you can find them in other resellers' catalogue. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them.
+  - You need an (E)EPROM programmer, a device that can be connected to your computer and that can write the data into the memory chip. You can buy a programmer from internet or build your own device like me.
+- **Where can I find the chips you're using in the LM80C computer?**
+  - Unfortunately, Zilog seems that it has stopped manufacturing the Z80 family chips, so currently you can find some remains of the warehouse from big online resellers or new/used parts over online auctions sites. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them. The VDp and PSG chips are only available as used parts from several chinese reseller.
+- **The software seems not to be working/the hardware I built following your schematics doesn't work: where can I find help? Can I write to you?**
+  - The project is released "as it", without any warranty/responsability: despite I've tested it and I'm currently using it, I can not guarantee that it is completely error-free, so please don't write to complain about something not working. Open an "issue" or a "pull request". Thank you.
 
 ---
 
