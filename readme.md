@@ -3,17 +3,20 @@
 
 # LM80C - A Z80-based homebrew computer
 
-> This repo contains schematics, code and other stuff that you can use to realize my project of building a Z80-based homebrew computer as a sort of "back to the old, good, days of 8-bits systems".
-
+> This repo contains schematics, code and other stuff that you can use to replicate this project and build your own Z80-based homebrew computer as a sort of "back to the old, good, days of 8-bit systems".
+>
 > Project main page: [LM80C](http://www.leonardomiliani.com/en/lm80c/)
-
+>
 > z80, zilog, homebrew, 8-bits, computer, lm80c, ctc, pio, sio
 
 ---
 
 ## Getting started
 
+- [Overview](#overview)
 - [What you need](#what%20you%20need)
+- [Files](#files)
+- [Compilation](#compilation)
 - [Clone](#clone)
 - [FAQ](#faq)
 - [Support](#support)
@@ -21,22 +24,64 @@
 
 ---
 
+## Overview
+
+The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with video and audio capabilities. It's a stand-alone system thanks to its integrated keyboard that permits to use it without the necessity of host computers, usually used as input/output devices in other similar projects. With the LM80C BASIC you can write your own games, like "Lunar Lander" (see picture below):
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lunarlander.jpg" title="Lunar Lander on LM80C" alt="Lunar Lander on LM80C">
+
+### Main features
+
+- CPU: Zilog Z80@3.68 MHz
+- Memory:
+  - ROM: 32KB with built-in firmware
+  - RAM: 32KB SRAM
+- Video:
+  - TMS9918A with and 16KB of dedicated VRAM
+  - composite output
+  - 256x192 pixels, 15 colors, 32 sprites
+- Audio:
+  - Yamaha YM2149F (or GI AY-3-8910)
+  - 3 analog channels with tone&noise generation
+  - envelope control
+  - 2x8-bit I/O ports
+- I/O capabilities:
+  - Z80 PIO:
+    - parallel input/output periphery
+    - 2x8-bit ports
+    - 4 operatin modes
+  - Z80 SIO:
+    - serial input/output periphery
+    - 2 serial ports
+    - higly configurable
+    - software-adjustable baude rates
+  - Z80 CTC:
+    - timer/counter with 4 channels
+   - generate system ticks and baud rates
+- Keyboard:
+  - external keyboard with 66 keys (a Commodore 16 keyboard is used)
+- More to come:
+  - support for SD memory cards
+
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/keyboard.jpg" title="LM80C keyboard" alt="LM80C keyboard">
+
+---
+
 ## What you need
 
-Before to start building your own LM80C computer you need several things:
+Before to start  building your own LM80C computer you need several things:
 - of course, you need some hardware;
 - Editor & assembler
 - A CAD to open schematics files
 
 ### Software
-I suggest to use [ATOM editor](https://atom.io) to write your ASM files, with [Language-assembler-SJASMPLUS](https://atom.io/packages/language-assembler-sjasmplus) package to highlight the Z80 assembly code. ATOM is a very complete editor and you can use for every language you use (personally, I use it for Lua coding, too). Another good editor that I've started using recently is [Visual Code Editor](https://code.visualstudio.com/): it's free and based on open source and multi-platform. The extension to highlight the assembly code is [Z80 ASM](https://github.com/Imanolea/z80asm-vscode).
+Personally I'm using [Visual Studio Code](https://code.visualstudio.com/) to write the ASM files: it's free, based on an open source project, and multi-platform (do not confuse with Visual Studio IDE). The extension to highlight the assembly code is [Z80 ASM](https://github.com/Imanolea/z80asm-vscode). Visual Code is a very complete editor and you can use for every language you use. Another good editor is [ATOM editor](https://atom.io) to edit the code, with [Language-assembler-SJASMPLUS](https://atom.io/packages/language-assembler-sjasmplus) package to highlight the Z80 assembly code. I switched from ATOM to Visual Studio Code because the latter is lighter. 
 
-To compile binaries I used [ZASM Assembler](http://k1.spdns.de/Develop/Projects/zasm/Distributions/), a multi-platform Z80 assembler that has a lot of features, like macros, C files inclusion and more. It also runs on Windows, Linux and Mac so that almost every user can compile the code with it and obtain the same binary files.
+To compile binaries I use [ZASM Assembler](http://k1.spdns.de/Develop/Projects/zasm/Distributions/), a multi-platform Z80 assembler that has a lot of features, like macros, C files inclusion and more. It runs on Linux and MacOS (but you can use it on a Windows-based system just by running a Linux istance in a virtual machine) so that almost every user can compile the code with it and obtain the same binary files.
 
-To open/modify schematics you need a CAD: [EagleCAD](https://www.autodesk.com/products/eagle/overview), a professional electronics CAD that is multi-platform and free to use for non commercial purposes. I used it for the first schematics I realized but recently I started using [KiCad](http://www.kicad-pcb.org/). Moreover, I've also added PDF files if you just want to look at the schematics but don't want to install any additional software.
+To open/modify schematics you need a CAD: [KiCad](http://www.kicad-pcb.org/) is the best choice, since it's free and doesn't have the limitations of the freeware version of [EagleCAD](https://www.autodesk.com/products/eagle/overview) (it can not permit to create a board bigger than 80 square cm., and the LM80C PCB is much bigger). Moreover, I've also added PDF files if you just want to look at the schematics but don't want to install any additional software.
 
 ### Hardware
-To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPROM](https://github.com/leomil72/TommyPROM) to use 74HCT595 shift registers, but you can use any (E)EPROM programmer you have. If you want to replicate my programmer, you need an [Arduino/Genuino Uno](https://www.arduino.cc) board. Please buy a genuine board, not a counterfit one, to help the opensource project. 
+To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPROM](https://github.com/leomil72/TommyPROM) to use 74HCT595 shift registers, but you can use any (E)EPROM programmer you have. If you want to replicate my programmer, you need an [Arduino/Genuino Uno](https://www.arduino.cc) board. Please buy a *genuine board*, not a counterfit one, to help the open-source project. 
 
 ---
 
