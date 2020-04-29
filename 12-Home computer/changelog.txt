@@ -19,7 +19,7 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
   and assign new functions to the keys;
 - revised PAUSE code: it is now possible to break the delay with the "RUN STOP" key;
 - better error management when in graphic modes: now if an error occurs in G2 and G3
-  modes, the BASIC interpreter returns into G1 mode; same behaviour if an error occurs in
+  modes, the BASIC interpreter returns into G1 mode; same behavior if an error occurs in
   direct mode while in graphics modes;
 - pressing the "RUN STOP" key while in direct mode and in graphics modes leads the
   interpreter to return to G1 mode 
