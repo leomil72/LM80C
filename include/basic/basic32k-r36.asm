@@ -208,9 +208,10 @@ SERIALS_EN      equ     CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Por
 SERABITS        equ     SERIALS_EN+$01  ; (1) serial port A data bits
 PBUFF           equ     SERABITS+$01    ; (13) Number print buffer
 MULVAL          equ     PBUFF+$0D       ; (3) Multiplier
-PROGST          equ     MULVAL+$03      ; (100) Start of program text area
-NMIUSR          equ     PROGST+$02      ; NMI exit point routine
-STLOOK          equ     NMIUSR+$64      ; Start of memory test
+NMIUSR          equ     MULVAL+$03      ; (3) NMI exit point routine
+PROGST          equ     NMIUSR+$03      ; (100) Start of program text area
+STLOOK          equ     PROGST+$64      ; Start of memory test
+
 
 ; BASIC ERROR CODE VALUES
 ; These values act as an offset to point to the error message into the error table
@@ -695,7 +696,6 @@ INITAB: jp      WARMST          ; Warm start jump
         defw    STLOOK          ; Temp string space
         defw    -2              ; Current line number (cold)
         defw    PROGST+1        ; Start of program text
-        db      $ED,$45,$00     ; NMI (VDP) routine exit point (RETN+NOP)
 INITBE:
 
 ; END OF INITIALISATION TABLE ---------------------------------------------------
