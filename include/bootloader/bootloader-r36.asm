@@ -165,7 +165,7 @@ RST18:          jp      CKINCHAR
 ;------------------------------------------------------------------------------
 ; interrupt routine for NMI (currently NOT used)
                 org     $0066
-                retn                    ; return from NMI
+                jp      NMIUSR          ; jumps to NMI user routine
 
 ;------------------------------------------------------------------------------
 
@@ -416,7 +416,10 @@ CHKCRSR:        call    FLASHCURSOR     ; call the flashing cursor routine
 ; HARDWARE INITIALISATION
 ; first run - setup HW & SW
 ;
-INIT_HW:        ld      HL,TEMPSTACK    ; load temp stack pointer
+INIT_HW:
+                ld      HL, $45ED       ; "RETN" instruction
+                ld      (NMIUSR), HL    ; set NMI exit point to RETN
+                ld      HL,TEMPSTACK    ; load temp stack pointer
                 ld      SP,HL           ; set stack to temp stack pointer
                 ld      HL,SERBUF_START ; set beginning of input buffer
                 ld      (serInPtr),HL   ; for incoming chars to store into buffer
