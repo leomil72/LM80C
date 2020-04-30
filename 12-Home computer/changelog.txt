@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.8   - 20200430
+
+- Fixed a bug in FN key codes that lead to the activation of the wrong FN keys;
+- introduced support for NMI custom routines (suggested by nippur72) with NMI statement;
+- fixed a bug that lead to un-wanted behaviors when graphic chars were parsed in direct mode;
+
+---------------------------------------------------------------------------------------------
 3.7   - 20200429
 
 - Added HELP command to automatically list the line where a program error has occurred;
@@ -20,8 +27,8 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 - revised PAUSE code: it is now possible to break the delay with the "RUN STOP" key;
 - better error management when in graphic modes: now if an error occurs in G2 and G3
   modes, the BASIC interpreter returns into G1 mode; same behavior if an error occurs in
-  direct mode while in graphics modes;
-- pressing the "RUN STOP" key while in direct mode and in graphics modes leads the
+  direct mode while in graphic modes;
+- pressing the "RUN STOP" key while in direct mode and in graphic modes leads the
   interpreter to return to G1 mode 
 
 ---------------------------------------------------------------------------------------------
@@ -29,10 +36,10 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 - Minor improvement in LIST code (no more empty lines after a line that ends at the most right
   side of the video; listing a program from serial when the computer is in graphic 2 mode does
-  not lead to a one row list anymore)
+  not lead to a one-row-list anymore)
 - fixed a bug in sound management (automatic cutting down of a sound wrongly altered the
   sound mixer);
-- added management of noise from PSG;
+- added management of noise by PSG;
 - fixed some timing issues in VDP access that lead to graphic glitches in graphic mode 2;
 - code improvements
 
