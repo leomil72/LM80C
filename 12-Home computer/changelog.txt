@@ -8,6 +8,16 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.9   - 20200502
+
+- Added POINT function to get the status of a pixel in G2 mode (set or reset)
+- Relocated CTC interrupt vectors to a jump table into RAM so that now the user can configure
+  the CTC channel interrupts to jump to custom routines (included the routine attached to
+  channel 3 that supervises several critical system routines);
+- now SERIAL has default arguments for data, parity, and stop bits if not passed;
+- changed FN key 5 function;
+
+---------------------------------------------------------------------------------------------
 3.8   - 20200430
 
 - Fixed a bug in FN key codes that lead to the activation of the wrong FN keys;
