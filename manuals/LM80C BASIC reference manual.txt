@@ -1258,12 +1258,12 @@ we force the audio to quit immediately. By setting a tone with duration
 equals to 0, the tone will last forever, unless you quit the volume off
 or you set another tone on the same channel.
 
-The inverse formula to calculate the value "dur" to pass to SOUND to
+The inverse formula to calculate the value "tone" to pass to SOUND to
 generate a tone of frequency "freq" is:
-dur = 4,096 - (1,843,299 / 16 / (freq))
-I.e.: if a tone with a frequency of 2,000 Hz (2 KHz) is required, "dur"
+tone = 4,096 - (1,843,299 / 16 / (freq))
+I.e.: if a tone with a frequency of 2,000 Hz (2 KHz) is required, "tone"
 equals to 
-dur = 4,096 - (1,843,200 / 16 / 2,000)) = 4,096 - 57.6 => 4,038(.4)
+tone = 4,096 - (1,843,200 / 16 / 2,000)) = 4,096 - 57.6 => 4,038(.4)
 In fact, if we use the previous formula, we get:
 Freq = 1,843,200 / 16 / (4,096 - 4,038) = 115,200 / 58 = 1,986 Hz
 (due to integer truncatings, the frequency is a little bit smaller than
