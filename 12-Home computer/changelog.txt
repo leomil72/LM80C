@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.10  - 20200508
+
+- Added GPRINT command to print text and ASCII chars in screen 2 as they would in text modes;
+- fixed a bug that lead to unpredictable behaviors when a line longer than 88 chars was
+  received from the serial port: now the interpeter simply drops exceeding chars.
+
+---------------------------------------------------------------------------------------------
 3.9   - 20200502
 
 - Added POINT function to get the status of a pixel in G2 mode (set or reset)
