@@ -8,6 +8,15 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.11  - 20200512
+
+- Changed the way TMR() reads the real time counter so that now continue readings won't
+  slow down the clock itself anymore;
+- Changed the frequency of the keyboard reading. This task is now done every 1/50th of a second
+  instead of each time the CTC channel 3 interrupt is raised: this lightens the "weight" of
+  the interrupt service routine.
+
+---------------------------------------------------------------------------------------------
 3.10  - 20200508
 
 - Added GPRINT command to print text and ASCII chars in screen 2 as they would in text modes;

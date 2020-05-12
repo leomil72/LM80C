@@ -6,9 +6,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.6                             *
-*                             (2020/05/01)                             *
-*                This release applies to the LM80C R3.9                *
+*                             Version  1.7                             *
+*                             (2020/05/12)                             *
+*             This release applies to the LM80C FW >=R3.9              *
 *                                                                      *
 ************************************************************************
 
@@ -36,7 +36,7 @@ The LM80C might have been a good computer at that time:
 - Serial I/O: 1xZ80 SIO
 - Parallel I/O: 1xZ80 PIO
 - Timer: 1xZ80 CTC
-- Serial line: 57,600 bps
+- Serial line: up to 57,600 bps
 ------------------------------------------------------------------------
 
                             2. MEMORY MAP
