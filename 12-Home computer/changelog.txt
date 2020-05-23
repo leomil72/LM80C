@@ -8,6 +8,14 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.12  - 20200523
+
+- Fixed a severe bug originated by a wrong design error of the final PCB: ports A & B of the
+  PSG were inverted into the schematic, same for the definition of the ports into the code.
+- Fixed a bug into the SOUND statement that accepted the third argument when generating a
+  noise, even the syntax shouldn't accept it.
+
+---------------------------------------------------------------------------------------------
 3.11  - 20200512
 
 - Changed the way TMR() reads the real time counter so that now continue readings won't
