@@ -8,6 +8,18 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13  - 20200530
+
+- New style for "£" char;
+- fixed a bug into the automatic shutting down manager of SOUND that didn't de-activate the
+  audio channel into the PSG mixer after a tone had finished its period of reproduction;
+- new INSTR statement, returning the position of the first occurrence of one string within
+  another;
+- changed the behavior of INKEY statement: now the minimum delay interval is set to 10
+  hundredths of a second. If a shorter interval is being passed, it will be automatically
+  set to 10 (this is because values under 10 could lead to faulty readings).
+
+---------------------------------------------------------------------------------------------
 3.12  - 20200523
 
 - Fixed a severe bug originated by a wrong design error of the final PCB: ports A & B of the
