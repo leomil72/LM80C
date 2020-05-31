@@ -1,0 +1,1 @@
+0 PRINT CHR$(159.5+RND(1));:GOTO
