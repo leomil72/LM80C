@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.1  - 20200607
+
+- Fixed a race condition that could lead the interrupt service routine access the PSG reg #7
+  (mixer) together with some BASIC statements (i.e., SOUND), resulting in wrong values being
+  stored into the mixer.
+
+---------------------------------------------------------------------------------------------
 3.13  - 20200530
 
 - New style for "£" char;
