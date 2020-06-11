@@ -128,15 +128,15 @@ CNTCHKSND:      inc     IX              ; set for...
 ; read a specific row of the keyboard matrix, set by A
 ; return read into A
 READKBLN:       push    BC
-                ld      B,$0F           ; reg #14
+                ld      B,$0F           ; register #15 (port B)
                 ld      C,PSG_REG       ; PSG register port
-                out     (C),B           ; select reg #14
+                out     (C),B           ; select reg #15 (port B)
                 ld      C,PSG_DAT       ; PSG data port
                 out     (C),A           ; activate the row
-                ld      B,$0E           ; register #15 (port B)
+                ld      B,$0E           ; register #14 (port A)
                 ld      C,PSG_REG       ; PSG register port
-                out     (C),B           ; select reg. 15 (port B)
-                in      A,(C)           ; read register #15
+                out     (C),B           ; select reg. 14 (port A)
+                in      A,(C)           ; read register #14
                 pop     BC
                 ret
 
