@@ -307,12 +307,12 @@ LDFNKEYCHR:     ld      A,(HL)          ; load char
 CNTFNK:         inc     HL              ; next char
                 djnz    LDFNKEYCHR      ; repeat for max. 16 chars
                 jp      LVKBRDCHK2      ; leave
-PUTCHRBUF1:     xor     A
-                ld      (KBDNPT),A      ; if send to input buffer, set RETURN as from BASIC
+PUTCHRBUF1:     xor     A               ; if send to input buffer,... 
+                ld      (KBDNPT),A      ; ...set input as from BASIC
                 ld      A,D             ; retrieve char
-                push    HL
+                push    HL              ; store HL
                 call    CHARINTOBFR     ; cursor off, so send char to buffer...
-                pop     HL
+                pop     HL              ; retrieve HL
                 jp      CNTFNK          ; jump over
 PRNTFNK:        ld      A,D             ; recover char
                 ld      (CHR4VID),A     ; store char for printing
