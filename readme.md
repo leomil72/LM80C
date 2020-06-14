@@ -1,4 +1,4 @@
-<a href="https://www.leonardomiliani.com/en/lm80c/"><img src="https://raw.githubusercontent.com/leomil72/LM80C/master/12-Home%20computer/LM80C.jpg" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
+<a href="https://www.leonardomiliani.com/en/lm80c/"><img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_inside.jpg" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
 
 
 # LM80C - A Z80-based homebrew computer
@@ -62,7 +62,7 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
 - More to come:
   - support for SD memory cards
 
-<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/keyboard.jpg" title="LM80C keyboard" alt="LM80C keyboard">
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_key_n_inside.jpg" title="LM80C motherboard inside its case" alt="LM80C motherboard inside its case">
 
 ### BASIC
 
@@ -87,6 +87,11 @@ To open/modify schematics you need a CAD: [KiCad](http://www.kicad-pcb.org/) is 
 
 ### Hardware
 To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPROM](https://github.com/leomil72/TommyPROM) to use 74HCT595 shift registers, but you can use any (E)EPROM programmer you have. If you want to replicate my programmer, you need an [Arduino/Genuino Uno](https://www.arduino.cc) board. Please buy a *genuine board*, not a counterfit one, to help the open-source project. 
+
+I reccomend you to assemble a prototype on breadboards to be sure that everything is working right. The pictures below represent the LM80C during its development:
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/12-Home%20computer/LM80C.jpg" title="LM80C prototype, built upon breadboards" alt="LM80C prototype, built upon breadboards">
+
+<img src="https://raw.githubusercontent.com/leomil72/LM80C/master/keyboard.jpg" title="LM80C keyboard over the breaboards" alt="LM80C keyboard over the breaboards">
 
 ---
 
