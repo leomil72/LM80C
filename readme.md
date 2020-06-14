@@ -18,6 +18,7 @@
 - [Files](#files)
 - [Compilation](#compilation)
 - [Clone](#clone)
+- [Emulation](#emulation)
 - [FAQ](#faq)
 - [Support](#support)
 - [Donations](#donations)
@@ -115,6 +116,11 @@ where "XX" is the release you want to compile. After the compilation you'll find
 
 ## Clone
 If you need, you can clone this repo to your local machine using `https://github.com/leomil72/LM80C`
+
+---
+
+## Emulation
+There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), written in Javascript by Antonino Porcino, that can be used to see how the real machine acts and works: you can test directly in your browser by opening [this link](https://nippur72.github.io/lm80c-emu/).
 
 ---
 
