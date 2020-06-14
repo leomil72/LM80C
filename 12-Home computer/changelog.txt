@@ -9,6 +9,7 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
 3.13.3  - 20200613
+
 - Fixed a bug with function keys that lead to get a syntax error or a non-function behaviour
   when pressed them while system was in direct mode and print-on-screen not active, i.e.
   in a graphics mode 2 & 3.
