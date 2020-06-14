@@ -6,9 +6,9 @@
 *                                                                      *
 ************************************************************************
 *                                                                      *
-*                             Version  1.7                             *
-*                             (2020/05/12)                             *
-*             This release applies to the LM80C FW >=R3.9              *
+*                             Version  1.8                             *
+*                             (2020/06/14)                             *
+*            This release applies to the LM80C FW >=R3.13.3            *
 *                                                                      *
 ************************************************************************
 
@@ -122,8 +122,7 @@ $0040   CTC CH0: jumps to CTC0IV (see below) - unused
 $0042   CTC CH1: jumps to CTC1IV (see below) - unused
 $0044   CTC CH2: jumps to CTC2IV (see below) - unused
 $0046   CTC CH3: jumps to CTC3IV (see below) - used by system
-$0066   NMI IRQ: actually, the NMI interrupt is not used, so nothing
-        is done other than RETN to caller
+$0066   NMI IRQ: jumps to NMIUSR (see below) - unused
 ------------------------------------------------------------------------
 
                           6. RAM REGISTERS
