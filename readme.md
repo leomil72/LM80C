@@ -59,7 +59,7 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
     - timer/counter with 4 channels
    - generate system ticks and baud rates
 - Keyboard:
-  - external keyboard with 66 keys (a Commodore 16 keyboard is used)
+  - external keyboard with 64 keys (I used a Commodore 16 keyboard, that has 66 keys but only 64 unique keys due to double connections for SHIFT and SHIFT/LOCK)
 - More to come:
   - support for SD memory cards
 
