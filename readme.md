@@ -76,12 +76,12 @@ The **LM80C BASIC** is a versatile and user-friendly programming language, the d
 Before to start  building your own LM80C computer you need several things:
 - of course, you need some hardware;
 - Editor & assembler
-- A CAD to open schematics files
+- A CAD to open schematics files and to generate Gerber files to make the PCB
 
 ### Software
 Personally I'm using [Visual Studio Code](https://code.visualstudio.com/) to write the ASM files: it's free, based on an open source project, and multi-platform (do not confuse with Visual Studio IDE). The extension to highlight the assembly code is [Z80 ASM](https://github.com/Imanolea/z80asm-vscode). Visual Code is a very complete editor and you can use for every language you use. Another good editor is [ATOM editor](https://atom.io) to edit the code, with [Language-assembler-SJASMPLUS](https://atom.io/packages/language-assembler-sjasmplus) package to highlight the Z80 assembly code. I switched from ATOM to Visual Studio Code because the latter is lighter. 
 
-To compile binaries I use [ZASM Assembler](http://k1.spdns.de/Develop/Projects/zasm/Distributions/), a multi-platform Z80 assembler that has a lot of features, like macros, C files inclusion and more. It runs on Linux and MacOS (but you can use it on a Windows-based system just by running a Linux instance in a virtual machine) so that almost everyone can compile the code with it and obtain the same binary files. However, the latest compiled binary file, ready to be burned into an EEPROM, is always available. 
+To compile binaries I use [ZASM Assembler](http://k1.spdns.de/Develop/Projects/zasm/Distributions/), a multi-platform Z80 assembler that has a lot of features, like macros, C files inclusion and more. It runs on Linux and MacOS (but you can use it on a Windows-based system just by running a Linux instance inside a virtual machine) so that almost everyone can compile the code with it and obtain the same binary files. However, the latest compiled binary file, ready to be burned into an EEPROM, is always available. 
 
 To open/modify schematics you need a CAD: [KiCad](http://www.kicad-pcb.org/) is the best choice, since it's free and doesn't have the limitations of the freeware version of [EagleCAD](https://www.autodesk.com/products/eagle/overview) (it can not permit to create a board bigger than 80 square cm., and the LM80C PCB is much bigger). Moreover, I've also added PDF files if you just want to look at the schematics but don't want to install any additional software.
 
@@ -97,12 +97,12 @@ I reccomend you to assemble a prototype on breadboards to be sure that everythin
 
 ## Files
 The files in this repo are organized in folders:
-- Folders numbered from "01" to "09": the contain the first tests I made and the computer without the video section, that you can replicate to work solely through the serial line.
-- Folders numbered "10" and "11" contain the releases that had preliminary support for video output.
+- Folders whose names start with "01-" through "09-": they contain the first tests I made and the computer without the video section, that you can replicate to work solely through the serial line.
+- Folders whose names start with "10-" and "11-" contain the releases that had preliminary support for video output.
 - Folder named "12-Home computer" contains the actual schematic of the LM80C computer and the main file of the firmware. Every release adds some functionality to the original Nascom BASIC. The greater the release number is the newer the firmware is.
-- Folder named "Include" contains the sub-folders with the files needed to compile the firmware. They are: "basic", "bootloader","psg", and "vdp". Each sub-folder contains the releases of the corresponding module of the firmware.
+- Folder named "include" contains the sub-folders with the files needed to compile the firmware. They are: "basic", "bootloader","psg", and "vdp". Each sub-folder contains the releases of the corresponding module of the firmware.
 - Folder named "Roms" contains pre-compiled binary files ready to be burned into the EEPROM chip.
-- Folder named "Manuals" contains useful manuals for the CPU, the peripheral chips, the video and audio chips, and a couple of text files that illustrate the main features of the LM80C and the reference manual of its BASIC language.
+- Folder named "Manuals" contains useful manuals for the CPU, the peripheral chips, the video and audio chips, and a couple of  files that illustrate the main features of the LM80C and the reference manual of its BASIC language.
 
 ---
 
@@ -110,7 +110,6 @@ The files in this repo are organized in folders:
 To compile the firmware, first download or clone the repo on your computer, than go into the "12-Home computer" folder and open a terminal in it, then give this command:
 `zasm -uwy --z80 ./LM80C-firmware-rXX.asm`
 where "XX" is the release you want to compile. After the compilation you'll find a file with extension `.rom` that you can burn into the EEPROM.
-Obviously, you should have downloaded and installed the compiler previously. The compiler I used is ZASM, that you can get from [this site](http://k1.spdns.de/Develop/Projects/zasm/Distributions/). It's available both for Linux and MacOS 8and other BSD related OSs). At the moment there isn't a Windows version, so to compile the source you need a Linux box, a Mac or a Windows computer with a virtual machine running Linux on it.
 
 ---
 
