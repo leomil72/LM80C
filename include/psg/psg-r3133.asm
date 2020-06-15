@@ -171,17 +171,17 @@ CHECKCTRL:      ld      A,%11111110     ; select CTRL row
                 ld      (HL),%00000010  ; set CTRL flag, reset SHIFT & ALT flags (currently multiply control keys are NOT supported)
 CHECKKBD:       ld      B,$08           ; 8 lines
                 ld      A,%01111111     ; start from the last line of the matrix
-RPTKBDRD:       ld      D,$0F           ; register #14 (port A)
+RPTKBDRD:       ld      D,$0F           ; register #15 (port B)
                 ld      C,PSG_REG       ; PSG register port
-                out     (C),D           ; select reg. #14
+                out     (C),D           ; select reg. #15
                 ld      C,PSG_DAT       ; PSG data port
                 out     (C),A           ; activate 1 line (active line is grounded, i.e. with a LOW signal)
                 ld      E,A             ; save current line into E
-                ld      D,$0E           ; register #15 (port B)
+                ld      D,$0E           ; register #14 (port A)
                 ld      C,PSG_REG       ; PSG register port
-                out     (C),D           ; select reg. 15 (port B)
+                out     (C),D           ; select reg. 14 (port A)
                 nop
-                in      A,(C)           ; read register #15
+                in      A,(C)           ; read register #14
                 cp      $FF             ; is there any line set to 0?
                 jr      Z,NOKEYPRSD     ; no, go to the next row
                 ; check control keys
