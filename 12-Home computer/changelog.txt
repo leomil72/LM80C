@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.4  - 20200704
+
+- Fixed a bug into the drawing line algorithm that crashed the system when there was a gap
+  of 1 pixel between the starting and ending points;
+- redefined chars 105,106, and 252 in 6x8
+
+---------------------------------------------------------------------------------------------
 3.13.3  - 20200613
 
 - Fixed a bug with function keys that lead to get a syntax error or a non-function behaviour
