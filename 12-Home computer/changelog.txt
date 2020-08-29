@@ -8,6 +8,12 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.5  - 20200829
+
+- Minor code revisions into BASIC interpreter
+- Fixed a buf into the comma-separated printing code that lead to wrong alignment of the text
+
+---------------------------------------------------------------------------------------------
 3.13.4  - 20200704
 
 - Fixed a bug into the drawing line algorithm that crashed the system when there was a gap
