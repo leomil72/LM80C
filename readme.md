@@ -136,7 +136,7 @@ There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), writ
 - **How do I burn the binary file into the EEPROM?**
   - You need an (E)EPROM programmer, a device that can be connected to your computer and that can write the data into the memory chip. You can buy a programmer from internet or build your own device like me.
 - **Where can I find the chips you're using in the LM80C computer?**
-  - Unfortunately, Zilog seems that it has stopped manufacturing the Z80 family chips, so currently you can find some remains of the warehouse from big online resellers or new/used parts over online auctions sites. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them. The VDp and PSG chips are only available as used parts from several chinese reseller.
+  - Zilog still manufactures the Z80 family chips, so you can get them from almost any good reseller, or, alternatively, new/used parts can be catched from online auctions sites. The 74HCTxx integrated are very common, so you shouldn't have any problem to grab them. The VDP and PSG chips are only available as used parts from several eastern resellers.
 - **The software seems not to be working/the hardware I built following your schematics doesn't work: where can I find help? Can I write to you?**
   - The project is released "as is", without any warranty/responsability: despite I've tested it and I'm currently using it, I can not guarantee that it is completely error-free, so please don't write to complain about something not working. Open an "issue" or a "pull request". Thank you.
 
