@@ -12,6 +12,7 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 - Changed the cursor management routine: now the cursor is visiblw when being moved
 - Now when the computer is software reset, the NMI is disabled before restart
+- Tab printing with comma now reduced to 10 spaces
 
 ---------------------------------------------------------------------------------------------
 
