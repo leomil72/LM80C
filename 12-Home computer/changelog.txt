@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.6  - 20200910
+
+- Changed the cursor management routine: now the cursor is visiblw when being moved
+- Now when the computer is software reset, the NMI is disabled before restart
+
+---------------------------------------------------------------------------------------------
+
 3.13.5  - 20200829
 
 - Minor code revisions into BASIC interpreter
