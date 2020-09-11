@@ -139,6 +139,8 @@ EXG2MD:         ; load pattern table
                 ld      (SCR_SIZE_W),A  ; screen width = 32 cols
                 ld      A,$18
                 ld      (SCR_SIZE_H),A  ; screen height = 24 rows
+                ld      A,$14
+                ld      (COMMAN),A      ; width for commas (3 columns)
                 ld      DE,$3800
                 ld      (SCR_NAM_TB),DE ; set name table address
                  ; load color table
