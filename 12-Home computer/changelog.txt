@@ -8,6 +8,14 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.7  - 20200911
+
+- Fixed a bug into the new cursor management routine: now the cursor won't appear during
+  PRINTing anymore
+- Fixed a bug into the comma tabulation: now the max. allowed number of columns is 
+  calculated dinamically, according to the screen width
+
+---------------------------------------------------------------------------------------------
 3.13.6  - 20200910
 
 - Changed the cursor management routine: now the cursor is visible when being moved
