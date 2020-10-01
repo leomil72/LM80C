@@ -5431,9 +5431,7 @@ CNTPLOT:push    HL              ; store HL
         ld      E,A             ; store value of cell
         ld      A,D             ; retrieve pixel
         cpl                     ; revert bits
-        ld      D,A             ; move it again into D
-        ld      A,E             ; retrieve value of cell
-        and     D               ; set video pixel to off
+        and     E               ; set video pixel to off
         di                      ; disable INTs
         call    WRITE_VIDEO_LOC ; write new value into VRAM cell
         ei                      ; re-enable INTs
