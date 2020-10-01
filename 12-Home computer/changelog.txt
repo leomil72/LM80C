@@ -8,6 +8,15 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.13.8  - 20201001
+
+- Fixed a little bug in COLOR statement: it didn't store the foreground color set by the
+  user
+- Now PLOT, CIRCLE, and DRAW statements accept color "0" to draw pixels with background
+  color, i.e. reset pixels that are on
+- Code cleaning
+
+---------------------------------------------------------------------------------------------
 3.13.7  - 20200911
 
 - Fixed a bug into the new cursor management routine: now the cursor won't appear during
