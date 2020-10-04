@@ -17,7 +17,6 @@
 - [What you need](#what%20you%20need)
 - [Files](#files)
 - [Compilation](#compilation)
-- [Clone](#clone)
 - [Emulation](#emulation)
 - [FAQ](#faq)
 - [Support](#support)
