@@ -36,7 +36,7 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
   - ROM: 32KB (with built-in firmware & BASIC)
   - RAM: 32KB SRAM
 - Video:
-  - TMS9918A with and 16KB of dedicated VRAM
+  - TMS9918A with 16KB of dedicated VRAM
   - composite output
   - 256x192 pixels, 15 colors, 32 sprites
 - Audio:
