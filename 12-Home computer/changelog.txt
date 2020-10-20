@@ -8,6 +8,12 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.14    - 20201020
+
+- New graphic command PAINT to fill connected areas of the screen with a specific color
+- Now POINT returns the color of the pixel being tested
+
+---------------------------------------------------------------------------------------------
 3.13.8  - 20201001
 
 - Fixed a little bug in COLOR statement: it didn't store the foreground color set by the
