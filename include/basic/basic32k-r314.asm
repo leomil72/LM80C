@@ -5412,9 +5412,6 @@ PAINT:  call    CHKG2M          ; check if in graphic mode 2
         ld      C,A             ; ...into C
         push    BC              ; store starting X,Y into stack
         ; main loop
-;130 IF PT<0 THEN END
-;140 X=ST(PT,0):Y=ST(PT,1):PT=PT-1
-;150 X1=X
 NXTLOOP:ld      HL,(PNT)        ; retrieve PNT
         ld      A,H             ; check if PNT=0
         or      L
@@ -5422,7 +5419,6 @@ NXTLOOP:ld      HL,(PNT)        ; retrieve PNT
         dec     HL              ; no, so decrement PNT...
         ld      (PNT),HL        ; ...and store it
         pop     BC              ; retrieve pixel coordinates X,Y into BC
-;170 IF X1>=0 THEN IF POINT(X1,Y)=0 THEN X1=X1-1:GOTO 170
 PAINT0: call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,PAINT11      ; pixel is set, so jump over
         ld      A,B             ; pixel is reset, check if X1=0
@@ -5430,23 +5426,17 @@ PAINT0: call    CHECKPA         ; check if pixel is set/reset
         jr      Z,PAINT1        ; yes, jump over
         dec     B               ; no, decrement X1...
         jr      PAINT0          ; ...and repeat
-;180 X1=X1+1 ??
-;190 SA=0:SB=0
 PAINT11:inc     B               ; if found a pixel on, the re-increment X1
 PAINT1: xor     A               ; reset A
         ld      (SPA),A         ; set SA=0
         ld      (SPB),A         ; set SB=0
-;200 IF POINT(X1,Y)=0 THEN 210
-;205 GOTO 130
 MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,NXTLOOP      ; it's set, so goto next loop
-;210 PLOT X1,Y
         ld      A,B             ; copy X1
         ld      (TMPBFR1),A     ; into buffer
         ld      A,C             ; copy Y
         ld      (TMPBFR2),A     ; into buffer
         call    CNTPLOT         ; plot pixel X1,Y
-;220 IF SA=0 AND Y>0 THEN IF POINT(X1,Y-1)=0 THEN A=X1:B=Y-1:GOSUB 300:SA=1:GOTO 240
         ld      A,(SPA)
         and     A               ; SA=0?
         jr      NZ,PAINT2       ; no, jump over
@@ -5465,7 +5455,6 @@ MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         ld      A,$01           ; set SA=1...
         ld      (SPA),A         ; ...into memory
         jp      PAINT3          ; jump over
-;230 IF SA=1 AND Y>0 THEN IF POINT(X1,Y-1)<>0 THEN SA=0
 PAINT2: ld      A,(SPA)
         rra                     ; check if SA=1
         jr      NC,PAINT3       ; no, jump over
@@ -5477,7 +5466,6 @@ PAINT2: ld      A,(SPA)
         jp      Z,PAINT3        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
         ld      (SPA),A         ; ...set SA=0
-;240 IF SB=0 AND Y<191 THEN IF POINT(X1,Y+1)=0 THEN A=X1:B=Y+1:GOSUB 300:SB=1:GOTO 260
 PAINT3: ld      A,(SPB)         ; check if
         and     A               ; B=0
         jr      NZ,PAINT4       ; no, jump over
@@ -5496,7 +5484,6 @@ PAINT3: ld      A,(SPB)         ; check if
         ld      A,$01           ; SB=1
         ld      (SPB),A         ; set SB
         jp      PAINT5          ; jump over
-;250 IF SB=1 AND Y<191 THEN IF POINT(X1,Y+1)<>0 THEN SB=0
 PAINT4: ld      A,(SPB)         ; load SB
         rra                     ; check if SB=1
         jp      NC,PAINT5       ; no, jump over
@@ -5508,8 +5495,6 @@ PAINT4: ld      A,(SPB)         ; load SB
         jp      Z,PAINT5        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
         ld      (SPB),A         ; ...set SB=0
-;260 X1=X1+1
-;270 GOTO 200
 PAINT5: inc     B               ; X1=X1+1
         jp      Z,NXTLOOP       ; if X1>255 (X1=0) then goto next loop
         jp      MNPAINT         ; otherwise, repeat for next X
