@@ -25,8 +25,10 @@
 ; values can be both signed or unsigned words
 ; inputs: HL, DE
 ; destroys: A,F,HL
-; returns: if both registers are 2's complement, use Z and S flags;
-; otherwise:
+;
+; returns: Z=1 if HL = DE
+; for UNSIGNED: C=1 if HL<DE  //  C=0 if HL>DE
+; for SIGNED:   S=1 (M) if HL<DE  //  S=0 (P) if HL>DE
 ; if HL=DE: Z,P,NC  - Z=1, S=0; C=0
 ; if HL>DE: NZ,P,NC - Z=0, S=0; C=0
 ; if HL<DE: NZ,M,C  - Z=0, S=1; C=1
@@ -134,4 +136,26 @@ DIV_16_8LP: add     HL,HL
             sub     C
             inc     L
             djnz    DIV_16_8LP
+            ret
+        
+; ----------------------------------------------------------------------
+; divide a 16-bit number by a 16-bit number
+; (16/16 division)
+;
+; inputs: AC (Dividend), DE (divisor)
+; destroys: HL,A,C
+; OPERATION: AC/DE
+; returns: AC (quotient), HL (remainder)
+; source: WKT
+DIV_16_16:  ld      HL, 0
+            ld      B, 16
+DV16_16_LP: sla     C
+            set     0,C         ; this simulates the SLL undocumented instruction
+            rla
+            adc     HL,HL
+            sbc     HL,DE
+            jr      NC, $+4
+            add     HL,DE
+            dec     C
+            djnz    DV16_16_LP
             ret
