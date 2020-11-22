@@ -99,12 +99,13 @@ I strongly reccomend you to assemble a prototype on breadboards to be sure that 
 
 ## Files
 The files in this repo are organized in folders:
-- Folders whose names start with "01-" through "09-": they contain the first tests I made and the computer without the video section, that you can replicate to work solely through the serial line.
-- Folders whose names start with "10-" and "11-" contain the releases that had preliminary support for video output.
-- Folder named "12-Home computer" contains the actual schematic of the LM80C computer and the main file of the firmware. Every release adds some functionality to the original Nascom BASIC. The greater the release number is the newer the firmware is.
-- Folder named "include" contains the sub-folders with the files needed to compile the firmware. They are: "basic", "bootloader","psg", and "vdp". Each sub-folder contains the releases of the corresponding module of the firmware.
-- Folder named "Roms" contains pre-compiled binary files ready to be burned into the EEPROM chip.
-- Folder named "Manuals" contains useful manuals for the CPU, the peripheral chips, the video and audio chips, and a couple of  files that illustrate the main features of the LM80C and the reference manual of its BASIC language.
+- "12-Home Computer": this folder contains the main ASM file to compile the current firmware of the LM80C Color Computer.
+- "BASIC examples": this folder contains BASIC programs that can be loaded and executed with the integrated LM80C BASIC interpreter. If the name contains a release version (i.e. R20), it means it's the minimum firmware release required to run such program, because it makes use of some statements not present in previous releases.
+-  "Legacy": old firmware are stored into this folder. Folders whose names start with "01-" through "09-" contain the first tests I made with the computer without the video section, that you can replicate to work solely through the serial line. Folders whose names start with "10-" and "11-" contain the releases that had preliminary support for video output. "Legacy cores" contains the old firmwares of the latest hardware version of the computer. Every release adds some functionality to the original BASIC. The greater the release number is, the newer the firmware is.
+- "Rom": this folder contains pre-compiled binary files, ready to be burned into the EEPROM chip.
+- "Schematics": this folder contains the KiCad files of the current hardware revision of the computer, plus some PDF files including the complete schematics of the computer.
+- "include": this folder contains the sub-folders with the files needed to compile the firmware. They are: "basic", "bootloader","psg", and "vdp". Each sub-folder contains the file of the corresponding module.
+- "manuals": this folder contains useful manuals for the CPU, the peripheral chips, the video and audio chips, and a couple of  files that illustrate the main features of the LM80C and the reference manual of the LM80C BASIC language.
 
 ---
 
