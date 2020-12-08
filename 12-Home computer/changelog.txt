@@ -8,6 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 ---------------------------------------------------------------------------------------------
+3.15    - 20201121
+
+- New title text;
+- Added ELSE statement to expand IF..THEN evaluation instruction, to execute one or more
+  statements if the condition is false;
+
+---------------------------------------------------------------------------------------------
 3.14    - 20201020
 
 - New graphic command PAINT to fill connected areas of the screen with a specific color
