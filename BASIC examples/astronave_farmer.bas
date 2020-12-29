@@ -1,6 +1,7 @@
 2 REM "ASTRONAVE FARMER (C) 1983 MARIO PETTENGHI & MCOMPUTER"
 4 REM "CONVERTITO PER LM80C BASIC DA LEONARDO MILIANI"
-6 CO=8:VE=11:SOG=20:OGG=10:DIM CO$(8),VE$(11),SOG$(20),OGG(10),OGG$(10),FL(9)
+6 CO=8:VE=11:SOG=20:OGG=10
+8 DIM CO$(8),VE$(11),SOG$(20),OGG(10),OGG$(10),FL(9)
 10 DX$=CHR$(13):SCREEN 0:COLOR11,1:VOLUME0,15:GOTO 500
 20 INPUT "Cosa devo fare";FR$:X=0:Y=0
 22 TT$="":FORJ=1TOLEN(FR$):TC$=MID$(FR$,J,1)
@@ -52,8 +53,8 @@
 560 FOR J=1 TO OGG:READ OGG(J),OGG$(J):NEXT
 590 LO=1:CLS
 600 PRINT "--------------------------------------":GOSUB 82
-610 PRINT :GOSUB 200
-620 PRINT :GOSUB 20
+610 PRINT:GOSUB 200
+620 PRINT:GOSUB 20
 630 GOTO 600
 1000 IF Y=0 THEN PRINT "Non ci trovi nulla di":PRINT"interessante!":RETURN
 1010 IF LO=2 AND Y=10 THEN 1014
@@ -62,7 +63,7 @@
 1016 PRINT "riconoscimento.":RETURN
 1020 IF LO=4 AND Y=11 THEN 1024
 1022 GOTO 1030
-1024 PRINT PRINT "E' di metallo, ma lo sportello non":PRINT"ha serrature.":RETURN
+1024 PRINT:PRINT "E' di metallo, ma lo sportello non":PRINT"ha serrature.":RETURN
 1030 IF LO=6 AND Y=13 AND OGG(3)=69 THEN 1034
 1032 GOTO 1040
 1034 PRINT "Era il comandante C.P.Ustinov.":PRINT"Grand'uomo. Non ha soldi ";
@@ -209,12 +210,12 @@
 2110 RETURN: REM PARDON!
 2120 PRINT "E' la sala controllo traffico. Di fronte";
 2121 PRINT "a me c'e' un pulsante con la scritta"
-2122 PRINT"'INTERRUTTORE ASCENSORE', mi sembra trop-";
-2123 PRINT "po bello..."
+2122 PRINT "'INTERRUTTORE ASCENSORE'... mi sembra"
+2123 PRINT "troppo bello..."
 2125 O=11:RETURN
 2130 PRINT "Vedo l'ascensore, ora inutilizzabile."
-2131 PRIN T"Sono in un lungo corridoio. A ovest c'e'"
-2132 PRINT"la sala di sbarco, a est la sala del"
+2131 PRINT "Sono in un lungo corridoio. A ovest c'e'";
+2132 PRINT "la sala di sbarco, a est la sala del"
 2134 PRINT "computer."
 2135 E=15:O=17:RETURN
 2140 PRINT "Sono nella sala del computer. Vedo i"
@@ -278,7 +279,7 @@
 2262 PRINT "sono strane attrezzature in ogni punto."
 2265 N=3:S=24:O=25:E=25:RETURN
 6990 REM BEEP
-7000 SOUND1,3500,5:PAUSE5:RETURN
+7000 SOUND1,3500,5:RETURN
 8000 PRINT :IF LO=1 THEN PRINT "Sei solo all'inizio.":RETURN
 8010 IF LO=2 THEN PRINT "Stai in guardia e cerca con pazienza.":RETURN
 8020 IF LO<27 AND LO>23 THEN PRINT "Studia i punti....":RETURN
