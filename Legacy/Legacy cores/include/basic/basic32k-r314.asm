@@ -608,32 +608,32 @@ SCMSG:  defb    "Serial Configuration",0
 SAMSG:  defb    "Serial Port Already Open",0
 HPMSG:  defb    "HELP Call",0
 
-ERRTBL  equ $
-NFPTR   defw    NFMSG
-SNPTR   defw    SNMSG
-RGPTR   defw    RGMSG
-ODPTR   defw    ODMSG
-FCPTR   defw    FCMSG
-OVPTR   defw    OVMSG
-OMPTR   defw    OMMSG
-ULPTR   defw    ULMSG
-BSPTR   defw    BSMSG
-DDPTR   defw    DDMSG
-DZPTR   defw    DZMSG
-IDPTR   defw    IDMSG
-TMPTR   defw    TMMSG
-OSPTR   defw    OSMSG
-LSPTR   defw    LSMSG
-STPTR   defw    STMSG
-CNPTR   defw    CNMSG
-UFPTR   defw    UFMSG
-MOPTR   defw    MOMSG
-HXPTR   defw    HXMSG
-BNPTR   defw    BNMSG
-GMPRT   defw    GMMSG
-SCPTR   defw    SCMSG
-SAPTR   defw    SAMSG
-HPPTR   defw    HPMSG
+ERRTBL: equ $
+NFPTR:  defw    NFMSG
+SNPTR:  defw    SNMSG
+RGPTR:  defw    RGMSG
+ODPTR:  defw    ODMSG
+FCPTR:  defw    FCMSG
+OVPTR:  defw    OVMSG
+OMPTR:  defw    OMMSG
+ULPTR:  defw    ULMSG
+BSPTR:  defw    BSMSG
+DDPTR:  defw    DDMSG
+DZPTR:  defw    DZMSG
+IDPTR:  defw    IDMSG
+TMPTR:  defw    TMMSG
+OSPTR:  defw    OSMSG
+LSPTR:  defw    LSMSG
+STPTR:  defw    STMSG
+CNPTR:  defw    CNMSG
+UFPTR:  defw    UFMSG
+MOPTR:  defw    MOMSG
+HXPTR:  defw    HXMSG
+BNPTR:  defw    BNMSG
+GMPRT:  defw    GMMSG
+SCPTR:  defw    SCMSG
+SAPTR:  defw    SAMSG
+HPPTR:  defw    HPMSG
 
 ; INITIALISATION TABLE -------------------------------------------------------
 ; these values are copied into RAM at startup
@@ -1290,7 +1290,7 @@ LST04:  call    SRCHLIN         ; find address of line number
         ld      (TMPBFR2),BC    ; set address of ending line
 LST06:  push    BC              ; store address for later use
         jp      LISTLP          ; jump to list
-LSTALL  ld      DE,65529        ; set ending line to max. allowed line number
+LSTALL: ld      DE,65529        ; set ending line to max. allowed line number
         call    SRCHLIN         ; get address of last line
         ld      (TMPBFR2),BC    ; store it
         ld      DE,$0000        ; set start to first line in memory
@@ -1376,7 +1376,7 @@ SRCHLIN:push    HL              ; store HL (this is needed because HL store the 
 TSTSPC: ld      A,(TMPKEYBFR)   ; Get input character
         cp      SPC             ; Is it SPACE?
         ret     NZ              ; No, return
-WTSPC   call    GETINP          ; Yes, stop listing and wait for another space or BREAK
+WTSPC:  call    GETINP          ; Yes, stop listing and wait for another space or BREAK
         cp      SPC             ; is it SPACE?
         jr      NZ,CNTWTSP      ; no, continue
         xor     A
@@ -2302,7 +2302,7 @@ SGNEXP: dec     D               ; Dee to flag negative exponent
 ; execute OR, AND, and XOR operations
 PAND:   xor     A               ; for AND, Z=1
         jr      CNTLGC          
-POR     xor     A               ; for OR, Z=0, S=1
+POR:    xor     A               ; for OR, Z=0, S=1
         sub     $01
         jr      CNTLGC
 PXOR:   xor     A               ; for XOR, Z=0, S=0
@@ -3723,7 +3723,9 @@ SND1:   cpl                     ; complement of A - this is used later to set on
         jr      NC,SNDOVR       ; (is there a rest? no, jump over
         inc     H               ; yes, increment H)
 SNDOVR: ld      L,A             ; ...register pair...
-        ld      (HL),DE         ; ...and store the value
+        ld      (HL),E          ; ...and store the value
+        inc     HL
+        ld      (HL),D
         pop     HL              ; retrieve HL
         ret                     ; Return to caller
 NOISUP: cp      $07             ; is channel in range 4 to 6 (for a noise)?
@@ -6540,12 +6542,12 @@ HEX4:   ld      (HL),C          ; to PBUFF+3
         pop     BC              ; Get BC back
         ld      HL,PBUFF        ; Reset to start of PBUFF
         jp      STR1            ; Convert the PBUFF to a string and return it
-BYT2ASC	ld      B,A             ; Save original value
+BYT2ASC:ld      B,A             ; Save original value
         and     $0F             ; Strip off upper nybble
         cp      $0A             ; 0-9?
         jr      C,ADD30         ; If A-F, add 7 more
         add     A,$07           ; Bring value up to ASCII A-F
-ADD30	add     A,$30           ; And make ASCII
+ADD30:  add     A,$30           ; And make ASCII
         ld      C,A             ; Save converted char to C
         ld      A,B             ; Retrieve original value
         rrca                    ; and Rotate it right
@@ -6556,21 +6558,21 @@ ADD30	add     A,$30           ; And make ASCII
         cp      $0A             ; 0-9? < A hex?
         jr      C,ADD301        ; Skip Add 7
         add     A,$07           ; Bring it up to ASCII A-F
-ADD301	add     A,$30           ; And make it full ASCII
+ADD301: add     A,$30           ; And make it full ASCII
         ld      B,A             ; Store high order byte
         ret
 
 ; Convert "&Hnnnn" to FPREG
 ; Gets a character from (HL) checks for Hexadecimal ASCII numbers "&Hnnnn"
 ; Char is in A, NC if char is ;<=>?@ A-z, CY is set if 0-9
-HEXTFP  ex      DE,HL           ; Move code string pointer to DE
+HEXTFP: ex      DE,HL           ; Move code string pointer to DE
         ld      HL,$0000        ; Zero out the value
         call    GETHEX          ; Check the number for valid hex
         jp      C,HXERR         ; First value wasn't hex, HX error
         jr      HEXLP1          ; Convert first character
-HEXLP   call    GETHEX          ; Get second and addtional characters
+HEXLP:  call    GETHEX          ; Get second and addtional characters
         jr      C,HEXIT         ; Exit if not a hex character
-HEXLP1  add     HL,HL           ; Rotate 4 bits to the left
+HEXLP1: add     HL,HL           ; Rotate 4 bits to the left
         add     HL,HL
         add     HL,HL
         add     HL,HL
@@ -6578,7 +6580,7 @@ HEXLP1  add     HL,HL           ; Rotate 4 bits to the left
         ld      L,A             ; Save new value
         jr      HEXLP           ; And continue until all hex characters are in
 
-GETHEX  inc     DE              ; Next location
+GETHEX: inc     DE              ; Next location
         ld      A,(DE)          ; Load character at pointer
         cp      SPC
         jp      Z,GETHEX        ; Skip spaces
@@ -6589,11 +6591,11 @@ GETHEX  inc     DE              ; Next location
         sub     $07             ; Reduce to A-F
         cp      $0A             ; Value should be $0A-$0F at this point
         ret     C               ; CY set if was :            ; < = > ? @
-NOSUB7  cp      $10             ; > Greater than "F"?
+NOSUB7: cp      $10             ; > Greater than "F"?
         ccf
         ret                     ; CY set if it wasn't valid hex
 
-HEXIT   ex      DE,HL           ; Value into DE, Code string into HL
+HEXIT:  ex      DE,HL           ; Value into DE, Code string into HL
         ld      A,D             ; Load DE into AC
         ld      C,E             ; For prep to
         push    HL
