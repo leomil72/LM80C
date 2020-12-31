@@ -11,6 +11,13 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 
 ---------------------------------------------------------------------------------------------
 
+1.02    - 20201231
+
+- Fixed a bug into the serial code: the incoming chars were print on screen even if the
+  cursor was off (i.e., in indirect mode)
+
+---------------------------------------------------------------------------------------------
+
 1.01    - 20201231
 
 - Code revision to comply with the assembler SJASMPLUS
