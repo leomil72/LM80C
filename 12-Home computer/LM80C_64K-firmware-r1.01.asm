@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - FIRMWARE - R1.0
+; LM80C 64K - FIRMWARE - R1.01
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -11,10 +11,10 @@
 ; NASCOM BASIC originally modified by Gran Searle
 ; Code modified and adapted for LM80C by Leonardo Miliani
 ;
-; Edited with Atom Editor
+; Edited with Visual Studio Code
 ;
-; Compiled with ZASM assembler 4.2.4
-; https://k1.spdns.de/Develop/Projects/zasm-4.0/Distributions/
+; Compiled with SjASMPlus assembler 1.18.0
+; https://github.com/z00m128/sjasmplus
 ; ------------------------------------------------------------------------------
 ; Copyright notes:
 ; Parts of the code (c) Grant Searle - free for non commercial use
@@ -52,41 +52,36 @@
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
 
-
-; ------------------------------------------------------------------------------
-; this line instructs the assembler to prepare a file for a ROM target
-; meaning that blank cells will be filled up with $FF
-;#target rom
-
-; this line instructs the assembler to compile taking account that code
-; starts at $0000 (the address reached by Z80 upon reset)
-;#code BOOT, $0000
+; output binary file
+    OUTPUT "LM80C-64K-firmware-1.01.bin"
 
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
 ; configure the hardware, checks if warm or cold startup and loads the BASIC interpreter
-include "../include/bootloader/bootloader64k-r1.0.asm"
+    INCLUDE "../include/bootloader/bootloader64k-r1.01.asm"
 
 ; incude the latest version of the VDP module
-include "../include/vdp/vdp64k-r1.0.asm"
+    INCLUDE "../include/vdp/vdp64k-r1.0.asm"
 
 ; incude the latest version of the PSG module
-include "../include/psg/psg64k-r1.0.asm"
+    INCLUDE "../include/psg/psg64k-r1.0.asm"
 
-; include the latest version of the NASCOM BASIC interpreter
-include "../include/basic/basic64k-r1.0.asm"
+; include the latest version of the LM80C BASIC interpreter
+    INCLUDE "../include/basic/basic64k-r1.01.asm"
 
 ; include utils
-include "../include/utils/utils-r11.asm"
+    INCLUDE "../include/utils/utils-r11.asm"
 
 ; include the latest version of the font sets
-include "../include/vdp/6x8fonts-r16.asm"
-include "../include/vdp/8x8fonts-r18.asm"
-include "../include/vdp/logo-fonts.asm"
+    INCLUDE "../include/vdp/6x8fonts-r16.asm"
+    INCLUDE "../include/vdp/8x8fonts-r18.asm"
+    INCLUDE "../include/vdp/logo-fonts.asm"
 
 ; include ROM/RAM switcher
-include "../include/switcher/switcher-r11.asm"
+    INCLUDE "../include/switcher/switcher-r11.asm"
+
+; include workspace equates
+    INCLUDE "../include/workspace/workspace-r1.0.asm"
+
 ; END OF ASSEMBLY SOURCE
-
-
 ;-------------------------------------------------------------------------------

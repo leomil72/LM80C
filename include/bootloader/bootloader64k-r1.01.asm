@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - BOOTLOADER - R1.0
+; LM80C 64K - BOOTLOADER - R1.01
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -63,13 +63,6 @@ SER_BUFSIZE     equ     $58
 SER_FULLSIZE    equ     $50
 SER_EMPTYSIZE   equ     $05
 
-SERBUF_START    equ     END_OF_FW       ; RAM starts here
-serInPtr        equ     SERBUF_START + SER_BUFSIZE
-serRdPtr        equ     serInPtr+2
-serBufUsed      equ     serRdPtr+2
-basicStarted    equ     serBufUsed+1
-bufWrap         equ     (SERBUF_START + SER_BUFSIZE) & $FF
-TEMPSTACK       equ     CURPOS - 3      ; top of BASIC line input buffer so is "free ram" when BASIC resets
 
 ;------------------------------------------------------------------------------
 ;                                F I R M W A R E
@@ -81,60 +74,62 @@ RST00:          di                      ; be sure that INTs are disabled
 
 ;------------------------------------------------------------------------------
 ; interrupt vector when SIO ch.B has a char available in its buffer
-                ;org     $0004
+                ;$0004
                 defw    RX_CHB_AVAIL
 
 ;------------------------------------------------------------------------------
 ; interrupt vector for SIO ch.B special conditions (i.e. buf overrun)
-                ;org     $0006
+                ;$0006
                 defw    SPEC_RXB_CNDT
 
 ;------------------------------------------------------------------------------
 ; send a character over serial ch. A
-                ;org     $0008
+                ;$0008
 RST08:          jp      TXA
-                defs    1,$FF   ; filler
+                BLOCK   1,$FF   ; filler
 
 ;------------------------------------------------------------------------------
 ; interrupt vector when SIO ch.A has a char available in its buffer
-                ;org     $000C
+                ;$000C
                 defw    RX_CHA_AVAIL
 
 ;------------------------------------------------------------------------------
 ; interrupt vector for SIO ch.A special conditions (i.e. buf overrun)
-                ;org     $000E
+                ;$000E
                 defw    SPEC_RXA_CNDT
 
 ;------------------------------------------------------------------------------
 ; receive a character over serial ch. A
-                ;org     $0010
+                ;$0010
 RST10:          jp      RXA
-                defs    5,$FF   ; filler
+                BLOCK   5,$FF   ; filler
 ;------------------------------------------------------------------------------
 ; check serial status
 
-                ;org     $0018
+                ;$0018
 RST18:          jp      CKINCHAR
-                defs    $25,$FF ; filler
+                BLOCK   $25,$FF ; filler
 ;------------------------------------------------------------------------------
 ; interrupt vectors for CTC 
-                ;org     $0040               ; for CH0 Timer - used in BASIC by serial 1 for bps
+                ;$0040               ; for CH0 Timer - used in BASIC by serial 1 for bps
                 defw    CTC0IV
-                ;org     $0042               ; for CH1 Timer - used in BASIC by serial 2 for bps
+                ;$0042               ; for CH1 Timer - used in BASIC by serial 2 for bps
                 defw    CTC1IV
-                ;org     $0044               ; for CH2 timer - unused
+                ;$0044               ; for CH2 timer - unused
                 defw    CTC2IV
-                ;org     $0046               ; for CH3 Timer - used by FW for 100ths/s counter
+                ;$0046               ; for CH3 Timer - used by FW for 100ths/s counter
                 defw    CTC3IV
-                defs    $1e,$ff ; filler
+                BLOCK   $1E,$FF ; filler
 ;------------------------------------------------------------------------------
 ; interrupt routine for NMI
-                ;org     $0066
+                ;$0066
                 jp      NMIUSR              ; jump to execute NMI service routine
-                defs    $27,$FF ; filler
+                BLOCK   $27,$FF ; filler
 ;------------------------------------------------------------------------------
-
-                ;org     $0090
+    LUA
+        sj.insert_define("TIME", '"' .. os.date("%d-%m-%Y %H:%M:%S") .. '"')
+	ENDLUA
+                ;$0090
                 defb    $4C,$4D,$38,$30,$43,$20,$36,$34
                 defb    $4B,$20,$43,$4F,$4C,$4F,$52,$00
                 defb    $43,$4F,$4D,$50,$55,$54,$45,$52
@@ -143,10 +138,9 @@ RST18:          jp      CKINCHAR
                 defb    $20,$62,$79,$00,$00,$00,$00,$00
                 defb    $4C,$65,$6F,$6E,$61,$72,$64,$6F
                 defb    $20,$4D,$69,$6C,$69,$61,$6E,$69
-FWVER:          defm    "FW 1.0",$20,"28/12/2020",$00
-                defs    $1E,$FF ; filler
-;------------------------------------------------------------------------------
-                ;org     $0100
+FWVER:          defm    "FW 1.01",$20,TIME,$00
+FMVEREND:       equ     $
+                BLOCK   $100-FMVEREND,$FF   ; filler
 ;------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -156,6 +150,7 @@ FWVER:          defm    "FW 1.0",$20,"28/12/2020",$00
 ;-------------------------------------------------------------------------------
 ; interrupt driven routine to get chars from Z80 SIO ch.A
 ; this is the only channel that can print received chars onto the screen
+                ;$0100
 RX_CHA_AVAIL:   push    AF              ; store A
                 push    HL              ; and HL
                 call    A_RTS_OFF       ; disable RTS line
@@ -582,6 +577,6 @@ CTCCONF:        defb    $FB,$ED,$4D     ; CTC0 interrupt vector (ei; reti)
 ;------------------------------------------------------------------------------
 ; welcome messages
 MSGTXT1:        defm    "    LM80C 64K Color Computer",CR
-                defm    " by Leonardo Miliani * FW R1.0",CR,0
+                defm    " by Leonardo Miliani * FW R1.01",CR,0
 MSGTXT2:        defb    CR
                 defm    "   <C>old or <W>arm start? ",0

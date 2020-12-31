@@ -11,6 +11,13 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 
 ---------------------------------------------------------------------------------------------
 
+1.01    - 20201231
+
+- Code revision to comply with the assembler SJASMPLUS
+- Moved equates for BASIC workspace area into a separated file
+
+---------------------------------------------------------------------------------------------
+
 1.00    - 20201229 - The 64K edition
 
 - Hardware revision for memory expansion to 64K of RAM and bank switching mechanism to

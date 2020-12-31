@@ -52,10 +52,10 @@ ROM2RAM:        ld      A,(basicStarted); check if BASIC is already started
                 ; WARNING: Do **NOT** change the following "out()" sequence, ABSOLUTELY!
 CNTCP2RAM:      ld      A,%11001111     ; set mode 3 (mode control)
                 out     (PIO_CB),A      ; for PIO port B
-                ld      A,%11111101     ; prepare the current pin port setting
-                out     (PIO_DB),A      ; and store into the internal register
+                ld      A,%11111101     ; set pin #0 as HIGH to enable ROM
+                out     (PIO_DB),A      ; store the value into the internal register
                 xor     A               ; set pins to OUTPUT
-                out     (PIO_CB),A      ; for port B
+                out     (PIO_CB),A      ; for port B, activating the RAM
                 ld      BC,END_OF_FW    ; copy FW from ROM to high RAM 
                 ld      HL,$0000        ; source address
                 ld      DE,TMP_FW_LOC   ; dest. address
