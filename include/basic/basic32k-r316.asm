@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C BASIC 64K - R1.01
+; LM80C BASIC - R3.16
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -17,13 +17,13 @@
 ; Videos about the computer: https://www.youtube.com/user/leomil72/videos
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
-; LM80C BASIC 64K - originally based on the following NASCOM BASIC versions:
+; LM80C BASIC originally based on the following NASCOM BASIC versions:
 ; 4.7  - original version by NASCOM/MICROSOFT
 ; 4.7b - modified version by Grant Searle (additional commands & functions)
 
 
 ;------------------------------------------------------------------------------
-;  L M 8 0 C   6 4 K   B A S I C
+;  L M 8 0 C   B A S I C
 ;------------------------------------------------------------------------------
 
 ; GENERAL EQUATES
@@ -250,8 +250,8 @@ BRKRET: call    CLREG           ; Clear registers and stack
 BLNSPC: defb    "        ",0    ; 8 empty cells to align the "XXXX Bytes free" message
 BFREE:  defb    " Bytes free",CR,CR,0
 
-SIGNON: defb    "LM80C BASIC 64K ",251," 2020 L.Miliani"
-        defb    " Z80 BASIC 4.7 ",251," 1978 Microsoft",CR,0
+SIGNON: defb    "LM80C BASIC 3.16 ",251,"2021 L.Miliani"
+        defb    " Z80 BASIC 4.7  ",251,"1978 Microsoft",CR,0
 
 MEMMSG: defb    "Memory top",0
 
@@ -5308,7 +5308,7 @@ CKCOL:  dec     HL              ; dec 'cos GETCHR INCs
         pop     DE              ; retrieve DE
         ld      (DE),A          ; store color into temp buffer
         ret                     ; return to caller
-
+        
 
 ; paint X,Y[,C]: in graphics mode, fills an area starting
 ; at point X,Y, using default color or, if used, with
@@ -6311,7 +6311,7 @@ HLPERR: ld      E,HP            ; HELP call error
 KEY:    dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
         jp      Z,LSTKEYS       ; jump if nothing follows
-        ; change FN keys
+                                ; change FN keys
         call    GETINT          ; get a number
         and     A               ; is it 0?
         jr      NZ,KEYCH        ; no, jump over         
@@ -6688,7 +6688,7 @@ RESET:  ld      A,(SERIALS_EN)
         call    NZ,RSTSERS      ; yes, reset serials
         call    DISNMI          ; disable NMI vector
         di                      ; disable INTs
-        jp      ROM2RAM         ; Restart
+        jp      $0000           ; Restart
 
 
 INITST: ld      A,$00           ; Clear break flag

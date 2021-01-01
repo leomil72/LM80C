@@ -7,6 +7,24 @@
 The following file reports the changelog of the LM80C firmware developed by Leonardo Miliani
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
+P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
+
+---------------------------------------------------------------------------------------------
+3.16    - 20210101
+
+- Code revision to comply with the assembler SJASMPLUS
+- Moved equates for BASIC workspace area into a separated file
+- Serial buffer overrun revision
+- Added key auto-repeat
+- Added support for INSERT key to insert a space between text by moving the chars after the
+  cursor position
+- LIST now manage ending line number correctly, so that it won't list the line after the
+  one passed as argument anymore
+- BASIC support for serial channel B
+- Preliminary support for external mass storage (stubs for ERASE, FILES, LOAD, SAVE commands)
+- Mechanism to enable/disable the 512-byte buffer for mass storage I/O operations (by
+  pressing SHIFT while logo is shown on startup) - AT THE MOMENT, DISABLED BY DEFAULT INTO CODE
+
 ---------------------------------------------------------------------------------------------
 3.15    - 20201121
 

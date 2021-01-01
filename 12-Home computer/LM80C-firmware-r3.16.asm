@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - FIRMWARE - R1.01
+; LM80C - FIRMWARE - R3.16
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -51,23 +51,25 @@
 ; Videos about the computer: https://www.youtube.com/user/leomil72/videos
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
-
 ; output binary file
-    OUTPUT "LM80C-64K-firmware-1.01.bin"
+    OUTPUT "LM80C-firmware-r3.16.bin"
+
+; set computer model
+    DEFINE  LM80C
 
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
 ; configure the hardware, checks if warm or cold startup and loads the BASIC interpreter
-    INCLUDE "../include/bootloader/bootloader64k-r1.01.asm"
+    INCLUDE "../include/bootloader/bootloader-r316.asm"
 
 ; incude the latest version of the VDP module
-    INCLUDE "../include/vdp/vdp64k-r1.0.asm"
+    INCLUDE "../include/vdp/vdp-r316.asm"
 
 ; incude the latest version of the PSG module
-    INCLUDE "../include/psg/psg64k-r1.0.asm"
+    INCLUDE "../include/psg/psg-r316.asm"
 
 ; include the latest version of the LM80C BASIC interpreter
-    INCLUDE "../include/basic/basic64k-r1.01.asm"
+    INCLUDE "../include/basic/basic32k-r316.asm"
 
 ; include utils
     INCLUDE "../include/utils/utils-r11.asm"
@@ -77,11 +79,10 @@
     INCLUDE "../include/vdp/8x8fonts-r18.asm"
     INCLUDE "../include/vdp/logo-fonts.asm"
 
-; include ROM/RAM switcher
-    INCLUDE "../include/switcher/switcher-r11.asm"
-
 ; include workspace equates
     INCLUDE "../include/workspace/workspace-r1.0.asm"
 
 ; END OF ASSEMBLY SOURCE
+
+
 ;-------------------------------------------------------------------------------

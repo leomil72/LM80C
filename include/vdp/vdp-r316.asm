@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - VDP ROUTINES - R1.0
+; LM80C - VDP ROUTINES - R3.16
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -216,7 +216,7 @@ RPT104:         call    LOADLOGOCHRS
                 ld      D,A             ; 256 times
                 ld      E,A             ; x 256 times
                 ld      (TMPBFR1),A     ; sound flag set to 0
-                inc     A               ; A=1
+                ;inc     A               ; A=1 ----- DISABLED AT THE MOMENT!
                 ld      (DOS_EN),A      ; DOS enabled
 DEC_D:          nop                     ; does nothing...
                 nop
@@ -234,7 +234,7 @@ DEC_D:          nop                     ; does nothing...
                 ld      A,(TMPBFR1)
                 cp      $02
                 call    NZ,BEEPOFF
-                call    CHECKSHIFT
+                ;call    CHECKSHIFT     DISABLED AT THE MOMENT!
                 djnz    DEC_D
 ERASECLRTBL:    ; erase color table
                 ld      A,$11           ; foreground and background set to black
@@ -306,7 +306,7 @@ CHECKSHIFT:     push    AF
 LVCKSHF:        pop     AF
                 ret
 
-
+         
 ; empty video buffer
 EMPTYVIDBUF:    ld      A,(SCR_MODE)    ; check screen mode
                 cp      $02             ; is it G2 mode?
@@ -511,9 +511,9 @@ LOAD_CRSR_POS:  ld      A,(SCR_CURS_Y)  ; load cursor Y
                 jr      Z,CONT_POS_CURS ; yes, jump over
                 ld      DE,POS_TB_CRS_32; no, load position table address of cursor for 32 cols
 CONT_POS_CURS:  add     HL,DE           ; the correct starting address of the required row is now into HL
-                ld      E,(HL)         ; load starting address of the required row into DE
+                                ld      E,(HL)         ; load starting address of the required row into DE
                 inc     HL
-                ld      D,(HL)                
+                ld      D,(HL)   
                 ld      HL,(SCR_NAM_TB) ; load starting address of name table
                 add     HL,DE           ; starting address of the current row into name table
                 ld      A,(SCR_CURS_X)  ; load cursor X

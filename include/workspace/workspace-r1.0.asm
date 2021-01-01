@@ -18,7 +18,13 @@
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
 
+; set starting of RAM based on computer model
+    IFDEF LM80C64K
 SERBUF_START    equ     END_OF_FW       ; RAM starts here
+    ELSE
+SERBUF_START    equ     $8000           ; RAM starts here
+    ENDIF
+
 serInPtr        equ     SERBUF_START + SER_BUFSIZE
 serRdPtr        equ     serInPtr+2
 serBufUsed      equ     serRdPtr+2

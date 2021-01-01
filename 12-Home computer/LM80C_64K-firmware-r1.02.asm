@@ -51,9 +51,11 @@
 ; Videos about the computer: https://www.youtube.com/user/leomil72/videos
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
-
 ; output binary file
     OUTPUT "LM80C-64K-firmware-1.02.bin"
+
+; set computer model
+    DEFINE  LM80C64K
 
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
@@ -66,7 +68,7 @@
 ; incude the latest version of the PSG module
     INCLUDE "../include/psg/psg64k-r1.0.asm"
 
-; include the latest version of the LM80C BASIC interpreter
+; include the latest version of the LM80C 64K BASIC interpreter
     INCLUDE "../include/basic/basic64k-r1.01.asm"
 
 ; include utils

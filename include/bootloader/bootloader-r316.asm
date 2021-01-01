@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - BOOTLOADER - R1.01
+; LM80C - BOOTLOADER - R3.16
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -70,7 +70,7 @@ SER_EMPTYSIZE   equ     $05
 ; BASE MEMORY - RESET LOCATION ($0000) -> the CPU jumps to $0000 after a reset
                 org     $0000
 RST00:          di                      ; be sure that INTs are disabled
-                jp      ROM2RAM         ; jump to ROM/RAM switcher
+                jp      INIT_HW         ; jump to system initialization
 
 ;------------------------------------------------------------------------------
 ; interrupt vector when SIO ch.B has a char available in its buffer
@@ -130,15 +130,15 @@ RST18:          jp      CKINCHAR
         sj.insert_define("TIME", '"' .. os.date("%d-%m-%Y %H:%M:%S") .. '"')
 	ENDLUA
                 ;$0090
-                defb    $4C,$4D,$38,$30,$43,$20,$36,$34
-                defb    $4B,$20,$43,$4F,$4C,$4F,$52,$00
+                defb    $4C,$4D,$38,$30,$43,$20,$43,$4F
+                defb    $4C,$4F,$52,$00,$00,$00,$00,$00
                 defb    $43,$4F,$4D,$50,$55,$54,$45,$52
                 defb    $20,$28,$32,$30,$32,$30,$29,$00
                 defb    $44,$65,$73,$69,$67,$6E,$65,$64
                 defb    $20,$62,$79,$00,$00,$00,$00,$00
                 defb    $4C,$65,$6F,$6E,$61,$72,$64,$6F
                 defb    $20,$4D,$69,$6C,$69,$61,$6E,$69
-FWVER:          defm    "FW 1.01",$20,TIME,$00
+FWVER:          defm    "FW 1.02",$20,TIME,$00
 FMVEREND:       equ     $
                 BLOCK   $100-FMVEREND,$FF   ; filler
 ;------------------------------------------------------------------------------
@@ -167,9 +167,9 @@ RX_CHA_AVAIL:   push    AF              ; store A
 CNTRXCHA:       push    AF              ; store char
                 xor     A
                 ld      (KBDNPT),A      ; a char from serial is like a char printed by BASIC
-                ld      A,(PRNTVIDEO)   ; load status of print-on-video
-                cp      $01             ; is the print on video on?
-                call    Z,CHAR2VID      ; yes, print on screen
+                ld      A,(CRSR_STATE)  ; check cursor state
+                or      A               ; is it on?
+                call    NZ,CHAR2VID     ; yes, print on screen
                 pop     AF              ; retrieve char
                 call    TXA             ; send back to serial
 LVRXCHA:        pop     HL              ; retrieve HL
@@ -451,15 +451,16 @@ CHKCRSR:        call    FLASHCURSOR     ; call the flashing cursor routine
 ;               HARDWARE INITIALISATION
 ;------------------------------------------------------------------------------
 ; first run - setup HW & SW
-; now run from RAM
+;
 INIT_HW:        ld      HL,TEMPSTACK    ; load temp stack pointer
-INIT_HW2:       ld      SP,HL           ; set stack to temp stack pointer
+                ld      SP,HL           ; set stack to temp stack pointer
                 ld      HL,SERBUF_START ; set beginning of input buffer
                 ld      (serInPtr),HL   ; for incoming chars to store into buffer
                 ld      (serRdPtr),HL   ; and for chars to be read from buffer
                 xor     A               ; reset A
                 ld      (serBufUsed),A  ; actual buffer size is 0
                 ld      (SERIALS_EN),A  ; set serial ports status to OFF
+                call    HELLOWRLD       ; little serial blink with LEDs
                 call    initCTC         ; configure CTC, then...
                 call    initPSG         ; ...configure PSG
                 call    SHOW_LOGO       ; show computer logo
@@ -476,7 +477,6 @@ INIT_HW2:       ld      SP,HL           ; set stack to temp stack pointer
                 ld      (PRNTVIDEO),A   ; ...to activate the print-on-video
                 ld      HL,MSGTXT1      ; sign-on message
                 call    RAWPRINT        ; print message
-                ;call    CURSOR_ON       ; enable cursor
                 ld      A,(basicStarted); check if BASIC is already started
                 cp      'Y'             ; to see if this is a power-up
                 jr      NZ,COLDSTART    ; if not, then do a COLD start
@@ -515,6 +515,25 @@ ECHO_CHAR:      ld      (CHR4VID),A     ; set char for video printing
                 ld      (PRNTVIDEO),A   ; re-enable video printing
                 ret                     ; return to caller
                 
+;-------------------------------------------------------------------------------
+; little serial blink with LEDs
+HELLOWRLD:      ld      C,$09           ; 8 LEDs to be turned off + 1 more step to turn off the last LED
+                ld      A,%11001111     ; set mode 3 (mode control)
+                out     (PIO_CB),A      ; for PIO port B
+                xor     A               ; set pins to OUTPUT
+                out     (PIO_CB),A      ; for port B
+                inc     A               ; LSB on
+LEDLIGHT:       out     (PIO_DB),A      ; turn LEDs on/off for a "Supercar" sequence
+                ld      E,$20           ; little delay
+DEC_E:          ld      B,$00           ; count to 256
+COUNTER:        djnz    COUNTER         ; decrement inner counter
+                dec     E               ; decrement outer counter
+                jr      NZ,DEC_E        ; finish delay
+                sla     A               ; shift reg.A to left 1 bit
+                dec     C               ; next LED
+                jr      NZ,LEDLIGHT     ; all LEDs done? no, repeat
+                ret                     ; return to caller
+
 ;-------------------------------------------------------------------------------
 ; Z80 SIO default settings for serial channels
 SIO_A_SETS:     defb    %00110000       ; write into WR0: error reset, select WR0
@@ -576,7 +595,7 @@ CTCCONF:        defb    $FB,$ED,$4D     ; CTC0 interrupt vector (ei; reti)
 
 ;------------------------------------------------------------------------------
 ; welcome messages
-MSGTXT1:        defm    "    LM80C 64K Color Computer",CR
-                defm    " by Leonardo Miliani * FW R1.01",CR,0
+MSGTXT1:        defm    "      LM80C Color Computer",CR
+                defm    " by Leonardo Miliani * FW R3.16",CR,0
 MSGTXT2:        defb    CR
                 defm    "   <C>old or <W>arm start? ",0
