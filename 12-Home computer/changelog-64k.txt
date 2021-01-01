@@ -11,6 +11,13 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 
 ---------------------------------------------------------------------------------------------
 
+1.03    - 2021xxxx
+
+- Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
+  of the video chip
+
+---------------------------------------------------------------------------------------------
+
 1.02    - 20201231
 
 - Fixed a bug into the serial code: the incoming chars were print on screen even if the
