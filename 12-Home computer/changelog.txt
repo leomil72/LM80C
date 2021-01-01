@@ -15,6 +15,8 @@ P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding ch
 - Code revision to comply with the assembler SJASMPLUS
 - Moved equates for BASIC workspace area into a separated file
 - Serial buffer overrun revision
+- Fixed a bug into the serial code: the incoming chars were print on screen even if the
+  cursor was off (i.e., in indirect mode)
 - Added key auto-repeat
 - Added support for INSERT key to insert a space between text by moving the chars after the
   cursor position
