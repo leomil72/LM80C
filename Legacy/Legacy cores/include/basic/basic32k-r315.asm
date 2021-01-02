@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C BASIC - R3.14
+; LM80C BASIC - R3.15
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -59,7 +59,7 @@ CRSDN           equ     $1F             ; cursor down
 ; AND SO ON. THE FIRST CELLS ARE FILLED WITH VALUES STORED INTO ROM AT $(INITAB) ADDRESS
 WRKSPC          equ     basicStarted+$01; (3) BASIC Work space
 NMIUSR          equ     WRKSPC+$03      ; (3) NMI exit point routine
-USR             equ     NMIUSR+$03      ; (3) "USR (x)" jump  <-- in $8065/8066 the user can store the address of a specific machine language routine
+USR             equ     NMIUSR+$03      ; (3) "USR (x)" jump  <-- in (USR+$01)/(USR+$02) the user can store the address of a specific machine language routine
 OUTSUB          equ     USR+$03         ; (1) "out p,n"
 OTPORT          equ     OUTSUB+$01      ; (2) Port (p)
 DIVSUP          equ     OTPORT+$02      ; (1) Division support routine
@@ -69,7 +69,7 @@ DIV3            equ     DIV2+$04        ; (3) <-   be
 DIV4            equ     DIV3+$03        ; (2) <-inserted
 SEED            equ     DIV4+$02        ; (35) Random number seed  <-- starting address of a seed table
 LSTRND          equ     SEED+$23        ; (4) Last random number
-INPSUB          equ     LSTRND+$04      ; (1) #INP (x)" Routine
+INPSUB          equ     LSTRND+$04      ; (1) INP A,(x) Routine
 INPORT          equ     INPSUB+$01      ; (2) PORT (x)
 LWIDTH          equ     INPORT+$02      ; (1) Terminal width
 COMMAN          equ     LWIDTH+$01      ; (1) Width for commas
@@ -79,18 +79,19 @@ CHKSUM          equ     CTLOFG+$01      ; (2) Array load/save check sum
 NMIFLG          equ     CHKSUM+$02      ; (1) Flag for NMI break routine
 BRKFLG          equ     NMIFLG+$01      ; (1) Break flag
 RINPUT          equ     BRKFLG+$01      ; (3) Input reflection
-STRSPC          equ     RINPUT+$03      ; (2) Bottom of string space
-LINEAT          equ     STRSPC+$02      ; (2) Current line number
+STRSPC          equ     RINPUT+$03      ; (2) Pointer to bottom (start) of string space - default is 100 bytes below the top of memory
+LINEAT          equ     STRSPC+$02      ; (2) Current line number. -1 means "direct mode", while -2 means cold start.
 HLPLN           equ     LINEAT+$02      ; (2) Current line with errors
-FNKEYS          equ     HLPLN+$02       ; (128) text of FN keys
-BASTXT          equ     FNKEYS+$80      ; (3) Pointer to start of program   <-- actually this is the last value pre-filled by the firmware at startup
+FNKEYS          equ     HLPLN+$02       ; (128) default text of FN keys
+BASTXT          equ     FNKEYS+$80      ; (3) Pointer to start of BASIC program in memory
+; - - - - - - - - - - - - - - - - - - -   the above are locations pre-filled by the firmware at startup
 BUFFER          equ     BASTXT+$03      ; (5) Input buffer
 STACK           equ     BUFFER+$05      ; (85) Initial stack
 CURPOS          equ     STACK+$55       ; (1) Character position on line
-LCRFLG          equ     CURPOS+$01      ; (1) Locate/Create flag
-TYPE            equ     LCRFLG+$01      ; (1) Data type flag
+LCRFLG          equ     CURPOS+$01      ; (1) Locate/Create flag for DIM statement
+TYPE            equ     LCRFLG+$01      ; (1) Data type flag: 0=numeric, non-zero=string
 DATFLG          equ     TYPE+$01        ; (1) Literal statement flag
-LSTRAM          equ     DATFLG+$01      ; (2) Last available RAM
+LSTRAM          equ     DATFLG+$01      ; (2) Last available RAM location usable by BASIC
 TMSTPT          equ     LSTRAM+$02      ; (2) Temporary string pointer
 TMSTPL          equ     TMSTPT+$02      ; (12) Temporary string pool
 TMPSTR          equ     TMSTPL+$0C      ; (4) Temporary string
@@ -105,16 +106,7 @@ BRKLIN          equ     READFG+$01      ; (2) Line of break
 NXTOPR          equ     BRKLIN+$02      ; (2) Next operator in EVAL
 ERRLIN          equ     NXTOPR+$02      ; (2) Line of error
 CONTAD          equ     ERRLIN+$02      ; (2) Where to CONTinue
-PROGND          equ     CONTAD+$02      ; (2) End of program
-VAREND          equ     PROGND+$02      ; (2) End of variables
-ARREND          equ     VAREND+$02      ; (2) End of arrays
-NXTDAT          equ     ARREND+$02      ; (2) Next data item
-FNRGNM          equ     NXTDAT+$02      ; (2) Name of FN argument
-FNARG           equ     FNRGNM+$02      ; (4) FN argument value
-FPREG           equ     FNARG+$04       ; (3) Floating point register
-FPEXP           equ     FPREG+$03       ; (1) Floating point exponent
-SGNRES          equ     FPEXP+$01       ; (1) Sign of result
-TMRCNT          equ     SGNRES+$01      ; (4) TMR counter for 1/100 seconds
+TMRCNT          equ     CONTAD+$02      ; (4) TMR counter for 1/100 seconds
 CTC0IV          equ     TMRCNT+$04      ; (3) CTC0 interrupt vector
 CTC1IV          equ     CTC0IV+$03      ; (3) CTC1 interrupt vector
 CTC2IV          equ     CTC1IV+$03      ; (3) CTC2 interrupt vector
@@ -145,9 +137,9 @@ VIDTMP2         equ     VIDTMP1+$02     ; (2) temporary video word
 ; - - - - - - - - - - - - - - - - - - -   ...TO HERE. DO NOT ADD ANYTHING RELATED TO VPD OUT OF THIS RANGE,
                                         ; OTHERWISE YOU WILL HAVE TO CHECK THE POINTER IN "CLR_RAM_REG" FUNCTION
 ; - - - - - - - - - - - - - - - - - - -   SOUND & KEYBOARD REGISTERS - FROM HERE...
-CHASNDDTN       equ     VIDTMP2+$02     ; (2) sound Ch.A duration (1/100s)
-CHBSNDDTN       equ     CHASNDDTN+$02   ; (2) sound Ch.B duration (1/100s)
-CHCSNDDTN       equ     CHBSNDDTN+$02   ; (2) sound Ch.C duration (1/100s)
+CHASNDDTN       equ     VIDTMP2+$02     ; (2) sound Ch.A duration (in 1/100s)
+CHBSNDDTN       equ     CHASNDDTN+$02   ; (2) sound Ch.B duration (in 1/100s)
+CHCSNDDTN       equ     CHBSNDDTN+$02   ; (2) sound Ch.C duration (in 1/100s)
 KBDNPT          equ     CHCSNDDTN+$02   ; (1) temp cell used to flag if input comes from keyboard
 KBTMP           equ     KBDNPT+$01      ; (1) temp cell used by keyboard scanner
 TMPKEYBFR       equ     KBTMP+$01       ; (1) temp buffer for last key pressed
@@ -155,9 +147,22 @@ LASTKEYPRSD     equ     TMPKEYBFR+$01   ; (1) last key code pressed
 CONTROLKEYS     equ     LASTKEYPRSD+$01 ; (1) flags for control keys (bit#0=SHIFT; bit#1=CTRL; bit#2=C=)
 ; - - - - - - - - - - - - - - - - - - -   ...TO HERE. DO NOT ADD ANYTHING RELATED TO PSG OUT OF THIS RANGE,
                                         ; OTHERWISE YOU WILL HAVE TO CHANGE THE POINTER IN "initPSG" FUNCTION
-SERIALS_EN      equ     CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Port1(A), bit 1 for Port2(B): 0=OFF, 1=ON
+SERIALS_EN      equ     CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Port1 (A), bit 1 for Port2 (B): 0=OFF, 1=ON
 SERABITS        equ     SERIALS_EN+$01  ; (1) serial port A data bits
-PBUFF           equ     SERABITS+$01    ; (13) Number print buffer
+SERBBITS        equ     SERABITS+$01    ; (1) serial port B data bits
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                        ; from here there are the RAM locations that
+                                        ; are saved during SAVE
+PROGND          equ     SERBBITS+$01    ; (2) End of program
+VAREND          equ     PROGND+$02      ; (2) End of variables
+ARREND          equ     VAREND+$02      ; (2) End of arrays
+NXTDAT          equ     ARREND+$02      ; (2) Next data item
+FNRGNM          equ     NXTDAT+$02      ; (2) Name of FN argument
+FNARG           equ     FNRGNM+$02      ; (4) FN argument value
+FPREG           equ     FNARG+$04       ; (3) Floating point register
+FPEXP           equ     FPREG+$03       ; (1) Floating point exponent
+SGNRES          equ     FPEXP+$01       ; (1) Sign of result
+PBUFF           equ     SGNRES+$01      ; (13) Number print buffer
 MULVAL          equ     PBUFF+$0D       ; (3) Multiplier
 PROGST          equ     MULVAL+$03      ; (100) Start of program text area
 STLOOK          equ     PROGST+$64      ; Start of memory test
@@ -215,6 +220,7 @@ INIT:   ld      HL,INITAB       ; Initialise workspace
 MSIZE:  ld      HL,MEMMSG       ; Point to message
         call    PRS             ; Output "Memory size"
         call    PROMPT          ; Get input with '?'
+        call    CURSOR_ON       ; enable cursor
         call    GETCHR          ; Get next character
         or      A               ; Set flags
         jp      NZ,TSTMEM       ; If number - Test if RAM there
@@ -244,7 +250,8 @@ TSTMEM: call    ATOH            ; Get high memory into DE
         ld      (HL),B          ; Restore old contents
         jp      NZ,MSIZE        ; Ask again if no RAM
 
-SETTOP: dec     HL              ; Back one byte
+SETTOP: call    CURSOR_OFF      ; disable cursor
+        dec     HL              ; Back one byte
         ld      DE,STLOOK-1     ; See if enough RAM
         call    CPDEHL          ; Compare DE with HL
         jp      C,MSIZE         ; Ask again if not enough RAM
@@ -266,6 +273,8 @@ SETTOP: dec     HL              ; Back one byte
         push    HL              ; Save bytes free
         ld      HL,SIGNON       ; Sign-on message
         call    PRS             ; Output string
+        ld      HL,BLNSPC       ; Empty space
+        call    PRS             ; Output string
         pop     HL              ; Get bytes free back
         call    PRNTHL          ; Output amount of free memory
         ld      HL,BFREE        ; " Bytes free" message
@@ -276,11 +285,11 @@ BRKRET: call    CLREG           ; Clear registers and stack
         call    CURSOR_ON       ; enable cursor
         jp      PRNTOK          ; Go to get command line
 
-BFREE:  defb    " Bytes free",CR,0
+BLNSPC: defb    "        ",0    ; 8 empty cells to align the "XXXX Bytes free" message
+BFREE:  defb    " Bytes free",CR,CR,0
 
-SIGNON: defb    "Z80 BASIC Ver 4.8",CR
-        defb    "Copyright ",251," 1978"
-        defb    " by Microsoft",CR,0
+SIGNON: defb    "LM80C BASIC 3.15 ",251,"2020 L.Miliani"
+        defb    " Z80 BASIC 4.7  ",251,"1978 Microsoft",CR,0
 
 MEMMSG: defb    "Memory top",0
 
@@ -346,11 +355,12 @@ WORDS:  defb    'E'+$80,"ND"            ; from here the list contains the COMMAN
         defb    'R'+$80,"ESTORE"
         defb    'G'+$80,"OSUB"
         defb    'R'+$80,"ETURN"
-        defb    'R'+$80,"EM"
+        defb    'R'+$80,"EM"            ; original REM
         defb    'S'+$80,"TOP"
         defb    'O'+$80,"UT"
         defb    'O'+$80,"N"
-        defb    'N'+$80,"ULL"
+        defb    'F'+$80,"ILES"
+        defb    'E'+$80,"RASE"          ; added by Leonardo Miliani
         defb    'W'+$80,"AIT"
         defb    'D'+$80,"EF"
         defb    'P'+$80,"OKE"
@@ -377,12 +387,13 @@ WORDS:  defb    'E'+$80,"ND"            ; from here the list contains the COMMAN
         defb    'W'+$80,"IDTH"
         defb    'S'+$80,"YS"            ; added by Leonardo Miliani
         defb    'R'+$80,"ESET"          ; changed by Leonardo Miliani
+        defb    'E'+$80,"LSE"           ; added by Leonardo Miliani
         defb    'P'+$80,"RINT"
         defb    'C'+$80,"ONT"
         defb    'L'+$80,"IST"
         defb    'C'+$80,"LEAR"
-        defb    'C'+$80,"LOAD"
-        defb    'C'+$80,"SAVE"
+        defb    'L'+$80,"OAD"
+        defb    'S'+$80,"AVE"
         defb    'N'+$80,"EW"
         defb    'T'+$80,"AB("
         defb    'T'+$80,"O"
@@ -461,11 +472,12 @@ WORDTB: defw    PEND
         defw    RESTOR
         defw    GOSUB
         defw    RETURN
-        defw    REM
+        defw    REM         ; original REM
         defw    STOP
         defw    POUT
         defw    ON
-        defw    REM         ; removed - was NULL
+        defw    FILES       ; changed by Leonardo Miliani - was NULL
+        defw    ERASE       ; added by Leonardo Miliani
         defw    WAIT
         defw    DEF
         defw    POKE
@@ -473,7 +485,7 @@ WORDTB: defw    PEND
         defw    VPOKE       ; added by Leonardo Miliani
         defw    SREG        ; added by Leonardo Miliani
         defw    VREG        ; added by Leonardo Miliani
-        defw    SCREEN      ; mod function: now it sets up a graphics mode (Leonardo Miliani)
+        defw    SCREEN      ; new behaviour: now it sets up a graphics mode (Leonardo Miliani)
         defw    LOCATE      ; added by Leonardo Miliani
         defw    SOUND       ; added by Leonardo Miliani
         defw    VOLUME      ; added by Leonardo Miliani
@@ -492,12 +504,13 @@ WORDTB: defw    PEND
         defw    WIDTH
         defw    SYS         ; added by Leonardo Miliani
         defw    RESET       ; new behaviour: now it resets the system
+        defw    REM+2       ; ELSE: added by Leonardo Miliani
         defw    PRINT
         defw    CONT
         defw    LIST
         defw    CLEAR
-        defw    REM         ; not implemented (was CLOAD)
-        defw    REM         ; not implemented (was CSAVE)
+        defw    LOAD        ; re-implemented by Leonardo Miliani (was CLOAD)
+        defw    SAVE        ; re-implemented by Leonardo Miliani (was CSAVE)
         defw    NEW
 
 ; RESERVED WORD TOKEN VALUES
@@ -517,33 +530,34 @@ ZDATA   equ     $83             ; DATA
 ZGOTO   equ     $88             ; GOTO
 ZGOSUB  equ     $8C             ; GOSUB
 ZREM    equ     $8E             ; REM
-ZPRINT  equ     $AD             ; PRINT
-ZNEW    equ     $B3             ; NEW
+ZELSE   equ     $AE             ; ELSE
+ZPRINT  equ     $AF             ; PRINT
+ZNEW    equ     $B5             ; NEW
 
-ZTAB    equ     $B4             ; TAB
-ZTO     equ     $B5             ; TO
-ZFN     equ     $B6             ; FN
-ZSPC    equ     $B7             ; SPC
-ZTHEN   equ     $B8             ; THEN
-ZNOT    equ     $B9             ; NOT
-ZSTEP   equ     $BA             ; STEP
+ZTAB    equ     $B6             ; TAB
+ZTO     equ     $B7             ; TO
+ZFN     equ     $B8             ; FN
+ZSPC    equ     $B9             ; SPC
+ZTHEN   equ     $BA             ; THEN
+ZNOT    equ     $BB             ; NOT
+ZSTEP   equ     $BC             ; STEP
 
-ZPLUS   equ     $BB             ; +         <-- from here, there are the math operators
-ZMINUS  equ     $BC             ; -
-ZTIMES  equ     $BD             ; *
-ZDIV    equ     $BE             ; /
-ZMOD    equ     $BF             ; %
-ZDINT   equ     $C0             ; #
-ZOR     equ     $C4             ; OR
-ZGTR    equ     $C5             ; >
-ZEQUAL  equ     $C6             ; M
-ZLTH    equ     $C7             ; <
+ZPLUS   equ     $BD             ; +         <-- from here, there are the math operators
+ZMINUS  equ     $BE             ; -
+ZTIMES  equ     $BF             ; *
+ZDIV    equ     $C0             ; /
+ZMOD    equ     $C1             ; %
+ZDINT   equ     $C2             ; #
+ZOR     equ     $C6             ; OR
+ZGTR    equ     $C7             ; >
+ZEQUAL  equ     $C8             ; M
+ZLTH    equ     $C9             ; <
 
-ZSGN    equ     $C8             ; SGN       <-- from here, there are the functions
-ZPOINT  equ     $DE             ; ZPOINT    <-- if the user enters a custom function, between
+ZSGN    equ     $CA             ; SGN       <-- from here, there are the functions
+ZPOINT  equ     $E0             ; ZPOINT    <-- if the user enters a custom function, between
                                 ;               SGN and POINT, he/she must increment this pointer by 1
-ZINSTR  equ     $DF             ; ZINSTR    <-- same here
-ZLEFT   equ     $E7             ; LEFT$     <-- if the user enters a custom function anywhere,
+ZINSTR  equ     $E1             ; ZINSTR    <-- same here
+ZLEFT   equ     $E9             ; LEFT$     <-- if the user enters a custom function anywhere,
                                 ;               he/she must increment this pointer by 1
 
 ; ARITHMETIC PRECEDENCE TABLE
@@ -1005,7 +1019,7 @@ CRNCLP: ld      A,(HL)          ; Get byte
         cp      SPC             ; Is it a space?
         jp      Z,MOVDIR        ; Yes - Copy direct
         ld      B,A             ; Save character
-        cp      22H             ; '"'             ; Is it a quote?
+        cp      $22             ; '"'             ; Is it a quote?
         jp      Z,CPYLIT        ; Yes - Copy literal string
         or      A               ; Is it end of buffer?
         jp      Z,ENDBUF        ; Yes - End buffer
@@ -1741,7 +1755,7 @@ RETLIN: ld      HL,RUNCNT       ; Execution driver loop
         defb    $3E             ; Skip "pop HL"
 NXTDTA: pop     HL              ; Restore code string address
 
-DATA:   defb    $01,$3A         ; ':' End of statement
+DATA:   defb    $01,$3A         ; ':' End of statement (stands for LD BC,$0E3A - NOP)
 REM:    ld      C,$00           ; 00  End of statement
         ld      B,$00
 NXTSTL: ld      A,C             ; Statement and byte
@@ -1831,10 +1845,18 @@ IF:     call    EVAL            ; Evaluate expression
         dec     HL              ; Cancel increment
 IFGO:   call    TSTNUM          ; Make sure it's numeric
         call    TSTSGN          ; Test state of expression
-        jp      Z,REM           ; False - Drop through
-        call    GETCHR          ; Get next character
+        jp      Z,IF1           ; False - Jump over
+IF0:    call    GETCHR          ; Get next character
         jp      C,GOTO          ; Number - GOTO that line
         jp      IFJMP           ; Otherwise do statement
+IF1:    ld      C,ZELSE
+        call    REM+2           ; check statement
+        or      A               ; end of line?
+        ret     Z               ; yes, leave
+        cp      ZELSE
+        jr      NZ,IF1          ; ELSE not found, continue check
+        jp      IF0             ; return to IF
+
 
 MRPRNT: dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
@@ -3198,20 +3220,6 @@ ALLFOL: ld      C,$00           ; First byte of string
 ; return 0 if B$ is not contained into A$ or LEN(A$)<LEN(B$)
 ; return 1~255 to indicate the starting position of B$ into A$
 ; ex.: INSTR("HELLO","LO") returns 4
-;PT=0
-;DO
-;  TF=0:TP=0
-;  IF S1(PT)=S2(0) THEN
-;    TF=1:TP=PT:PT1=PT:PT2=0
-;    DO
-;      IF S1(PT1)<>S2(PT2) THEN TF=0:EXIT
-;      PT1=PT1+1
-;      PT2=PT2+1
-;    LOOP UNTIL PT2=LEN(S2)
-;  IF TF<>0 THEN EXIT
-;  PT=PT+1
-;LOOP UNTIL PT>=LEN(S1)-LEN(S2)
-;IF TF=0 THEN RETURN 0 ELSE RETURN TP
 LNS1    equ     TMPBFR1
 ADRS1   equ     TMPBFR2
 LNS2    equ     TMPBFR3
@@ -5240,7 +5248,7 @@ CHKG2M: ld      A,(SCR_MODE)    ; check screen mode
 ; print a text in screen 2
 ; GPRINT text,x,y[,fc[,bc]]
 ; where "text" is an expression that can be converted into a sequence of ASCII chars,
-; x & y are the coordinates (0<=x<=32, 0<=y<=23), fc & bc are foreground and background
+; x & y are the coordinates (0<=x<=31, 0<=y<=23), fc & bc are foreground and background
 ; colors (1~15), resp.
 ; (portions of code are from nippur72)
 GX      equ     TMPBFR3
@@ -5425,13 +5433,13 @@ PAINT0: call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,PAINT11      ; pixel is set, so jump over
         ld      A,B             ; pixel is reset, check if X1=0
         and     A               ; (reached the limit of the screen)
-        jr      Z,PAINT1        ; yes, jump over
+        jp      Z,PAINT1        ; yes, jump over
         dec     B               ; no, decrement X1...
-        jr      PAINT0          ; ...and repeat
+        jp      PAINT0          ; ...and repeat
 PAINT11:inc     B               ; if found a pixel on, the re-increment X1
 PAINT1: xor     A               ; reset A
-        ld      (SPA),A         ; set SA=0
-        ld      (SPB),A         ; set SB=0
+        ld      D,A             ; set SA=0
+        ld      E,A             ; set SB=0
 MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,NXTLOOP      ; it's set, so goto next loop
         ld      A,B             ; copy X1
@@ -5439,12 +5447,12 @@ MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         ld      A,C             ; copy Y
         ld      (TMPBFR2),A     ; into buffer
         call    CNTPLOT         ; plot pixel X1,Y
-        ld      A,(SPA)
+        ld      A,D             ; load SA into A
         and     A               ; SA=0?
         jr      NZ,PAINT2       ; no, jump over
         ld      A,C             ; load Y
         cp      $01             ; Y>0?
-        jr      C,PAINT2        ; no, jump over
+        jp      C,PAINT2        ; no, jump over
         dec     A               ; yes, Y=Y-1
         call    CHECKPY         ; check pixel X1,Y-1
         jr      NZ,PAINT2       ; it's set, so jump over
@@ -5454,22 +5462,22 @@ MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         ld      HL,(PNT)        ; load PNT
         inc     HL              ; increment PNT
         ld      (PNT),HL        ; store new PNT
-        ld      A,$01           ; set SA=1...
-        ld      (SPA),A         ; ...into memory
+        ld      A,$01           ; set SA=1 and...
+        ld      D,A             ; ...store SA into memory
         jp      PAINT3          ; jump over
-PAINT2: ld      A,(SPA)
+PAINT2: ld      A,D             ; load SA into A
         rra                     ; check if SA=1
         jr      NC,PAINT3       ; no, jump over
         ld      A,C             ; load Y
         cp      $01             ; Y>0?
-        jr      C,PAINT3        ; no, jump over
+        jp      C,PAINT3        ; no, jump over
         dec     A               ; Y=Y-1
         call    CHECKPY         ; check pixel X1,Y-1
         jp      Z,PAINT3        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
-        ld      (SPA),A         ; ...set SA=0
-PAINT3: ld      A,(SPB)         ; check if
-        and     A               ; B=0
+        ld      D,A             ; ...set SA=0
+PAINT3: ld      A,E             ; check if...
+        and     A               ; SB=0
         jr      NZ,PAINT4       ; no, jump over
         ld      A,C             ; load Y
         cp      $BF             ; Y<191?
@@ -5484,11 +5492,11 @@ PAINT3: ld      A,(SPB)         ; check if
         inc     HL              ; PNT=PNT+1
         ld      (PNT),HL        ; store PNT
         ld      A,$01           ; SB=1
-        ld      (SPB),A         ; set SB
+        ld      E,A             ; set SB
         jp      PAINT5          ; jump over
-PAINT4: ld      A,(SPB)         ; load SB
+PAINT4: ld      A,E             ; load SB
         rra                     ; check if SB=1
-        jp      NC,PAINT5       ; no, jump over
+        jr      NC,PAINT5       ; no, jump over
         ld      A,C             ; load Y
         cp      $BF             ; Y<191?
         jr      NC,PAINT5       ; no, jump over
@@ -5496,7 +5504,7 @@ PAINT4: ld      A,(SPB)         ; load SB
         call    CHECKPY         ; check pixel X1,Y+1
         jp      Z,PAINT5        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
-        ld      (SPB),A         ; ...set SB=0
+        ld      E,A             ; ...set SB=0
 PAINT5: inc     B               ; X1=X1+1
         jp      Z,NXTLOOP       ; if X1>255 (X1=0) then goto next loop
         jp      MNPAINT         ; otherwise, repeat for next X
@@ -5510,7 +5518,9 @@ CHECKPY:ld      (TMPBFR2),A     ; store Y
         ld      A,B             ; copy X1 into A
         ld      (TMPBFR1),A     ; store X1
         push    BC              ; save X1,Y
+        push    DE
         call    PNTRTN          ; check if pixel is set/reset
+        pop     DE
         pop     BC              ; retrieve X1,Y
         ret                     ; return to caller
 
@@ -6068,7 +6078,7 @@ SERIAL: call    GETINT          ; get port #
         or      E               ; LSB OR MSB, to check if bps=0
         jr      NZ,CNTSER       ; no, continue checking
         ; if baud rate is 0, then close the serial comm.
-RSTSER1:ld      A,(PRTNUM)      ; yes, so reset the channel. First, load port number
+RSTSERS:ld      A,(PRTNUM)      ; yes, so reset the channel. First, load port number
         dec     A               ; subtract 1, so that serial channel is 0=>A and 1=>B
         add     SIO_CA          ; find correct channel
         ld      C,A             ; store serial channel
@@ -6507,6 +6517,22 @@ CHKEY4: defb    "13",0
 CHKEY5: defb    "34",0
 
 
+; LOAD "filename"
+LOAD:   ret                     ; currently a stub for LOAD
+
+
+; SAVE "filename"
+SAVE:   ret                     ; currently a stub for SAVE
+
+
+; FILES
+FILES:  ret                     ; currently a stub for FILES
+
+
+; ERASE "filename"
+ERASE:  ret                     ; currently a stub for ERASE
+
+
 ; HEX$(nn) Convert 16 bit number to Hexadecimal string
 HEX: 	call	TSTNUM          ; Verify it's a number
         call	DEINT           ; Get integer -32768 to 32767
@@ -6676,8 +6702,8 @@ MONOUT: jp      $0008           ; output a char
 
 
 RESET:  ld      A,(SERIALS_EN)
-        and     $01             ; is serial port #1 open?
-        call    NZ,RSTSER1      ; yes, reset serial 1
+        and     $11             ; are serial ports open?
+        call    NZ,RSTSERS      ; yes, reset serials
         call    DISNMI          ; disable NMI vector
         di                      ; disable INTs
         jp      $0000           ; Restart

@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C BASIC - R3.14
+; LM80C BASIC - R3.16
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -17,14 +17,13 @@
 ; Videos about the computer: https://www.youtube.com/user/leomil72/videos
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
-; NASCOM BASIC versions:
-; 4.7  - original version by NASCOM
+; LM80C BASIC originally based on the following NASCOM BASIC versions:
+; 4.7  - original version by NASCOM/MICROSOFT
 ; 4.7b - modified version by Grant Searle (additional commands & functions)
-; 4.8  - modified by Leonardo Miliani (new commands/functions)
 
 
 ;------------------------------------------------------------------------------
-;  B A S I C
+;  L M 8 0 C   B A S I C
 ;------------------------------------------------------------------------------
 
 ; GENERAL EQUATES
@@ -45,6 +44,7 @@ HOME            equ     $19             ; Home (cursor at 0,0)
 ESC             equ     $1B             ; Escape
 SPC             equ     $20             ; Space
 DEL             equ     $7F             ; Delete
+INSRT           equ     $1A             ; Insert Key
 ; cursor ASCII codes
 CRSLFT          equ     $1C             ; cursor left
 CRSRGT          equ     $1D             ; cursor right
@@ -52,144 +52,105 @@ CRSUP           equ     $1E             ; cursor up
 CRSDN           equ     $1F             ; cursor down
 
 
-; BASIC WORK SPACE LOCATIONS
-; BY STARTING FROM $805E THE INTERPRETER ALLOCATES THE FOLLOWING RAM CELLS
-; TO STORE IMPORTANT VALUES USED FOR SOME SPECIFIC FUNCTIONS:
-; THEY CAN BE VECTOR (ADDRESSES) FUNCTIONS, SYSTEM DATAS (I.E. VARIABLES)
-; AND SO ON. THE FIRST CELLS ARE FILLED WITH VALUES STORED INTO ROM AT $(INITAB) ADDRESS
-WRKSPC          equ     basicStarted+$01; (3) BASIC Work space
-NMIUSR          equ     WRKSPC+$03      ; (3) NMI exit point routine
-USR             equ     NMIUSR+$03      ; (3) "USR (x)" jump  <-- in $8065/8066 the user can store the address of a specific machine language routine
-OUTSUB          equ     USR+$03         ; (1) "out p,n"
-OTPORT          equ     OUTSUB+$01      ; (2) Port (p)
-DIVSUP          equ     OTPORT+$02      ; (1) Division support routine
-DIV1            equ     DIVSUP+$01      ; (4) <- Values
-DIV2            equ     DIV1+$04        ; (4) <-   to
-DIV3            equ     DIV2+$04        ; (3) <-   be
-DIV4            equ     DIV3+$03        ; (2) <-inserted
-SEED            equ     DIV4+$02        ; (35) Random number seed  <-- starting address of a seed table
-LSTRND          equ     SEED+$23        ; (4) Last random number
-INPSUB          equ     LSTRND+$04      ; (1) #INP (x)" Routine
-INPORT          equ     INPSUB+$01      ; (2) PORT (x)
-LWIDTH          equ     INPORT+$02      ; (1) Terminal width
-COMMAN          equ     LWIDTH+$01      ; (1) Width for commas
-NULFLG          equ     COMMAN+$01      ; (1) Null after input byte flag
-CTLOFG          equ     NULFLG+$01      ; (1) Control "O" flag
-CHKSUM          equ     CTLOFG+$01      ; (2) Array load/save check sum
-NMIFLG          equ     CHKSUM+$02      ; (1) Flag for NMI break routine
-BRKFLG          equ     NMIFLG+$01      ; (1) Break flag
-RINPUT          equ     BRKFLG+$01      ; (3) Input reflection
-STRSPC          equ     RINPUT+$03      ; (2) Bottom of string space
-LINEAT          equ     STRSPC+$02      ; (2) Current line number
-HLPLN           equ     LINEAT+$02      ; (2) Current line with errors
-FNKEYS          equ     HLPLN+$02       ; (128) text of FN keys
-BASTXT          equ     FNKEYS+$80      ; (3) Pointer to start of program   <-- actually this is the last value pre-filled by the firmware at startup
-BUFFER          equ     BASTXT+$03      ; (5) Input buffer
-STACK           equ     BUFFER+$05      ; (85) Initial stack
-CURPOS          equ     STACK+$55       ; (1) Character position on line
-LCRFLG          equ     CURPOS+$01      ; (1) Locate/Create flag
-TYPE            equ     LCRFLG+$01      ; (1) Data type flag
-DATFLG          equ     TYPE+$01        ; (1) Literal statement flag
-LSTRAM          equ     DATFLG+$01      ; (2) Last available RAM
-TMSTPT          equ     LSTRAM+$02      ; (2) Temporary string pointer
-TMSTPL          equ     TMSTPT+$02      ; (12) Temporary string pool
-TMPSTR          equ     TMSTPL+$0C      ; (4) Temporary string
-STRBOT          equ     TMPSTR+$04      ; (2) Bottom of string space
-CUROPR          equ     STRBOT+$02      ; (2) Current operator in EVAL
-LOOPST          equ     CUROPR+$02      ; (2) First statement of loop
-DATLIN          equ     LOOPST+$02      ; (2) Line of current DATA item
-FORFLG          equ     DATLIN+$02      ; (1) "FOR" loop flag
-LSTBIN          equ     FORFLG+$01      ; (1) Last byte entered
-READFG          equ     LSTBIN+$01      ; (1) Read/Input flag
-BRKLIN          equ     READFG+$01      ; (2) Line of break
-NXTOPR          equ     BRKLIN+$02      ; (2) Next operator in EVAL
-ERRLIN          equ     NXTOPR+$02      ; (2) Line of error
-CONTAD          equ     ERRLIN+$02      ; (2) Where to CONTinue
-PROGND          equ     CONTAD+$02      ; (2) End of program
-VAREND          equ     PROGND+$02      ; (2) End of variables
-ARREND          equ     VAREND+$02      ; (2) End of arrays
-NXTDAT          equ     ARREND+$02      ; (2) Next data item
-FNRGNM          equ     NXTDAT+$02      ; (2) Name of FN argument
-FNARG           equ     FNRGNM+$02      ; (4) FN argument value
-FPREG           equ     FNARG+$04       ; (3) Floating point register
-FPEXP           equ     FPREG+$03       ; (1) Floating point exponent
-SGNRES          equ     FPEXP+$01       ; (1) Sign of result
-TMRCNT          equ     SGNRES+$01      ; (4) TMR counter for 1/100 seconds
-CTC0IV          equ     TMRCNT+$04      ; (3) CTC0 interrupt vector
-CTC1IV          equ     CTC0IV+$03      ; (3) CTC1 interrupt vector
-CTC2IV          equ     CTC1IV+$03      ; (3) CTC2 interrupt vector
-CTC3IV          equ     CTC2IV+$03      ; (3) CTC3 interrupt vector
-; - - - - - - - - - - - - - - - - - - -   VIDEO REGISTERS - FROM HERE...
-SCR_SIZE_W      equ     CTC3IV+$03      ; (1) screen width (it can be either 40 chars or 32 chars/bytes)
-SCR_SIZE_H      equ     SCR_SIZE_W+$01  ; (1) screen height (it can be 24/48/192: 24 for text, 48 for MC, 192 for graphics)
-SCR_MODE        equ     SCR_SIZE_H+$01  ; (1) screen mode (0=text, 1=G1, 2=G2, 3=MC, 4=ExG2)
-SCR_NAM_TB      equ     SCR_MODE+$02    ; (2) video name table address
-SCR_CURS_X      equ     SCR_NAM_TB+$02  ; (1) cursor X
-SCR_CURS_Y      equ     SCR_CURS_X+$01  ; (1) cursor Y
-SCR_CUR_NX      equ     SCR_CURS_Y+$01  ; (1) new cursor X position
-SCR_CUR_NY      equ     SCR_CUR_NX+$01  ; (1) new cursor Y position
-SCR_ORG_CHR     equ     SCR_CUR_NY+$01  ; (1) original char positioned under the cursor
-CRSR_STATE      equ     SCR_ORG_CHR+$01 ; (1) state of cursor (1=on, 0=off)
-LSTCSRSTA       equ     CRSR_STATE+$01  ; (1) last cursor state
-PRNTVIDEO       equ     LSTCSRSTA+$01   ; (1) print on video buffer (1=on / 0=off) set to off on graphic only modes
-CHR4VID         equ     PRNTVIDEO+$01   ; (1) char for video buffer
-FRGNDCLR        equ     CHR4VID+$01     ; (1) foreground color as set by SCREEN or COLOR commands
-BKGNDCLR        equ     FRGNDCLR+$01    ; (1) background color as set by SCREEN or COLOR commands
-TMPBFR1         equ     BKGNDCLR+$01    ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
-TMPBFR2         equ     TMPBFR1+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
-TMPBFR3         equ     TMPBFR2+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
-TMPBFR4         equ     TMPBFR3+$02     ; (2) word for general purposes use (temp. buffer for 1 or 2 bytes)
-VIDEOBUFF       equ     TMPBFR4+$02     ; (40) buffer used for video scrolling and other purposes
-VIDTMP1         equ     VIDEOBUFF+$28   ; (2) temporary video word
-VIDTMP2         equ     VIDTMP1+$02     ; (2) temporary video word
-; - - - - - - - - - - - - - - - - - - -   ...TO HERE. DO NOT ADD ANYTHING RELATED TO VPD OUT OF THIS RANGE,
-                                        ; OTHERWISE YOU WILL HAVE TO CHECK THE POINTER IN "CLR_RAM_REG" FUNCTION
-; - - - - - - - - - - - - - - - - - - -   SOUND & KEYBOARD REGISTERS - FROM HERE...
-CHASNDDTN       equ     VIDTMP2+$02     ; (2) sound Ch.A duration (1/100s)
-CHBSNDDTN       equ     CHASNDDTN+$02   ; (2) sound Ch.B duration (1/100s)
-CHCSNDDTN       equ     CHBSNDDTN+$02   ; (2) sound Ch.C duration (1/100s)
-KBDNPT          equ     CHCSNDDTN+$02   ; (1) temp cell used to flag if input comes from keyboard
-KBTMP           equ     KBDNPT+$01      ; (1) temp cell used by keyboard scanner
-TMPKEYBFR       equ     KBTMP+$01       ; (1) temp buffer for last key pressed
-LASTKEYPRSD     equ     TMPKEYBFR+$01   ; (1) last key code pressed
-CONTROLKEYS     equ     LASTKEYPRSD+$01 ; (1) flags for control keys (bit#0=SHIFT; bit#1=CTRL; bit#2=C=)
-; - - - - - - - - - - - - - - - - - - -   ...TO HERE. DO NOT ADD ANYTHING RELATED TO PSG OUT OF THIS RANGE,
-                                        ; OTHERWISE YOU WILL HAVE TO CHANGE THE POINTER IN "initPSG" FUNCTION
-SERIALS_EN      equ     CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Port1(A), bit 1 for Port2(B): 0=OFF, 1=ON
-SERABITS        equ     SERIALS_EN+$01  ; (1) serial port A data bits
-PBUFF           equ     SERABITS+$01    ; (13) Number print buffer
-MULVAL          equ     PBUFF+$0D       ; (3) Multiplier
-PROGST          equ     MULVAL+$03      ; (100) Start of program text area
-STLOOK          equ     PROGST+$64      ; Start of memory test
+;-------------------------------------------------------------------------
+; BASIC ERROR MESSAGES
+; the interpreter looks for a single-byte code in the following list,
+; then loads the corresponding memory pointer in "ERRTBL" table to
+; find where to retrieve the message text in "ERRORS" 
 
 ; BASIC ERROR CODE VALUES
 ; These values act as an offset to point to the error message into the error table
 ; must be incremented by 2 because they point to a word address jump
-NF              equ     $00             ; NEXT without FOR
-SN              equ     $02             ; Syntax error
-RG              equ     $04             ; RETURN without GOSUB
-OD              equ     $06             ; Out of DATA
-FC              equ     $08             ; Function call error
-OV              equ     $0A             ; Overflow
-OM              equ     $0C             ; Out of memory
-UL              equ     $0E             ; Undefined line number
-BS              equ     $10             ; Bad subscript
-DD              equ     $12             ; Re-Dimensioned array
-DZ              equ     $14             ; Division by zero (/0)
-ID              equ     $16             ; Illegal direct
-TM              equ     $18             ; Type mis-match
-OS              equ     $1A             ; Out of string space
-LS              equ     $1C             ; String too long
-ST              equ     $1E             ; String formula too complex
-CN              equ     $20             ; Can't continue
-UF              equ     $22             ; Undefined FN function
-MO              equ     $24             ; Missing operand
-HX              equ     $26             ; HEX error
-BN              equ     $28             ; BIN error
-GM              equ     $2A             ; No Graphics Mode
-SC              equ     $2C             ; Serial configuration
-SA              equ     $2E             ; Serial port already open
-HP              equ     $30             ; HELP call
+NF              equ     $00     ; NEXT without FOR
+SN              equ     $02     ; Syntax error
+RG              equ     $04     ; RETURN without GOSUB
+OD              equ     $06     ; Out of DATA
+FC              equ     $08     ; Function call error
+OV              equ     $0A     ; Overflow
+OM              equ     $0C     ; Out of memory
+UL              equ     $0E     ; Undefined line number
+BS              equ     $10     ; Bad subscript
+DD              equ     $12     ; Re-Dimensioned array
+DZ              equ     $14     ; Division by zero (/0)
+ID              equ     $16     ; Illegal direct
+TM              equ     $18     ; Type mis-match
+OS              equ     $1A     ; Out of string space
+LS              equ     $1C     ; String too long
+ST              equ     $1E     ; String formula too complex
+CN              equ     $20     ; Can't continue
+UF              equ     $22     ; Undefined FN function
+MO              equ     $24     ; Missing operand
+HX              equ     $26     ; HEX error
+BN              equ     $28     ; BIN error
+GM              equ     $2A     ; No Graphics Mode
+SC              equ     $2C     ; Serial configuration
+SA              equ     $2E     ; Serial port already open
+SO              equ     $30     ; Serial buffer overrun
+HP              equ     $32     ; HELP call
+
+; BASIC ERROR POINTER TABLE
+ERRTBL: equ $
+NFPTR:  defw    NFMSG
+SNPTR:  defw    SNMSG
+RGPTR:  defw    RGMSG
+ODPTR:  defw    ODMSG
+FCPTR:  defw    FCMSG
+OVPTR:  defw    OVMSG
+OMPTR:  defw    OMMSG
+ULPTR:  defw    ULMSG
+BSPTR:  defw    BSMSG
+DDPTR:  defw    DDMSG
+DZPTR:  defw    DZMSG
+IDPTR:  defw    IDMSG
+TMPTR:  defw    TMMSG
+OSPTR:  defw    OSMSG
+LSPTR:  defw    LSMSG
+STPTR:  defw    STMSG
+CNPTR:  defw    CNMSG
+UFPTR:  defw    UFMSG
+MOPTR:  defw    MOMSG
+HXPTR:  defw    HXMSG
+BNPTR:  defw    BNMSG
+GMPRT:  defw    GMMSG
+SCPTR:  defw    SCMSG
+SAPTR:  defw    SAMSG
+SOPTR:  defw    SOMSG
+HPPTR:  defw    HPMSG
+
+; BASIC ERROR MESSAGE LIST
+ERRORS  equ $
+NFMSG:  defb    "NEXT Without FOR",0
+SNMSG:  defb    "Syntax",0
+RGMSG:  defb    "RETURN without GOSUB",0
+ODMSG:  defb    "Out of DATA",0
+FCMSG:  defb    "Illegal Function Call",0
+OVMSG:  defb    "Overflow",0
+OMMSG:  defb    "Out of Memory",0
+ULMSG:  defb    "Undefined Line",0
+BSMSG:  defb    "Bad Subscript",0
+DDMSG:  defb    "Re-Dimensioned Array",0
+DZMSG:  defb    "Division by Zero",0
+IDMSG:  defb    "Illegal Direct",0
+TMMSG:  defb    "Type Mis-match",0
+OSMSG:  defb    "Out of String Space",0
+LSMSG:  defb    "String Too Long",0
+STMSG:  defb    "String Formula Too Complex",0
+CNMSG:  defb    "Can't Continue",0
+UFMSG:  defb    "Undefined FN Function",0
+MOMSG:  defb    "Missing Operand",0
+HXMSG:  defb    "HEX Format",0
+BNMSG:  defb    "BIN Format",0
+GMMSG:  defb    "No Graphics Mode",0
+SCMSG:  defb    "Serial Configuration",0
+SAMSG:  defb    "Serial Port Already Open",0
+SOMSG:  defb    "Serial Buffer Overrun",0
+HPMSG:  defb    "HELP Call",0
+
+
+;-----------------------------------------------------------------------------
+; STARTING POINTS FOR BASIC BOOT
+; COLD: reset every memory pointer, acting as a power-up boot
+; WARM: preserve program in memory, keeping every current pointer
 
 COLD:   jp      STARTB          ; Jump for cold start
 WARM:   jp      WARMST          ; Jump for warm start
@@ -215,6 +176,7 @@ INIT:   ld      HL,INITAB       ; Initialise workspace
 MSIZE:  ld      HL,MEMMSG       ; Point to message
         call    PRS             ; Output "Memory size"
         call    PROMPT          ; Get input with '?'
+        call    CURSOR_ON       ; enable cursor
         call    GETCHR          ; Get next character
         or      A               ; Set flags
         jp      NZ,TSTMEM       ; If number - Test if RAM there
@@ -244,11 +206,17 @@ TSTMEM: call    ATOH            ; Get high memory into DE
         ld      (HL),B          ; Restore old contents
         jp      NZ,MSIZE        ; Ask again if no RAM
 
-SETTOP: dec     HL              ; Back one byte
+SETTOP: call    CURSOR_OFF      ; disable cursor
+        dec     HL              ; Back one byte
         ld      DE,STLOOK-1     ; See if enough RAM
         call    CPDEHL          ; Compare DE with HL
         jp      C,MSIZE         ; Ask again if not enough RAM
-        ld      DE,0-100        ; 100 Bytes string space
+        ld      A,(DOS_EN)      ; read if the user enabled/disabled DOS while booting
+        rra                     ; is DOS disabled?
+        jr      NC,NODOS        ; yes, so jump over
+        ld      DE,0-512        ; no, so reserve 512 bytes on top of RAM...
+        add     HL,DE           ; ...for I/O buffer
+NODOS:  ld      DE,0-100        ; 100 Bytes string space
         ld      (LSTRAM),HL     ; Save last available RAM
         add     HL,DE           ; Allocate string space
         ld      (STRSPC),HL     ; Save string space
@@ -266,6 +234,8 @@ SETTOP: dec     HL              ; Back one byte
         push    HL              ; Save bytes free
         ld      HL,SIGNON       ; Sign-on message
         call    PRS             ; Output string
+        ld      HL,BLNSPC       ; Empty space
+        call    PRS             ; Output string
         pop     HL              ; Get bytes free back
         call    PRNTHL          ; Output amount of free memory
         ld      HL,BFREE        ; " Bytes free" message
@@ -273,14 +243,15 @@ SETTOP: dec     HL              ; Back one byte
 
 WARMST: ld      SP,STACK        ; Temporary stack
 BRKRET: call    CLREG           ; Clear registers and stack
+        call    RESFN           ; reset FN keys and auto-repeat
         call    CURSOR_ON       ; enable cursor
         jp      PRNTOK          ; Go to get command line
 
-BFREE:  defb    " Bytes free",CR,0
+BLNSPC: defb    "        ",0    ; 8 empty cells to align the "XXXX Bytes free" message
+BFREE:  defb    " Bytes free",CR,CR,0
 
-SIGNON: defb    "Z80 BASIC Ver 4.8",CR
-        defb    "Copyright ",251," 1978"
-        defb    " by Microsoft",CR,0
+SIGNON: defb    "LM80C BASIC 3.16 ",251,"2021 L.Miliani"
+        defb    " Z80 BASIC 4.7  ",251,"1978 Microsoft",CR,0
 
 MEMMSG: defb    "Memory top",0
 
@@ -296,7 +267,7 @@ MEMMSG: defb    "Memory top",0
 FNCTAB: defw    SGN
         defw    TMR         ; added by Leonardo Miliani
         defw    INT
-        defw    ABS
+        defw    ABS_        ; _ necessary for assembler warning
         defw    USR
         defw    FRE
         defw    INP
@@ -346,11 +317,12 @@ WORDS:  defb    'E'+$80,"ND"            ; from here the list contains the COMMAN
         defb    'R'+$80,"ESTORE"
         defb    'G'+$80,"OSUB"
         defb    'R'+$80,"ETURN"
-        defb    'R'+$80,"EM"
+        defb    'R'+$80,"EM"            ; original REM
         defb    'S'+$80,"TOP"
         defb    'O'+$80,"UT"
         defb    'O'+$80,"N"
-        defb    'N'+$80,"ULL"
+        defb    'F'+$80,"ILES"
+        defb    'E'+$80,"RASE"          ; added by Leonardo Miliani
         defb    'W'+$80,"AIT"
         defb    'D'+$80,"EF"
         defb    'P'+$80,"OKE"
@@ -377,12 +349,13 @@ WORDS:  defb    'E'+$80,"ND"            ; from here the list contains the COMMAN
         defb    'W'+$80,"IDTH"
         defb    'S'+$80,"YS"            ; added by Leonardo Miliani
         defb    'R'+$80,"ESET"          ; changed by Leonardo Miliani
+        defb    'E'+$80,"LSE"           ; added by Leonardo Miliani
         defb    'P'+$80,"RINT"
         defb    'C'+$80,"ONT"
         defb    'L'+$80,"IST"
         defb    'C'+$80,"LEAR"
-        defb    'C'+$80,"LOAD"
-        defb    'C'+$80,"SAVE"
+        defb    'L'+$80,"OAD"
+        defb    'S'+$80,"AVE"
         defb    'N'+$80,"EW"
         defb    'T'+$80,"AB("
         defb    'T'+$80,"O"
@@ -461,11 +434,12 @@ WORDTB: defw    PEND
         defw    RESTOR
         defw    GOSUB
         defw    RETURN
-        defw    REM
+        defw    REM         ; original REM
         defw    STOP
         defw    POUT
         defw    ON
-        defw    REM         ; removed - was NULL
+        defw    FILES       ; changed by Leonardo Miliani - was NULL
+        defw    ERASE       ; added by Leonardo Miliani
         defw    WAIT
         defw    DEF
         defw    POKE
@@ -473,7 +447,7 @@ WORDTB: defw    PEND
         defw    VPOKE       ; added by Leonardo Miliani
         defw    SREG        ; added by Leonardo Miliani
         defw    VREG        ; added by Leonardo Miliani
-        defw    SCREEN      ; mod function: now it sets up a graphics mode (Leonardo Miliani)
+        defw    SCREEN      ; new behaviour: now it sets up a graphics mode (Leonardo Miliani)
         defw    LOCATE      ; added by Leonardo Miliani
         defw    SOUND       ; added by Leonardo Miliani
         defw    VOLUME      ; added by Leonardo Miliani
@@ -492,12 +466,13 @@ WORDTB: defw    PEND
         defw    WIDTH
         defw    SYS         ; added by Leonardo Miliani
         defw    RESET       ; new behaviour: now it resets the system
+        defw    REM+2       ; ELSE: added by Leonardo Miliani
         defw    PRINT
         defw    CONT
         defw    LIST
         defw    CLEAR
-        defw    REM         ; not implemented (was CLOAD)
-        defw    REM         ; not implemented (was CSAVE)
+        defw    LOAD        ; re-implemented by Leonardo Miliani (was CLOAD)
+        defw    SAVE        ; re-implemented by Leonardo Miliani (was CSAVE)
         defw    NEW
 
 ; RESERVED WORD TOKEN VALUES
@@ -517,33 +492,34 @@ ZDATA   equ     $83             ; DATA
 ZGOTO   equ     $88             ; GOTO
 ZGOSUB  equ     $8C             ; GOSUB
 ZREM    equ     $8E             ; REM
-ZPRINT  equ     $AD             ; PRINT
-ZNEW    equ     $B3             ; NEW
+ZELSE   equ     $AE             ; ELSE
+ZPRINT  equ     $AF             ; PRINT
+ZNEW    equ     $B5             ; NEW
 
-ZTAB    equ     $B4             ; TAB
-ZTO     equ     $B5             ; TO
-ZFN     equ     $B6             ; FN
-ZSPC    equ     $B7             ; SPC
-ZTHEN   equ     $B8             ; THEN
-ZNOT    equ     $B9             ; NOT
-ZSTEP   equ     $BA             ; STEP
+ZTAB    equ     $B6             ; TAB
+ZTO     equ     $B7             ; TO
+ZFN     equ     $B8             ; FN
+ZSPC    equ     $B9             ; SPC
+ZTHEN   equ     $BA             ; THEN
+ZNOT    equ     $BB             ; NOT
+ZSTEP   equ     $BC             ; STEP
 
-ZPLUS   equ     $BB             ; +         <-- from here, there are the math operators
-ZMINUS  equ     $BC             ; -
-ZTIMES  equ     $BD             ; *
-ZDIV    equ     $BE             ; /
-ZMOD    equ     $BF             ; %
-ZDINT   equ     $C0             ; #
-ZOR     equ     $C4             ; OR
-ZGTR    equ     $C5             ; >
-ZEQUAL  equ     $C6             ; M
-ZLTH    equ     $C7             ; <
+ZPLUS   equ     $BD             ; +         <-- from here, there are the math operators
+ZMINUS  equ     $BE             ; -
+ZTIMES  equ     $BF             ; *
+ZDIV    equ     $C0             ; /
+ZMOD    equ     $C1             ; %
+ZDINT   equ     $C2             ; #
+ZOR     equ     $C6             ; OR
+ZGTR    equ     $C7             ; >
+ZEQUAL  equ     $C8             ; M
+ZLTH    equ     $C9             ; <
 
-ZSGN    equ     $C8             ; SGN       <-- from here, there are the functions
-ZPOINT  equ     $DE             ; ZPOINT    <-- if the user enters a custom function, between
+ZSGN    equ     $CA             ; SGN       <-- from here, there are the functions
+ZPOINT  equ     $E0             ; ZPOINT    <-- if the user enters a custom function, between
                                 ;               SGN and POINT, he/she must increment this pointer by 1
-ZINSTR  equ     $DF             ; ZINSTR    <-- same here
-ZLEFT   equ     $E7             ; LEFT$     <-- if the user enters a custom function anywhere,
+ZINSTR  equ     $E1             ; ZINSTR    <-- same here
+ZLEFT   equ     $E9             ; LEFT$     <-- if the user enters a custom function anywhere,
                                 ;               he/she must increment this pointer by 1
 
 ; ARITHMETIC PRECEDENCE TABLE
@@ -579,61 +555,6 @@ PRITAB: defb    $79             ; Precedence value
         defb    $46             ; Precedence value
         defw    POR             ; FPREG = <last> OR FPREG
 
-; BASIC ERROR CODE LIST
-
-ERRORS  equ $
-NFMSG:  defb    "NEXT Without FOR",0
-SNMSG:  defb    "Syntax",0
-RGMSG:  defb    "RETURN without GOSUB",0
-ODMSG:  defb    "Out of DATA",0
-FCMSG:  defb    "Illegal Function Call",0
-OVMSG:  defb    "Overflow",0
-OMMSG:  defb    "Out of Memory",0
-ULMSG:  defb    "Undefined Line",0
-BSMSG:  defb    "Bad Subscript",0
-DDMSG:  defb    "Re-Dimensioned Array",0
-DZMSG:  defb    "Division by Zero",0
-IDMSG:  defb    "Illegal Direct",0
-TMMSG:  defb    "Type Mis-match",0
-OSMSG:  defb    "Out of String Space",0
-LSMSG:  defb    "String Too Long",0
-STMSG:  defb    "String Formula Too Complex",0
-CNMSG:  defb    "Can't Continue",0
-UFMSG:  defb    "Undefined FN Function",0
-MOMSG:  defb    "Missing Operand",0
-HXMSG:  defb    "HEX Format",0
-BNMSG:  defb    "BIN Format",0
-GMMSG:  defb    "No Graphics Mode",0
-SCMSG:  defb    "Serial Configuration",0
-SAMSG:  defb    "Serial Port Already Open",0
-HPMSG:  defb    "HELP Call",0
-
-ERRTBL: equ $
-NFPTR:  defw    NFMSG
-SNPTR:  defw    SNMSG
-RGPTR:  defw    RGMSG
-ODPTR:  defw    ODMSG
-FCPTR:  defw    FCMSG
-OVPTR:  defw    OVMSG
-OMPTR:  defw    OMMSG
-ULPTR:  defw    ULMSG
-BSPTR:  defw    BSMSG
-DDPTR:  defw    DDMSG
-DZPTR:  defw    DZMSG
-IDPTR:  defw    IDMSG
-TMPTR:  defw    TMMSG
-OSPTR:  defw    OSMSG
-LSPTR:  defw    LSMSG
-STPTR:  defw    STMSG
-CNPTR:  defw    CNMSG
-UFPTR:  defw    UFMSG
-MOPTR:  defw    MOMSG
-HXPTR:  defw    HXMSG
-BNPTR:  defw    BNMSG
-GMPRT:  defw    GMMSG
-SCPTR:  defw    SCMSG
-SAPTR:  defw    SAMSG
-HPPTR:  defw    HPMSG
 
 ; INITIALISATION TABLE -------------------------------------------------------
 ; these values are copied into RAM at startup
@@ -675,6 +596,8 @@ INITAB: jp      WARMST          ; Warm start jump
         defw    STLOOK          ; Temp string space
         defw    -2              ; Current line number (cold)
         defw    -1              ; Current line with errors (no errors)
+AUTORP: defb    $40             ; delay for key auto-repeat start
+        defb    $08             ; auto-repeat delay
 DEFFNKS:defm    "LIST",13,0,0,0,0,0,0,0,0,0,0,0     ; KEY 1
         defm    "RUN",13,0,0,0,0,0,0,0,0,0,0,0,0    ; KEY 2
         defm    "SCREEN1",13,0,0,0,0,0,0,0,0        ; KEY 3
@@ -1005,7 +928,7 @@ CRNCLP: ld      A,(HL)          ; Get byte
         cp      SPC             ; Is it a space?
         jp      Z,MOVDIR        ; Yes - Copy direct
         ld      B,A             ; Save character
-        cp      22H             ; '"'             ; Is it a quote?
+        cp      $22             ; '"'             ; Is it a quote?
         jp      Z,CPYLIT        ; Yes - Copy literal string
         or      A               ; Is it end of buffer?
         jp      Z,ENDBUF        ; Yes - End buffer
@@ -1190,8 +1113,6 @@ PUTCTL: ld      A,B             ; Get number of bytes in buffer
 OUTIT:  jp      MORINP          ; Get another character
 
 OUTNBS: call    OUTC            ; Output bell and back over it
-        ;ld      A,BKSP          ; send back space
-        ;call    OUTC            ;
         jp      OUTIT           ; get more chars
 
 CPDEHL: ld      A,H             ; Get H
@@ -1267,29 +1188,32 @@ LIST:   pop     BC              ; rubbish - not needed (legacy from original cal
         cp      ZMINUS          ; is it '-'?
         jr      NZ,LST01        ; no, look for a line number
         ld      DE,$0000        ; yes, set search from 0
-        call    SRCHLIN         ; find address of line number
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
         ld      (TMPBFR1),BC    ; store address of starting line
         call    CHKSYN          ; skip '-'
         defb    ZMINUS
         call    ATOH            ; now, look for another number (ASCII number to DE)
-        call    SRCHLIN         ; find address of line number
+        call    SRCLN           ; find a line, getting the previous if it doesn't exist
         ld      (TMPBFR2),BC    ; store address of ending line
         ld      BC,(TMPBFR1)    ; retrieve address of starting line
         push    BC              ; store address of line for later use
         jp      LISTLP          ; go listing
 LST01:  call    ATOH            ; get a line number (ASCII number to DE)
-LST01H: call    SRCHLIN         ; find address of line number
+LST01H: ld      (TMPBFR4),DE    ; store ending line address for later use - N.B.: this is a hook for HELP command
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
         ld      (TMPBFR1),BC    ; store address of starting line
-        ld      (TMPBFR2),BC    ; same address for ending line (we'll change later if needed)
+        ld      (TMPBFR2),BC    ; same address for ending line (we'll change it later if needed)
         dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
-        jp      Z,LST06         ; nothing follows, so ending & starting lines are the same
+        jp      Z,LSTNOT        ; nothing follows, so ending & starting lines are the same
         cp      ZMINUS          ; is it '-'?
         jp      Z,LST03         ; yes, read ending line
-LST04:  call    SRCHLIN         ; find address of line number
-        ld      (TMPBFR2),BC    ; set address of ending line
 LST06:  push    BC              ; store address for later use
         jp      LISTLP          ; jump to list
+LSTNOT: ld      DE,(TMPBFR4)
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
+        jp      C,LST06
+        jp      PRNTOK
 LSTALL: ld      DE,65529        ; set ending line to max. allowed line number
         call    SRCHLIN         ; get address of last line
         ld      (TMPBFR2),BC    ; store it
@@ -1305,8 +1229,10 @@ LST03:  call    CHKSYN          ; skip '-'
         or      E               ; is line=0?
         jr      NZ,LST05        ; no, jump over
         ld      DE,65529        ; yes set last valid line number
-LST05:  call    SRCHLIN         ; find address of line number
-        ld      (TMPBFR2),BC    ; store address of ending line
+        call    SRCHLIN         ; get address of last line
+        jp      LST02
+LST05:  call    SRCLN           ; find a line, getting the previous if it doesn't exist
+LST02:  ld      (TMPBFR2),BC    ; store address of ending line
         ld      BC,(TMPBFR1)    ; retrieve address of starting line
         push    BC              ; store it for later use
 LISTLP: pop     HL              ; Restore address of line
@@ -1366,9 +1292,21 @@ NXTLN:  pop     DE              ; recover address of current line
         jp      C,PRNTOK        ; finish - leave & print OK
         push    DE              ; store address of current line
         jp      LISTLP          ; continue listing
+; look for the address of a program line
 SRCHLIN:push    HL              ; store HL (this is needed because HL store the pointer to the input buffer)
         call    SRCHLN          ; search for line number in DE
         pop     HL              ; retrieve HL
+        ret                     ; return to caller
+; look for the address of a program line - if the line isn't found,
+; it look backward for the previous line
+SRCLN:  push    HL              ; store HL
+SRCLN1: call    SRCHLN          ; search for line in DE
+        jp      C,LVSRLN        ; found it, leave loop
+        dec     DE              ; not found, decrement number to look backward for an existing line
+        ld      A,E
+        or      D               ; is line number zero?
+        jr      NZ,SRCLN1       ; no, continue
+LVSRLN: pop     HL              ; retrieve HL
         ret                     ; return to caller
 
 ; during LISTing, check if PAUSE is pressed, then pause listing and
@@ -1647,7 +1585,8 @@ GTLNLP: call    GETCHR          ; Get next character
         jp      GTLNLP          ; Go to next character
 
 CLEAR:  jp      Z,INTVAR        ; Just "CLEAR" Keep parameters
-        call    POSINT          ; Get integer 0 to 32767 to DE
+        call    GETNUM          ; Evaluate a number
+        call    DEINT           ; Get integer -32768 to 32767 into DE
         dec     HL              ; Cancel increment
         call    GETCHR          ; Get next character
         push    HL              ; Save code string address
@@ -1657,7 +1596,8 @@ CLEAR:  jp      Z,INTVAR        ; Just "CLEAR" Keep parameters
         call    CHKSYN          ; Check for comma
         defb    ','
         push    DE              ; Save number
-        call    POSINT          ; Get integer 0 to 32767
+        call    GETNUM          ; Evaluate a number
+        call    DEINT           ; Get integer -32768 to 32767 into DE
         dec     HL              ; Cancel increment
         call    GETCHR          ; Get next character
         jp      NZ,SNERR        ; ?SN Error if more on line
@@ -1741,7 +1681,7 @@ RETLIN: ld      HL,RUNCNT       ; Execution driver loop
         defb    $3E             ; Skip "pop HL"
 NXTDTA: pop     HL              ; Restore code string address
 
-DATA:   defb    $01,$3A         ; ':' End of statement
+DATA:   defb    $01,$3A         ; ':' End of statement (stands for LD BC,$0E3A - NOP)
 REM:    ld      C,$00           ; 00  End of statement
         ld      B,$00
 NXTSTL: ld      A,C             ; Statement and byte
@@ -1831,10 +1771,18 @@ IF:     call    EVAL            ; Evaluate expression
         dec     HL              ; Cancel increment
 IFGO:   call    TSTNUM          ; Make sure it's numeric
         call    TSTSGN          ; Test state of expression
-        jp      Z,REM           ; False - Drop through
-        call    GETCHR          ; Get next character
+        jp      Z,IF1           ; False - Jump over
+IF0:    call    GETCHR          ; Get next character
         jp      C,GOTO          ; Number - GOTO that line
         jp      IFJMP           ; Otherwise do statement
+IF1:    ld      C,ZELSE
+        call    REM+2           ; check statement
+        or      A               ; end of line?
+        ret     Z               ; yes, leave
+        cp      ZELSE
+        jr      NZ,IF1          ; ELSE not found, continue check
+        jp      IF0             ; return to IF
+
 
 MRPRNT: dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
@@ -3198,20 +3146,6 @@ ALLFOL: ld      C,$00           ; First byte of string
 ; return 0 if B$ is not contained into A$ or LEN(A$)<LEN(B$)
 ; return 1~255 to indicate the starting position of B$ into A$
 ; ex.: INSTR("HELLO","LO") returns 4
-;PT=0
-;DO
-;  TF=0:TP=0
-;  IF S1(PT)=S2(0) THEN
-;    TF=1:TP=PT:PT1=PT:PT2=0
-;    DO
-;      IF S1(PT1)<>S2(PT2) THEN TF=0:EXIT
-;      PT1=PT1+1
-;      PT2=PT2+1
-;    LOOP UNTIL PT2=LEN(S2)
-;  IF TF<>0 THEN EXIT
-;  PT=PT+1
-;LOOP UNTIL PT>=LEN(S1)-LEN(S2)
-;IF TF=0 THEN RETURN 0 ELSE RETURN TP
 LNS1    equ     TMPBFR1
 ADRS1   equ     TMPBFR2
 LNS2    equ     TMPBFR3
@@ -4324,7 +4258,7 @@ RETINT: ld      HL,FPEXP        ; Point to exponent
         rla                     ; Carry = sign of integer
         jp      CONPOS          ; Set sign of result
 
-ABS:    call    TSTSGN          ; Test sign of FPREG
+ABS_:   call    TSTSGN          ; Test sign of FPREG
         ret     P               ; Return if positive
 INVSGN: ld      HL,FPREG+2      ; Point to MSB
         ld      A,(HL)          ; Get sign of mantissa
@@ -5240,7 +5174,7 @@ CHKG2M: ld      A,(SCR_MODE)    ; check screen mode
 ; print a text in screen 2
 ; GPRINT text,x,y[,fc[,bc]]
 ; where "text" is an expression that can be converted into a sequence of ASCII chars,
-; x & y are the coordinates (0<=x<=32, 0<=y<=23), fc & bc are foreground and background
+; x & y are the coordinates (0<=x<=31, 0<=y<=23), fc & bc are foreground and background
 ; colors (1~15), resp.
 ; (portions of code are from nippur72)
 GX      equ     TMPBFR3
@@ -5425,13 +5359,13 @@ PAINT0: call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,PAINT11      ; pixel is set, so jump over
         ld      A,B             ; pixel is reset, check if X1=0
         and     A               ; (reached the limit of the screen)
-        jr      Z,PAINT1        ; yes, jump over
+        jp      Z,PAINT1        ; yes, jump over
         dec     B               ; no, decrement X1...
-        jr      PAINT0          ; ...and repeat
+        jp      PAINT0          ; ...and repeat
 PAINT11:inc     B               ; if found a pixel on, the re-increment X1
 PAINT1: xor     A               ; reset A
-        ld      (SPA),A         ; set SA=0
-        ld      (SPB),A         ; set SB=0
+        ld      D,A             ; set SA=0
+        ld      E,A             ; set SB=0
 MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         jr      NZ,NXTLOOP      ; it's set, so goto next loop
         ld      A,B             ; copy X1
@@ -5439,12 +5373,12 @@ MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         ld      A,C             ; copy Y
         ld      (TMPBFR2),A     ; into buffer
         call    CNTPLOT         ; plot pixel X1,Y
-        ld      A,(SPA)
+        ld      A,D             ; load SA into A
         and     A               ; SA=0?
         jr      NZ,PAINT2       ; no, jump over
         ld      A,C             ; load Y
         cp      $01             ; Y>0?
-        jr      C,PAINT2        ; no, jump over
+        jp      C,PAINT2        ; no, jump over
         dec     A               ; yes, Y=Y-1
         call    CHECKPY         ; check pixel X1,Y-1
         jr      NZ,PAINT2       ; it's set, so jump over
@@ -5454,22 +5388,22 @@ MNPAINT:call    CHECKPA         ; check if pixel is set/reset
         ld      HL,(PNT)        ; load PNT
         inc     HL              ; increment PNT
         ld      (PNT),HL        ; store new PNT
-        ld      A,$01           ; set SA=1...
-        ld      (SPA),A         ; ...into memory
+        ld      A,$01           ; set SA=1 and...
+        ld      D,A             ; ...store SA into memory
         jp      PAINT3          ; jump over
-PAINT2: ld      A,(SPA)
+PAINT2: ld      A,D             ; load SA into A
         rra                     ; check if SA=1
         jr      NC,PAINT3       ; no, jump over
         ld      A,C             ; load Y
         cp      $01             ; Y>0?
-        jr      C,PAINT3        ; no, jump over
+        jp      C,PAINT3        ; no, jump over
         dec     A               ; Y=Y-1
         call    CHECKPY         ; check pixel X1,Y-1
         jp      Z,PAINT3        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
-        ld      (SPA),A         ; ...set SA=0
-PAINT3: ld      A,(SPB)         ; check if
-        and     A               ; B=0
+        ld      D,A             ; ...set SA=0
+PAINT3: ld      A,E             ; check if...
+        and     A               ; SB=0
         jr      NZ,PAINT4       ; no, jump over
         ld      A,C             ; load Y
         cp      $BF             ; Y<191?
@@ -5484,11 +5418,11 @@ PAINT3: ld      A,(SPB)         ; check if
         inc     HL              ; PNT=PNT+1
         ld      (PNT),HL        ; store PNT
         ld      A,$01           ; SB=1
-        ld      (SPB),A         ; set SB
+        ld      E,A             ; set SB
         jp      PAINT5          ; jump over
-PAINT4: ld      A,(SPB)         ; load SB
+PAINT4: ld      A,E             ; load SB
         rra                     ; check if SB=1
-        jp      NC,PAINT5       ; no, jump over
+        jr      NC,PAINT5       ; no, jump over
         ld      A,C             ; load Y
         cp      $BF             ; Y<191?
         jr      NC,PAINT5       ; no, jump over
@@ -5496,7 +5430,7 @@ PAINT4: ld      A,(SPB)         ; load SB
         call    CHECKPY         ; check pixel X1,Y+1
         jp      Z,PAINT5        ; if pixel is off, jump over
         xor     A               ; pixel is on, so...
-        ld      (SPB),A         ; ...set SB=0
+        ld      E,A             ; ...set SB=0
 PAINT5: inc     B               ; X1=X1+1
         jp      Z,NXTLOOP       ; if X1>255 (X1=0) then goto next loop
         jp      MNPAINT         ; otherwise, repeat for next X
@@ -5510,7 +5444,9 @@ CHECKPY:ld      (TMPBFR2),A     ; store Y
         ld      A,B             ; copy X1 into A
         ld      (TMPBFR1),A     ; store X1
         push    BC              ; save X1,Y
+        push    DE
         call    PNTRTN          ; check if pixel is set/reset
+        pop     DE
         pop     BC              ; retrieve X1,Y
         ret                     ; return to caller
 
@@ -6063,12 +5999,22 @@ SERIAL: call    GETINT          ; get port #
         ld      (PRTNUM),A      ; store port number into a temp buffer
         call    CHKSYN          ; Make sure ',' follows
         defb    ','
+        dec     HL
+        call    GETCHR          ; check what's following
+        jp      Z,SNERR         ; error if nothing follows
+        jr      NC,SERVAR       ; it's not a number, try a variable
         call    ATOH            ; get bps (returned into DE)
-        ld      A,D             ; move MSB into A
-        or      E               ; LSB OR MSB, to check if bps=0
+        jr      CHKZSER         ; jump over
+SERVAR: call    GETNUM          ; get number
+        call    TSTSGN          ; check value
+        jp      M,FCERR         ; negative - illegal function call
+        ld      A,(FPEXP)       ; Get integer value to DE
+        call    FPINT           ; get integer number into BCDE - drop BC 'cause isn't necessary     
+CHKZSER:ld      A,D             ; bps is into DE - move MSB into A
+        or      E               ; check if bps=0
         jr      NZ,CNTSER       ; no, continue checking
-        ; if baud rate is 0, then close the serial comm.
-RSTSER1:ld      A,(PRTNUM)      ; yes, so reset the channel. First, load port number
+        ; if baud rate is 0, then close the serial comm.    
+RSTSERS:ld      A,(PRTNUM)      ; yes, so reset the channel. First, load port number
         dec     A               ; subtract 1, so that serial channel is 0=>A and 1=>B
         add     SIO_CA          ; find correct channel
         ld      C,A             ; store serial channel
@@ -6108,15 +6054,13 @@ CNTSER: ld      A,D
         cp      $01             ; E=1
         jr      NZ,CNTSER2      ; if not, jump over
         ld      A,(PRTNUM)      ; load port number
-        cp      $01             ; is it port 1? (currently do NOT support on port 2)
-        jp      NZ,SCERR        ; no, raise error and exit 
         ld      D,A             ; store port on D
         ld      A,(SERIALS_EN)  ; load address of serial status cell
         and     D               ; check status
         jp      Z,SCERR         ; port not open, raise error
         di                      ; disable INTs
         ld      A,D             ; move port # into A
-        ld      E,A             ; store original A into E
+        ld      E,A             ; and also into E
         add     A
         add     A               ; move A to left times 2
         ld      D,A             ; move value into D
@@ -6130,7 +6074,7 @@ CNTSER: ld      A,D
         in      A,(PIO_DB)      ; load status LEDs
         res     4,A             ; remove error LED
         jp      RXEND           ; terminate setting
-CNTRX2: call    SIO_A_EI        ; re-enable RX on port 2 -> CURRENTLY only port 1 is supported
+CNTRX2: call    SIO_B_EI        ; re-enable RX on port 2
         in      A,(PIO_DB)      ; load status LEDs
         res     5,A             ; remove error LED
 RXEND:  out     (PIO_DB),A      ; set new status for LEDs
@@ -6161,7 +6105,7 @@ CNTSER3:push    HL              ; store HL
         cp      $05             ; is it <5?
         jp      C,SCERR         ; yes, error
         cp      $09             ; is it >=9?
-        jp      NC,FCERR        ; no, error
+        jp      NC,FCERR        ; yes, error
         ld      (DATABT),A      ; store data bits
         call    CHKSYN          ; Make sure ',' follows
         defb    ','
@@ -6193,17 +6137,13 @@ CKBPS:  ld      HL,(BPS)        ; load BPS
         ld      E,(IX+0)        ; load LSB of item
         ld      D,(IX+1)        ; load MSB of item
         call    CMP16           ; is it equal?
-        jp      Z,FNDBPS        ; yes, found correspondance
+        jp      Z,SET_PT        ; yes, found a correspondance
         inc     IX
         inc     IX              ; no, go to next entry
         inc     C               ; increment pointer
         djnz    CKBPS           ; repeat for 10 entries
         jp      SCERR1          ; if nothing found, raise an error
-FNDBPS: ld      A,(PRTNUM)      ; check serial port
-        dec     A               ; is it port 1?
-        jp      Z,SET_P1        ; yes, set port 1
-        jp      SCERR1          ; at the moment, only port 1 can be configured
-SET_P1: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
+SET_PT: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
         ; TO0 output frequency=INPUT CLK/time constant. Time constant is set to get 16 times
         ; the requested baud rate. I.e., if bps is 19,200 then time constast is set to 6 because
         ; 1,843,200/6 = 307,200 Hz (that is 19,200 x 16)
@@ -6211,11 +6151,16 @@ SET_P1: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
         ld      B,$00           ; reset B
         ld      HL,CTC_CFG      ; address of first CTC divider
         add     HL,BC           ; adjust for correct CTC divider
-        ld      A,%01000111     ; interrupt off, counter mode, prsc=16 (doesn't matter), ext. start,
+        ld      C,CTC_CH0       ; CTC channel 0
+        ld      A,(PRTNUM)      ; load port number
+        rra                     ; is it 1 (Carry=1) or 2 (Carry=0)
+        jp      C,SET_CTC       ; port 1 => ch. 0, so continue
+        inc     C               ; port 2 => ch. 1, increment address port into C
+SET_CTC:ld      A,%01000111     ; interrupt off, counter mode, prsc=16 (doesn't matter), ext. start,
                                 ; start upon loading time constant, time constant follows, sw reset, command word
-        out     (CTC_CH0),A     ; configure CTC channel 0
+        out     (C),A           ; configure CTC channel 
         ld      A,(HL)          ; load CTC divider
-        out     (CTC_CH0),A     ; send divider
+        out     (C),A           ; send divider
         ; configure SIO
         ld      HL,SIO_A_SETS   ; load default settings for SIO
         ld      DE,SIOBFR       ; into a temp buffer
@@ -6241,11 +6186,16 @@ BITS7:  cp      $07             ; is it 7 bits?
         jp      SETPAR          ; jump to set parity
 BITS8:  set     6,B
         set     5,B             ; set D6 & D5 to 1,1
-SETPAR: ld      A,B
+SETPAR: ld      HL,SERABITS     ; load address for storing data bits
+        ld      A,(PRTNUM)      ; check serial port number
+        dec     A               ; is it port #1?
+        jp      Z,SETPAR2       ; yes, jump over
+        inc     HL              ; port #2, use SERBBITS instead
+SETPAR2:ld      A,B             ; retrieve DATA bits
         ld      (SIOBFR+5),A    ; save DATA bits
         and     %01100000       ; filter only D5&D6 bits
         add     A,A             ; shift left times 1
-        ld      (SERABITS),A    ; store for SIO_A_EI & SIO_A_DI functions
+        ld      (HL),A          ; store for SIO_EI & SIO_DI functions
         ld      A,(STPBT)       ; load STOP bits
         add     A,A
         add     A,A             ; 2 left shifts
@@ -6266,19 +6216,28 @@ STRPAR: ld      A,(SIOBFR+3)    ; load WR4 setting
         ld      HL,SIOBFR       ; settings for SIO ch. A
         ld      B,$06           ; 6 bytes to send
         ld      C,SIO_CA        ; I/O address of SIO ch.A
-        otir                    ; send bytes to SIO
+        ld      A,(PRTNUM)      ; load port number
+        rra                     ; is it 1 (Carry=1) or 2 (Carry=0)
+        jp      C,SRLCNT        ; port 1, continue
+        inc     C               ; port 2, increment address port into C
+SRLCNT: otir                    ; send bytes to SIO
         ; the following are settings for channel B (don't need to load HL since settings are contigous)
         ld      B,$04           ; other 4 bytes to send
+        ld      D,C             ; store port address into D
         ld      C,SIO_CB        ; I/O address of SIO ch.B
         otir                    ; send bytes to SIO
-        ; the following are settings for channel A
+        ; the following are settings for selected channel
         ld      A,$01           ; write into WR0: select WR1
-        out     (SIO_CA),A
+        ld      C,D             ; retrieve port address
+        out     (C),A
         ld      A,%00011000     ; interrupts on every RX char; parity is no special condition;
                                 ; buffer overrun is special condition
-        out     (SIO_CA),A
+        out     (C),A
+        ld      HL,SERIALS_EN
+        ld      A,(PRTNUM)      ; retrieve serial channel
+        dec     A               ; channel A?
+        jr      NZ,ENCHB        ; no, jump over
         call    SIO_A_EI        ; enable RX on SIO channel A
-EXITSER:ld      HL,SERIALS_EN
         set     0,(HL)          ; set serial port 1 status ON
         set     2,(HL)          ; set serial port 1 RX ON
         ; back to normal running
@@ -6286,7 +6245,16 @@ EXITSER:ld      HL,SERIALS_EN
         in      A,(PIO_DB)      ; load status LEDs
         set     6,A             ; set status LED on
         res     4,A             ; set error LED off
-        out     (PIO_DB),A      ; send new configuration
+        jr      EXNRM           ; leave
+ENCHB:  call    SIO_B_EI        ; enable RX on SIO channel B
+        set     1,(HL)          ; set serial port 2 status ON
+        set     3,(HL)          ; set serial port 2 RX ON
+        ; back to normal running
+        ei                      ; re-enable INTs
+        in      A,(PIO_DB)      ; load status LEDs
+        set     7,A             ; set status LED on
+        res     5,A             ; set error LED off
+EXNRM:  out     (PIO_DB),A      ; send new configuration
         pop     IX              ; retrieve IX
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
@@ -6297,12 +6265,20 @@ SUP_BPS:defw    57600,38400,28800,19200,14400,9600,4800,3600,2400,1200,600
 ; corresponding CTC divider
 CTC_CFG:defb    2,3,4,6,8,12,24,32,48,96,192
 
+
 ; serial configuration error
 SCERR1: pop     IX              ; retrieve IX
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
 SCERR:  ld      E,SC            ; Serial Configuration Error
         jp      ERROR           ; print error
+
+
+; serial buffer overrun
+SOERR:  call    PRNTCRLF
+        ld      E,SO            ; Serial Buffer Overrun
+        jp      ERROR
+
 
 ; check for direct mode
 DIRMOD: push    HL              ; Save code string address
@@ -6315,7 +6291,7 @@ DIRMOD: push    HL              ; Save code string address
         ret
 
 
-; HELP lists the line program where an error was found
+; HELP lists the line program where an error occured
 HELP:   call    DIRMOD          ; check if in direct mode
         push    HL              ; store HL
         ld      HL,(HLPLN)      ; load HELP line
@@ -6331,7 +6307,7 @@ HLPERR: ld      E,HP            ; HELP call error
         jp      ERROR           ; raise error
 
 
-; KEY command to list/modify function keys
+; KEY command to list/modify function keys and auto-repeat
 KEY:    dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
         jp      Z,LSTKEYS       ; jump if nothing follows
@@ -6339,17 +6315,17 @@ KEY:    dec     HL              ; dec 'cos GETCHR INCs
         call    GETINT          ; get a number
         and     A               ; is it 0?
         jr      NZ,KEYCH        ; no, jump over         
-        push    HL              ; yes - reset FN keys to defaults
+RESFN:  push    HL              ; yes - reset FN keys to defaults
         push    DE              ; store HL & DE
-        ld      HL,DEFFNKS      ; pointer to default FN keys texts
-        ld      DE,FNKEYS       ; pointer to destination
-        ld      BC,$0080        ; 128 chars to be copied
+        ld      HL,AUTORP       ; pointer to default auto-repeat delays and FN keys texts
+        ld      DE,KEYDEL       ; pointer to destination
+        ld      BC,$0082        ; 130 chars to be copied (2xauto-delay, 128xFN keys)
         ldir                    ; restore default texts
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
         ret                     ; return to caller
 KEYCH:  cp      $09             ; is it >= 9?
-        jp      NC,SNERR        ; yes - syntax error
+        jp      NC,SETREP       ; yes - jump over
         dec     A               ; FN key in range 0~7
         add     A,A             ; multiply A...
         add     A,A             ; ... times 4...
@@ -6447,7 +6423,6 @@ CNTLTK: inc     HL              ; next char
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
         ret                     ; return to caller
-
 PRTCHR: push    HL              ; store HL
         call    CLSQT           ; check if quotes are closed
         ld      A,'+'           ; '+' char
@@ -6465,7 +6440,6 @@ PRTCHR: push    HL              ; store HL
 PTCHR1: call    PRTCKEY         ; print it
         ld      A,')'           ; char )
         jp      PRTK3           ; continue
-
 CLSQT:  push    AF              ; store A
         ld      A,(TMPBFR1)     ; quote status
         and     A               ; are they closed?
@@ -6476,7 +6450,6 @@ CLSQT:  push    AF              ; store A
         ld      (TMPBFR1),A     ; as closed
 CLSQT1: pop     AF              ; retrieve A
         ret                     ; return to caller
-
 OPNQT:  push    AF              ; store A
         ld      A,(TMPBFR1)     ; quote status
         and     A               ; are they open?
@@ -6489,7 +6462,6 @@ OPNQT:  push    AF              ; store A
         ld      (TMPBFR1),A     ; as opened
 OPNQT1: pop     AF              ; retrieve A
         ret                     ; return to caller
-
 PRTCKEY:push    AF              ; store original char
 PRTK1:  ld      A,(DE)          ; load char
         and     A               ; is it 0?
@@ -6499,12 +6471,48 @@ PRTK1:  ld      A,(DE)          ; load char
         jp      PRTK1           ; repeat
 PRTEND: pop     AF              ; retrieve AF
         ret                     ; return to caller
-
+SETREP: cp      $09             ; is it special key 9? (stands for auto-repeat)
+        jp      NZ,SNERR        ; no, raise an error
+        call    CHKSYN          ; Check for comma
+        defb    ','
+        call    GETINT          ; get a number
+        ld      (TMPBFR1),A     ; store it
+        call    CHKSYN          ; Check for comma
+        defb    ','
+        call    GETINT          ; get another number
+        push    HL              ; store HL
+        ld      HL,AUTOKE       ; address of second cell for key auto-repeat
+        ld      (HL),A          ; store auto-repeat delay
+        dec     HL              ; previous cell
+        ld      A,(TMPBFR1)     ; retrieve value
+        ld      (HL),A          ; store delay for auto-repeat
+        pop     HL              ; retrieve HL
+        ret
 CHKEY1: defb    "KEY ",0
 CHKEY2: defb    ":",34,0
 CHKEY3: defb    "chr$(",0
 CHKEY4: defb    "13",0
 CHKEY5: defb    "34",0
+
+
+; LOAD "filename"
+; load a BASIC program from disk
+LOAD:   ret                     ; currently a stub for LOAD
+
+
+; SAVE "filename"
+; save a BASIC program on disk
+SAVE:   ret                     ; currently a stub for SAVE
+
+
+; FILES
+; list files on disk
+FILES:  ret                     ; currently a stub for FILES
+
+
+; ERASE "filename"
+; erase a file from disk
+ERASE:  ret                     ; currently a stub for ERASE
 
 
 ; HEX$(nn) Convert 16 bit number to Hexadecimal string
@@ -6676,8 +6684,8 @@ MONOUT: jp      $0008           ; output a char
 
 
 RESET:  ld      A,(SERIALS_EN)
-        and     $01             ; is serial port #1 open?
-        call    NZ,RSTSER1      ; yes, reset serial 1
+        and     $11             ; are serial ports open?
+        call    NZ,RSTSERS      ; yes, reset serials
         call    DISNMI          ; disable NMI vector
         di                      ; disable INTs
         jp      $0000           ; Restart

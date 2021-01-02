@@ -1,0 +1,51 @@
+---------------------------------------------------------------------------------------------
+
+                                LM80C 64K - Changelog
+
+---------------------------------------------------------------------------------------------
+
+The following file reports the changelog of the firmware developed by Leonardo Miliani
+for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
+
+P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
+
+---------------------------------------------------------------------------------------------
+
+1.03    - 2021xxxx
+
+- Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
+  of the video chip
+
+---------------------------------------------------------------------------------------------
+
+1.02    - 20201231
+
+- Fixed a bug into the serial code: the incoming chars were print on screen even if the
+  cursor was off (i.e., in indirect mode)
+
+---------------------------------------------------------------------------------------------
+
+1.01    - 20201231
+
+- Code revision to comply with the assembler SJASMPLUS
+- Moved equates for BASIC workspace area into a separated file
+
+---------------------------------------------------------------------------------------------
+
+1.00    - 20201229 - The 64K edition
+
+- Hardware revision for memory expansion to 64K of RAM and bank switching mechanism to
+  start in ROM, then switch to full 64K of RAM with copy of BASIC into the volatile memory
+- Hardware revision to get the same bank switching mechanism for the VRAM to let the use
+  of 2 portions of 16K each
+- Serial buffer overrun revision
+- Added key auto-repeat
+- Added support for INSERT key to insert a space between text by moving the chars after the
+  cursor position
+- LIST now manage ending line number correctly, so that it won't list the line after the
+  one passed as argument anymore
+- BASIC support for serial channel B
+- Code revision to comply with Z88DK assembler requirements
+- Preliminary support for external mass storage (stubs for ERASE, FILES, LOAD, SAVE commands)
+- Mechanism to enable/disable the 512-byte buffer for mass storage I/O operations (by
+  pressing SHIFT while logo is shown on startup)

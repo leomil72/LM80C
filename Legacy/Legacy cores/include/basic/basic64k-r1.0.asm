@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C BASIC - R3.15
+; LM80C BASIC 64K - R0.9
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -17,10 +17,9 @@
 ; Videos about the computer: https://www.youtube.com/user/leomil72/videos
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
-; NASCOM BASIC versions:
-; 4.7  - original version by NASCOM
+; LM80C BASIC 64K - originally based on the following NASCOM BASIC versions:
+; 4.7  - original version by NASCOM/MICROSOFT
 ; 4.7b - modified version by Grant Searle (additional commands & functions)
-; 4.8  - modified by Leonardo Miliani (new commands/functions)
 
 
 ;------------------------------------------------------------------------------
@@ -45,6 +44,7 @@ HOME            equ     $19             ; Home (cursor at 0,0)
 ESC             equ     $1B             ; Escape
 SPC             equ     $20             ; Space
 DEL             equ     $7F             ; Delete
+INSRT           equ     $1A             ; Insert Key
 ; cursor ASCII codes
 CRSLFT          equ     $1C             ; cursor left
 CRSRGT          equ     $1D             ; cursor right
@@ -53,7 +53,7 @@ CRSDN           equ     $1F             ; cursor down
 
 
 ; BASIC WORK SPACE LOCATIONS
-; BY STARTING FROM $805E THE INTERPRETER ALLOCATES THE FOLLOWING RAM CELLS
+; THE INTERPRETER ALLOCATES THE FOLLOWING RAM CELLS
 ; TO STORE IMPORTANT VALUES USED FOR SOME SPECIFIC FUNCTIONS:
 ; THEY CAN BE VECTOR (ADDRESSES) FUNCTIONS, SYSTEM DATAS (I.E. VARIABLES)
 ; AND SO ON. THE FIRST CELLS ARE FILLED WITH VALUES STORED INTO ROM AT $(INITAB) ADDRESS
@@ -82,7 +82,9 @@ RINPUT          equ     BRKFLG+$01      ; (3) Input reflection
 STRSPC          equ     RINPUT+$03      ; (2) Pointer to bottom (start) of string space - default is 100 bytes below the top of memory
 LINEAT          equ     STRSPC+$02      ; (2) Current line number. -1 means "direct mode", while -2 means cold start.
 HLPLN           equ     LINEAT+$02      ; (2) Current line with errors
-FNKEYS          equ     HLPLN+$02       ; (128) default text of FN keys
+KEYDEL          equ     HLPLN+$02       ; (1) delay before key auto-repeat starts
+AUTOKE          equ     KEYDEL+$01      ; (1) delay for key auto-repeat
+FNKEYS          equ     AUTOKE+$01      ; (128) default text of FN keys
 BASTXT          equ     FNKEYS+$80      ; (3) Pointer to start of BASIC program in memory
 ; - - - - - - - - - - - - - - - - - - -   the above are locations pre-filled by the firmware at startup
 BUFFER          equ     BASTXT+$03      ; (5) Input buffer
@@ -144,16 +146,19 @@ KBDNPT          equ     CHCSNDDTN+$02   ; (1) temp cell used to flag if input co
 KBTMP           equ     KBDNPT+$01      ; (1) temp cell used by keyboard scanner
 TMPKEYBFR       equ     KBTMP+$01       ; (1) temp buffer for last key pressed
 LASTKEYPRSD     equ     TMPKEYBFR+$01   ; (1) last key code pressed
-CONTROLKEYS     equ     LASTKEYPRSD+$01 ; (1) flags for control keys (bit#0=SHIFT; bit#1=CTRL; bit#2=C=)
+STATUSKEY       equ     LASTKEYPRSD+$01 ; (1) status key, used for auto-repeat
+KEYTMR          equ     STATUSKEY+$01   ; (2) timer used for auto-repeat key
+CONTROLKEYS     equ     KEYTMR+$02      ; (1) flags for control keys (bit#0=SHIFT; bit#1=CTRL; bit#2=C=)
 ; - - - - - - - - - - - - - - - - - - -   ...TO HERE. DO NOT ADD ANYTHING RELATED TO PSG OUT OF THIS RANGE,
                                         ; OTHERWISE YOU WILL HAVE TO CHANGE THE POINTER IN "initPSG" FUNCTION
 SERIALS_EN      equ     CONTROLKEYS+$01 ; (1) serial ports status: bit 0 for Port1 (A), bit 1 for Port2 (B): 0=OFF, 1=ON
 SERABITS        equ     SERIALS_EN+$01  ; (1) serial port A data bits
 SERBBITS        equ     SERABITS+$01    ; (1) serial port B data bits
+DOS_EN          equ     SERBBITS+$01    ; (1) DOS enable/disable (1/0)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                         ; from here there are the RAM locations that
                                         ; are saved during SAVE
-PROGND          equ     SERBBITS+$01    ; (2) End of program
+PROGND          equ     DOS_EN+$01      ; (2) End of program
 VAREND          equ     PROGND+$02      ; (2) End of variables
 ARREND          equ     VAREND+$02      ; (2) End of arrays
 NXTDAT          equ     ARREND+$02      ; (2) Next data item
@@ -167,34 +172,106 @@ MULVAL          equ     PBUFF+$0D       ; (3) Multiplier
 PROGST          equ     MULVAL+$03      ; (100) Start of program text area
 STLOOK          equ     PROGST+$64      ; Start of memory test
 
+
+;-------------------------------------------------------------------------
+; BASIC ERROR MESSAGES
+; the interpreter looks for a single-byte code in the following list,
+; then loads the corresponding memory pointer in "ERRTBL" table to
+; find where to retrieve the message text in "ERRORS" 
+
 ; BASIC ERROR CODE VALUES
 ; These values act as an offset to point to the error message into the error table
 ; must be incremented by 2 because they point to a word address jump
-NF              equ     $00             ; NEXT without FOR
-SN              equ     $02             ; Syntax error
-RG              equ     $04             ; RETURN without GOSUB
-OD              equ     $06             ; Out of DATA
-FC              equ     $08             ; Function call error
-OV              equ     $0A             ; Overflow
-OM              equ     $0C             ; Out of memory
-UL              equ     $0E             ; Undefined line number
-BS              equ     $10             ; Bad subscript
-DD              equ     $12             ; Re-Dimensioned array
-DZ              equ     $14             ; Division by zero (/0)
-ID              equ     $16             ; Illegal direct
-TM              equ     $18             ; Type mis-match
-OS              equ     $1A             ; Out of string space
-LS              equ     $1C             ; String too long
-ST              equ     $1E             ; String formula too complex
-CN              equ     $20             ; Can't continue
-UF              equ     $22             ; Undefined FN function
-MO              equ     $24             ; Missing operand
-HX              equ     $26             ; HEX error
-BN              equ     $28             ; BIN error
-GM              equ     $2A             ; No Graphics Mode
-SC              equ     $2C             ; Serial configuration
-SA              equ     $2E             ; Serial port already open
-HP              equ     $30             ; HELP call
+NF              equ     $00     ; NEXT without FOR
+SN              equ     $02     ; Syntax error
+RG              equ     $04     ; RETURN without GOSUB
+OD              equ     $06     ; Out of DATA
+FC              equ     $08     ; Function call error
+OV              equ     $0A     ; Overflow
+OM              equ     $0C     ; Out of memory
+UL              equ     $0E     ; Undefined line number
+BS              equ     $10     ; Bad subscript
+DD              equ     $12     ; Re-Dimensioned array
+DZ              equ     $14     ; Division by zero (/0)
+ID              equ     $16     ; Illegal direct
+TM              equ     $18     ; Type mis-match
+OS              equ     $1A     ; Out of string space
+LS              equ     $1C     ; String too long
+ST              equ     $1E     ; String formula too complex
+CN              equ     $20     ; Can't continue
+UF              equ     $22     ; Undefined FN function
+MO              equ     $24     ; Missing operand
+HX              equ     $26     ; HEX error
+BN              equ     $28     ; BIN error
+GM              equ     $2A     ; No Graphics Mode
+SC              equ     $2C     ; Serial configuration
+SA              equ     $2E     ; Serial port already open
+SO              equ     $30     ; Serial buffer overrun
+HP              equ     $32     ; HELP call
+
+; BASIC ERROR POINTER TABLE
+ERRTBL: equ $
+NFPTR:  defw    NFMSG
+SNPTR:  defw    SNMSG
+RGPTR:  defw    RGMSG
+ODPTR:  defw    ODMSG
+FCPTR:  defw    FCMSG
+OVPTR:  defw    OVMSG
+OMPTR:  defw    OMMSG
+ULPTR:  defw    ULMSG
+BSPTR:  defw    BSMSG
+DDPTR:  defw    DDMSG
+DZPTR:  defw    DZMSG
+IDPTR:  defw    IDMSG
+TMPTR:  defw    TMMSG
+OSPTR:  defw    OSMSG
+LSPTR:  defw    LSMSG
+STPTR:  defw    STMSG
+CNPTR:  defw    CNMSG
+UFPTR:  defw    UFMSG
+MOPTR:  defw    MOMSG
+HXPTR:  defw    HXMSG
+BNPTR:  defw    BNMSG
+GMPRT:  defw    GMMSG
+SCPTR:  defw    SCMSG
+SAPTR:  defw    SAMSG
+SOPTR:  defw    SOMSG
+HPPTR:  defw    HPMSG
+
+; BASIC ERROR MESSAGE LIST
+ERRORS  equ $
+NFMSG:  defb    "NEXT Without FOR",0
+SNMSG:  defb    "Syntax",0
+RGMSG:  defb    "RETURN without GOSUB",0
+ODMSG:  defb    "Out of DATA",0
+FCMSG:  defb    "Illegal Function Call",0
+OVMSG:  defb    "Overflow",0
+OMMSG:  defb    "Out of Memory",0
+ULMSG:  defb    "Undefined Line",0
+BSMSG:  defb    "Bad Subscript",0
+DDMSG:  defb    "Re-Dimensioned Array",0
+DZMSG:  defb    "Division by Zero",0
+IDMSG:  defb    "Illegal Direct",0
+TMMSG:  defb    "Type Mis-match",0
+OSMSG:  defb    "Out of String Space",0
+LSMSG:  defb    "String Too Long",0
+STMSG:  defb    "String Formula Too Complex",0
+CNMSG:  defb    "Can't Continue",0
+UFMSG:  defb    "Undefined FN Function",0
+MOMSG:  defb    "Missing Operand",0
+HXMSG:  defb    "HEX Format",0
+BNMSG:  defb    "BIN Format",0
+GMMSG:  defb    "No Graphics Mode",0
+SCMSG:  defb    "Serial Configuration",0
+SAMSG:  defb    "Serial Port Already Open",0
+SOMSG:  defb    "Serial Buffer Overrun",0
+HPMSG:  defb    "HELP Call",0
+
+
+;-----------------------------------------------------------------------------
+; STARTING POINTS FOR BASIC BOOT
+; COLD: reset every memory pointer, acting as a power-up boot
+; WARM: preserve program in memory, keeping every current pointer
 
 COLD:   jp      STARTB          ; Jump for cold start
 WARM:   jp      WARMST          ; Jump for warm start
@@ -255,7 +332,12 @@ SETTOP: call    CURSOR_OFF      ; disable cursor
         ld      DE,STLOOK-1     ; See if enough RAM
         call    CPDEHL          ; Compare DE with HL
         jp      C,MSIZE         ; Ask again if not enough RAM
-        ld      DE,0-100        ; 100 Bytes string space
+        ld      A,(DOS_EN)      ; read if the user enabled/disabled DOS while booting
+        rra                     ; is DOS disabled?
+        jr      NC,NODOS        ; yes, so jump over
+        ld      DE,0-512        ; no, so reserve 512 bytes on top of RAM...
+        add     HL,DE           ; ...for I/O buffer
+NODOS:  ld      DE,0-100        ; 100 Bytes string space
         ld      (LSTRAM),HL     ; Save last available RAM
         add     HL,DE           ; Allocate string space
         ld      (STRSPC),HL     ; Save string space
@@ -282,14 +364,15 @@ SETTOP: call    CURSOR_OFF      ; disable cursor
 
 WARMST: ld      SP,STACK        ; Temporary stack
 BRKRET: call    CLREG           ; Clear registers and stack
+        call    RESFN           ; reset FN keys and auto-repeat
         call    CURSOR_ON       ; enable cursor
         jp      PRNTOK          ; Go to get command line
 
 BLNSPC: defb    "        ",0    ; 8 empty cells to align the "XXXX Bytes free" message
 BFREE:  defb    " Bytes free",CR,CR,0
 
-SIGNON: defb    "LM80C BASIC 3.15 ",251,"2020 L.Miliani"
-        defb    " Z80 BASIC 4.7  ",251,"1978 Microsoft",CR,0
+SIGNON: defb    "LM80C BASIC 4.0 ",251," 2020 L.Miliani"
+        defb    " Z80 BASIC 4.7 ",251," 1978 Microsoft",CR,0
 
 MEMMSG: defb    "Memory top",0
 
@@ -593,61 +676,6 @@ PRITAB: defb    $79             ; Precedence value
         defb    $46             ; Precedence value
         defw    POR             ; FPREG = <last> OR FPREG
 
-; BASIC ERROR CODE LIST
-
-ERRORS  equ $
-NFMSG:  defb    "NEXT Without FOR",0
-SNMSG:  defb    "Syntax",0
-RGMSG:  defb    "RETURN without GOSUB",0
-ODMSG:  defb    "Out of DATA",0
-FCMSG:  defb    "Illegal Function Call",0
-OVMSG:  defb    "Overflow",0
-OMMSG:  defb    "Out of Memory",0
-ULMSG:  defb    "Undefined Line",0
-BSMSG:  defb    "Bad Subscript",0
-DDMSG:  defb    "Re-Dimensioned Array",0
-DZMSG:  defb    "Division by Zero",0
-IDMSG:  defb    "Illegal Direct",0
-TMMSG:  defb    "Type Mis-match",0
-OSMSG:  defb    "Out of String Space",0
-LSMSG:  defb    "String Too Long",0
-STMSG:  defb    "String Formula Too Complex",0
-CNMSG:  defb    "Can't Continue",0
-UFMSG:  defb    "Undefined FN Function",0
-MOMSG:  defb    "Missing Operand",0
-HXMSG:  defb    "HEX Format",0
-BNMSG:  defb    "BIN Format",0
-GMMSG:  defb    "No Graphics Mode",0
-SCMSG:  defb    "Serial Configuration",0
-SAMSG:  defb    "Serial Port Already Open",0
-HPMSG:  defb    "HELP Call",0
-
-ERRTBL  equ $
-NFPTR   defw    NFMSG
-SNPTR   defw    SNMSG
-RGPTR   defw    RGMSG
-ODPTR   defw    ODMSG
-FCPTR   defw    FCMSG
-OVPTR   defw    OVMSG
-OMPTR   defw    OMMSG
-ULPTR   defw    ULMSG
-BSPTR   defw    BSMSG
-DDPTR   defw    DDMSG
-DZPTR   defw    DZMSG
-IDPTR   defw    IDMSG
-TMPTR   defw    TMMSG
-OSPTR   defw    OSMSG
-LSPTR   defw    LSMSG
-STPTR   defw    STMSG
-CNPTR   defw    CNMSG
-UFPTR   defw    UFMSG
-MOPTR   defw    MOMSG
-HXPTR   defw    HXMSG
-BNPTR   defw    BNMSG
-GMPRT   defw    GMMSG
-SCPTR   defw    SCMSG
-SAPTR   defw    SAMSG
-HPPTR   defw    HPMSG
 
 ; INITIALISATION TABLE -------------------------------------------------------
 ; these values are copied into RAM at startup
@@ -689,6 +717,8 @@ INITAB: jp      WARMST          ; Warm start jump
         defw    STLOOK          ; Temp string space
         defw    -2              ; Current line number (cold)
         defw    -1              ; Current line with errors (no errors)
+AUTORP: defb    $40             ; delay for key auto-repeat start
+        defb    $08             ; auto-repeat delay
 DEFFNKS:defm    "LIST",13,0,0,0,0,0,0,0,0,0,0,0     ; KEY 1
         defm    "RUN",13,0,0,0,0,0,0,0,0,0,0,0,0    ; KEY 2
         defm    "SCREEN1",13,0,0,0,0,0,0,0,0        ; KEY 3
@@ -1281,30 +1311,33 @@ LIST:   pop     BC              ; rubbish - not needed (legacy from original cal
         cp      ZMINUS          ; is it '-'?
         jr      NZ,LST01        ; no, look for a line number
         ld      DE,$0000        ; yes, set search from 0
-        call    SRCHLIN         ; find address of line number
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
         ld      (TMPBFR1),BC    ; store address of starting line
         call    CHKSYN          ; skip '-'
         defb    ZMINUS
         call    ATOH            ; now, look for another number (ASCII number to DE)
-        call    SRCHLIN         ; find address of line number
+        call    SRCLN           ; find a line, getting the previous if it doesn't exist
         ld      (TMPBFR2),BC    ; store address of ending line
         ld      BC,(TMPBFR1)    ; retrieve address of starting line
         push    BC              ; store address of line for later use
         jp      LISTLP          ; go listing
 LST01:  call    ATOH            ; get a line number (ASCII number to DE)
-LST01H: call    SRCHLIN         ; find address of line number
+LST01H: ld      (TMPBFR4),DE    ; store ending line address for later use - N.B.: this is a hook for HELP command
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
         ld      (TMPBFR1),BC    ; store address of starting line
-        ld      (TMPBFR2),BC    ; same address for ending line (we'll change later if needed)
+        ld      (TMPBFR2),BC    ; same address for ending line (we'll change it later if needed)
         dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
-        jp      Z,LST06         ; nothing follows, so ending & starting lines are the same
+        jp      Z,LSTNOT        ; nothing follows, so ending & starting lines are the same
         cp      ZMINUS          ; is it '-'?
         jp      Z,LST03         ; yes, read ending line
-LST04:  call    SRCHLIN         ; find address of line number
-        ld      (TMPBFR2),BC    ; set address of ending line
 LST06:  push    BC              ; store address for later use
         jp      LISTLP          ; jump to list
-LSTALL  ld      DE,65529        ; set ending line to max. allowed line number
+LSTNOT: ld      DE,(TMPBFR4)
+        call    SRCHLIN         ; find address of line number, getting the following if it doesn't exist
+        jp      C,LST06
+        jp      PRNTOK
+LSTALL: ld      DE,65529        ; set ending line to max. allowed line number
         call    SRCHLIN         ; get address of last line
         ld      (TMPBFR2),BC    ; store it
         ld      DE,$0000        ; set start to first line in memory
@@ -1319,8 +1352,10 @@ LST03:  call    CHKSYN          ; skip '-'
         or      E               ; is line=0?
         jr      NZ,LST05        ; no, jump over
         ld      DE,65529        ; yes set last valid line number
-LST05:  call    SRCHLIN         ; find address of line number
-        ld      (TMPBFR2),BC    ; store address of ending line
+        call    SRCHLIN         ; get address of last line
+        jp      LST02
+LST05:  call    SRCLN           ; find a line, getting the previous if it doesn't exist
+LST02:  ld      (TMPBFR2),BC    ; store address of ending line
         ld      BC,(TMPBFR1)    ; retrieve address of starting line
         push    BC              ; store it for later use
 LISTLP: pop     HL              ; Restore address of line
@@ -1380,9 +1415,21 @@ NXTLN:  pop     DE              ; recover address of current line
         jp      C,PRNTOK        ; finish - leave & print OK
         push    DE              ; store address of current line
         jp      LISTLP          ; continue listing
+; look for the address of a program line
 SRCHLIN:push    HL              ; store HL (this is needed because HL store the pointer to the input buffer)
         call    SRCHLN          ; search for line number in DE
         pop     HL              ; retrieve HL
+        ret                     ; return to caller
+; look for the address of a program line - if the line isn't found,
+; it look backward for the previous line
+SRCLN:  push    HL              ; store HL
+SRCLN1: call    SRCHLN          ; search for line in DE
+        jp      C,LVSRLN        ; found it, leave loop
+        dec     DE              ; not found, decrement number to look backward for an existing line
+        ld      A,E
+        or      D               ; is line number zero?
+        jr      NZ,SRCLN1       ; no, continue
+LVSRLN: pop     HL              ; retrieve HL
         ret                     ; return to caller
 
 ; during LISTing, check if PAUSE is pressed, then pause listing and
@@ -1390,7 +1437,7 @@ SRCHLIN:push    HL              ; store HL (this is needed because HL store the 
 TSTSPC: ld      A,(TMPKEYBFR)   ; Get input character
         cp      SPC             ; Is it SPACE?
         ret     NZ              ; No, return
-WTSPC   call    GETINP          ; Yes, stop listing and wait for another space or BREAK
+WTSPC:  call    GETINP          ; Yes, stop listing and wait for another space or BREAK
         cp      SPC             ; is it SPACE?
         jr      NZ,CNTWTSP      ; no, continue
         xor     A
@@ -1661,7 +1708,8 @@ GTLNLP: call    GETCHR          ; Get next character
         jp      GTLNLP          ; Go to next character
 
 CLEAR:  jp      Z,INTVAR        ; Just "CLEAR" Keep parameters
-        call    POSINT          ; Get integer 0 to 32767 to DE
+        call    GETNUM          ; Evaluate a number
+        call    DEINT           ; Get integer -32768 to 32767 into DE
         dec     HL              ; Cancel increment
         call    GETCHR          ; Get next character
         push    HL              ; Save code string address
@@ -1671,7 +1719,8 @@ CLEAR:  jp      Z,INTVAR        ; Just "CLEAR" Keep parameters
         call    CHKSYN          ; Check for comma
         defb    ','
         push    DE              ; Save number
-        call    POSINT          ; Get integer 0 to 32767
+        call    GETNUM          ; Evaluate a number
+        call    DEINT           ; Get integer -32768 to 32767 into DE
         dec     HL              ; Cancel increment
         call    GETCHR          ; Get next character
         jp      NZ,SNERR        ; ?SN Error if more on line
@@ -2324,7 +2373,7 @@ SGNEXP: dec     D               ; Dee to flag negative exponent
 ; execute OR, AND, and XOR operations
 PAND:   xor     A               ; for AND, Z=1
         jr      CNTLGC          
-POR     xor     A               ; for OR, Z=0, S=1
+POR:    xor     A               ; for OR, Z=0, S=1
         sub     $01
         jr      CNTLGC
 PXOR:   xor     A               ; for XOR, Z=0, S=0
@@ -3731,7 +3780,9 @@ SND1:   cpl                     ; complement of A - this is used later to set on
         jr      NC,SNDOVR       ; (is there a rest? no, jump over
         inc     H               ; yes, increment H)
 SNDOVR: ld      L,A             ; ...register pair...
-        ld      (HL),DE         ; ...and store the value
+        ld      (HL),E          ; ...and store the value
+        inc     HL
+        ld      (HL),D
         pop     HL              ; retrieve HL
         ret                     ; Return to caller
 NOISUP: cp      $07             ; is channel in range 4 to 6 (for a noise)?
@@ -5380,7 +5431,7 @@ CKCOL:  dec     HL              ; dec 'cos GETCHR INCs
         pop     DE              ; retrieve DE
         ld      (DE),A          ; store color into temp buffer
         ret                     ; return to caller
-        
+
 
 ; paint X,Y[,C]: in graphics mode, fills an area starting
 ; at point X,Y, using default color or, if used, with
@@ -6071,11 +6122,21 @@ SERIAL: call    GETINT          ; get port #
         ld      (PRTNUM),A      ; store port number into a temp buffer
         call    CHKSYN          ; Make sure ',' follows
         defb    ','
+        dec     HL
+        call    GETCHR          ; check what's following
+        jp      Z,SNERR         ; error if nothing follows
+        jr      NC,SERVAR       ; it's not a number, try a variable
         call    ATOH            ; get bps (returned into DE)
-        ld      A,D             ; move MSB into A
-        or      E               ; LSB OR MSB, to check if bps=0
+        jr      CHKZSER         ; jump over
+SERVAR: call    GETNUM          ; get number
+        call    TSTSGN          ; check value
+        jp      M,FCERR         ; negative - illegal function call
+        ld      A,(FPEXP)       ; Get integer value to DE
+        call    FPINT           ; get integer number into BCDE - drop BC 'cause isn't necessary     
+CHKZSER:ld      A,D             ; bps is into DE - move MSB into A
+        or      E               ; check if bps=0
         jr      NZ,CNTSER       ; no, continue checking
-        ; if baud rate is 0, then close the serial comm.
+        ; if baud rate is 0, then close the serial comm.    
 RSTSERS:ld      A,(PRTNUM)      ; yes, so reset the channel. First, load port number
         dec     A               ; subtract 1, so that serial channel is 0=>A and 1=>B
         add     SIO_CA          ; find correct channel
@@ -6116,15 +6177,13 @@ CNTSER: ld      A,D
         cp      $01             ; E=1
         jr      NZ,CNTSER2      ; if not, jump over
         ld      A,(PRTNUM)      ; load port number
-        cp      $01             ; is it port 1? (currently do NOT support on port 2)
-        jp      NZ,SCERR        ; no, raise error and exit 
         ld      D,A             ; store port on D
         ld      A,(SERIALS_EN)  ; load address of serial status cell
         and     D               ; check status
         jp      Z,SCERR         ; port not open, raise error
         di                      ; disable INTs
         ld      A,D             ; move port # into A
-        ld      E,A             ; store original A into E
+        ld      E,A             ; and also into E
         add     A
         add     A               ; move A to left times 2
         ld      D,A             ; move value into D
@@ -6138,7 +6197,7 @@ CNTSER: ld      A,D
         in      A,(PIO_DB)      ; load status LEDs
         res     4,A             ; remove error LED
         jp      RXEND           ; terminate setting
-CNTRX2: call    SIO_A_EI        ; re-enable RX on port 2 -> CURRENTLY only port 1 is supported
+CNTRX2: call    SIO_B_EI        ; re-enable RX on port 2
         in      A,(PIO_DB)      ; load status LEDs
         res     5,A             ; remove error LED
 RXEND:  out     (PIO_DB),A      ; set new status for LEDs
@@ -6169,7 +6228,7 @@ CNTSER3:push    HL              ; store HL
         cp      $05             ; is it <5?
         jp      C,SCERR         ; yes, error
         cp      $09             ; is it >=9?
-        jp      NC,FCERR        ; no, error
+        jp      NC,FCERR        ; yes, error
         ld      (DATABT),A      ; store data bits
         call    CHKSYN          ; Make sure ',' follows
         defb    ','
@@ -6201,17 +6260,13 @@ CKBPS:  ld      HL,(BPS)        ; load BPS
         ld      E,(IX+0)        ; load LSB of item
         ld      D,(IX+1)        ; load MSB of item
         call    CMP16           ; is it equal?
-        jp      Z,FNDBPS        ; yes, found correspondance
+        jp      Z,SET_PT        ; yes, found a correspondance
         inc     IX
         inc     IX              ; no, go to next entry
         inc     C               ; increment pointer
         djnz    CKBPS           ; repeat for 10 entries
         jp      SCERR1          ; if nothing found, raise an error
-FNDBPS: ld      A,(PRTNUM)      ; check serial port
-        dec     A               ; is it port 1?
-        jp      Z,SET_P1        ; yes, set port 1
-        jp      SCERR1          ; at the moment, only port 1 can be configured
-SET_P1: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
+SET_PT: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
         ; TO0 output frequency=INPUT CLK/time constant. Time constant is set to get 16 times
         ; the requested baud rate. I.e., if bps is 19,200 then time constast is set to 6 because
         ; 1,843,200/6 = 307,200 Hz (that is 19,200 x 16)
@@ -6219,11 +6274,16 @@ SET_P1: ;init CTC CH0: CH0 provides RX/TX clock to SIO port A
         ld      B,$00           ; reset B
         ld      HL,CTC_CFG      ; address of first CTC divider
         add     HL,BC           ; adjust for correct CTC divider
-        ld      A,%01000111     ; interrupt off, counter mode, prsc=16 (doesn't matter), ext. start,
+        ld      C,CTC_CH0       ; CTC channel 0
+        ld      A,(PRTNUM)      ; load port number
+        rra                     ; is it 1 (Carry=1) or 2 (Carry=0)
+        jp      C,SET_CTC       ; port 1 => ch. 0, so continue
+        inc     C               ; port 2 => ch. 1, increment address port into C
+SET_CTC:ld      A,%01000111     ; interrupt off, counter mode, prsc=16 (doesn't matter), ext. start,
                                 ; start upon loading time constant, time constant follows, sw reset, command word
-        out     (CTC_CH0),A     ; configure CTC channel 0
+        out     (C),A           ; configure CTC channel 
         ld      A,(HL)          ; load CTC divider
-        out     (CTC_CH0),A     ; send divider
+        out     (C),A           ; send divider
         ; configure SIO
         ld      HL,SIO_A_SETS   ; load default settings for SIO
         ld      DE,SIOBFR       ; into a temp buffer
@@ -6249,11 +6309,16 @@ BITS7:  cp      $07             ; is it 7 bits?
         jp      SETPAR          ; jump to set parity
 BITS8:  set     6,B
         set     5,B             ; set D6 & D5 to 1,1
-SETPAR: ld      A,B
+SETPAR: ld      HL,SERABITS     ; load address for storing data bits
+        ld      A,(PRTNUM)      ; check serial port number
+        dec     A               ; is it port #1?
+        jp      Z,SETPAR2       ; yes, jump over
+        inc     HL              ; port #2, use SERBBITS instead
+SETPAR2:ld      A,B             ; retrieve DATA bits
         ld      (SIOBFR+5),A    ; save DATA bits
         and     %01100000       ; filter only D5&D6 bits
         add     A,A             ; shift left times 1
-        ld      (SERABITS),A    ; store for SIO_A_EI & SIO_A_DI functions
+        ld      (HL),A          ; store for SIO_EI & SIO_DI functions
         ld      A,(STPBT)       ; load STOP bits
         add     A,A
         add     A,A             ; 2 left shifts
@@ -6274,19 +6339,28 @@ STRPAR: ld      A,(SIOBFR+3)    ; load WR4 setting
         ld      HL,SIOBFR       ; settings for SIO ch. A
         ld      B,$06           ; 6 bytes to send
         ld      C,SIO_CA        ; I/O address of SIO ch.A
-        otir                    ; send bytes to SIO
+        ld      A,(PRTNUM)      ; load port number
+        rra                     ; is it 1 (Carry=1) or 2 (Carry=0)
+        jp      C,SRLCNT        ; port 1, continue
+        inc     C               ; port 2, increment address port into C
+SRLCNT: otir                    ; send bytes to SIO
         ; the following are settings for channel B (don't need to load HL since settings are contigous)
         ld      B,$04           ; other 4 bytes to send
+        ld      D,C             ; store port address into D
         ld      C,SIO_CB        ; I/O address of SIO ch.B
         otir                    ; send bytes to SIO
-        ; the following are settings for channel A
+        ; the following are settings for selected channel
         ld      A,$01           ; write into WR0: select WR1
-        out     (SIO_CA),A
+        ld      C,D             ; retrieve port address
+        out     (C),A
         ld      A,%00011000     ; interrupts on every RX char; parity is no special condition;
                                 ; buffer overrun is special condition
-        out     (SIO_CA),A
+        out     (C),A
+        ld      HL,SERIALS_EN
+        ld      A,(PRTNUM)      ; retrieve serial channel
+        dec     A               ; channel A?
+        jr      NZ,ENCHB        ; no, jump over
         call    SIO_A_EI        ; enable RX on SIO channel A
-EXITSER:ld      HL,SERIALS_EN
         set     0,(HL)          ; set serial port 1 status ON
         set     2,(HL)          ; set serial port 1 RX ON
         ; back to normal running
@@ -6294,7 +6368,16 @@ EXITSER:ld      HL,SERIALS_EN
         in      A,(PIO_DB)      ; load status LEDs
         set     6,A             ; set status LED on
         res     4,A             ; set error LED off
-        out     (PIO_DB),A      ; send new configuration
+        jr      EXNRM           ; leave
+ENCHB:  call    SIO_B_EI        ; enable RX on SIO channel B
+        set     1,(HL)          ; set serial port 2 status ON
+        set     3,(HL)          ; set serial port 2 RX ON
+        ; back to normal running
+        ei                      ; re-enable INTs
+        in      A,(PIO_DB)      ; load status LEDs
+        set     7,A             ; set status LED on
+        res     5,A             ; set error LED off
+EXNRM:  out     (PIO_DB),A      ; send new configuration
         pop     IX              ; retrieve IX
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
@@ -6305,12 +6388,20 @@ SUP_BPS:defw    57600,38400,28800,19200,14400,9600,4800,3600,2400,1200,600
 ; corresponding CTC divider
 CTC_CFG:defb    2,3,4,6,8,12,24,32,48,96,192
 
+
 ; serial configuration error
 SCERR1: pop     IX              ; retrieve IX
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
 SCERR:  ld      E,SC            ; Serial Configuration Error
         jp      ERROR           ; print error
+
+
+; serial buffer overrun
+SOERR:  call    PRNTCRLF
+        ld      E,SO            ; Serial Buffer Overrun
+        jp      ERROR
+
 
 ; check for direct mode
 DIRMOD: push    HL              ; Save code string address
@@ -6323,7 +6414,7 @@ DIRMOD: push    HL              ; Save code string address
         ret
 
 
-; HELP lists the line program where an error was found
+; HELP lists the line program where an error occured
 HELP:   call    DIRMOD          ; check if in direct mode
         push    HL              ; store HL
         ld      HL,(HLPLN)      ; load HELP line
@@ -6339,25 +6430,25 @@ HLPERR: ld      E,HP            ; HELP call error
         jp      ERROR           ; raise error
 
 
-; KEY command to list/modify function keys
+; KEY command to list/modify function keys and auto-repeat
 KEY:    dec     HL              ; dec 'cos GETCHR INCs
         call    GETCHR          ; Get next character
         jp      Z,LSTKEYS       ; jump if nothing follows
-                                ; change FN keys
+        ; change FN keys
         call    GETINT          ; get a number
         and     A               ; is it 0?
         jr      NZ,KEYCH        ; no, jump over         
-        push    HL              ; yes - reset FN keys to defaults
+RESFN:  push    HL              ; yes - reset FN keys to defaults
         push    DE              ; store HL & DE
-        ld      HL,DEFFNKS      ; pointer to default FN keys texts
-        ld      DE,FNKEYS       ; pointer to destination
-        ld      BC,$0080        ; 128 chars to be copied
+        ld      HL,AUTORP       ; pointer to default auto-repeat delays and FN keys texts
+        ld      DE,KEYDEL       ; pointer to destination
+        ld      BC,$0082        ; 130 chars to be copied (2xauto-delay, 128xFN keys)
         ldir                    ; restore default texts
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
         ret                     ; return to caller
 KEYCH:  cp      $09             ; is it >= 9?
-        jp      NC,SNERR        ; yes - syntax error
+        jp      NC,SETREP       ; yes - jump over
         dec     A               ; FN key in range 0~7
         add     A,A             ; multiply A...
         add     A,A             ; ... times 4...
@@ -6455,7 +6546,6 @@ CNTLTK: inc     HL              ; next char
         pop     DE              ; retrieve DE
         pop     HL              ; retrieve HL
         ret                     ; return to caller
-
 PRTCHR: push    HL              ; store HL
         call    CLSQT           ; check if quotes are closed
         ld      A,'+'           ; '+' char
@@ -6473,7 +6563,6 @@ PRTCHR: push    HL              ; store HL
 PTCHR1: call    PRTCKEY         ; print it
         ld      A,')'           ; char )
         jp      PRTK3           ; continue
-
 CLSQT:  push    AF              ; store A
         ld      A,(TMPBFR1)     ; quote status
         and     A               ; are they closed?
@@ -6484,7 +6573,6 @@ CLSQT:  push    AF              ; store A
         ld      (TMPBFR1),A     ; as closed
 CLSQT1: pop     AF              ; retrieve A
         ret                     ; return to caller
-
 OPNQT:  push    AF              ; store A
         ld      A,(TMPBFR1)     ; quote status
         and     A               ; are they open?
@@ -6497,7 +6585,6 @@ OPNQT:  push    AF              ; store A
         ld      (TMPBFR1),A     ; as opened
 OPNQT1: pop     AF              ; retrieve A
         ret                     ; return to caller
-
 PRTCKEY:push    AF              ; store original char
 PRTK1:  ld      A,(DE)          ; load char
         and     A               ; is it 0?
@@ -6507,7 +6594,23 @@ PRTK1:  ld      A,(DE)          ; load char
         jp      PRTK1           ; repeat
 PRTEND: pop     AF              ; retrieve AF
         ret                     ; return to caller
-
+SETREP: cp      $09             ; is it special key 9? (stands for auto-repeat)
+        jp      NZ,SNERR        ; no, raise an error
+        call    CHKSYN          ; Check for comma
+        defb    ','
+        call    GETINT          ; get a number
+        ld      (TMPBFR1),A     ; store it
+        call    CHKSYN          ; Check for comma
+        defb    ','
+        call    GETINT          ; get another number
+        push    HL              ; store HL
+        ld      HL,AUTOKE       ; address of second cell for key auto-repeat
+        ld      (HL),A          ; store auto-repeat delay
+        dec     HL              ; previous cell
+        ld      A,(TMPBFR1)     ; retrieve value
+        ld      (HL),A          ; store delay for auto-repeat
+        pop     HL              ; retrieve HL
+        ret   
 CHKEY1: defb    "KEY ",0
 CHKEY2: defb    ":",34,0
 CHKEY3: defb    "chr$(",0
@@ -6516,18 +6619,22 @@ CHKEY5: defb    "34",0
 
 
 ; LOAD "filename"
+; load a BASIC program from disk
 LOAD:   ret                     ; currently a stub for LOAD
 
 
 ; SAVE "filename"
+; save a BASIC program on disk
 SAVE:   ret                     ; currently a stub for SAVE
 
 
 ; FILES
+; list files on disk
 FILES:  ret                     ; currently a stub for FILES
 
 
 ; ERASE "filename"
+; erase a file from disk
 ERASE:  ret                     ; currently a stub for ERASE
 
 
@@ -6566,12 +6673,12 @@ HEX4:   ld      (HL),C          ; to PBUFF+3
         pop     BC              ; Get BC back
         ld      HL,PBUFF        ; Reset to start of PBUFF
         jp      STR1            ; Convert the PBUFF to a string and return it
-BYT2ASC	ld      B,A             ; Save original value
+BYT2ASC:ld      B,A             ; Save original value
         and     $0F             ; Strip off upper nybble
         cp      $0A             ; 0-9?
         jr      C,ADD30         ; If A-F, add 7 more
         add     A,$07           ; Bring value up to ASCII A-F
-ADD30	add     A,$30           ; And make ASCII
+ADD30:  add     A,$30           ; And make ASCII
         ld      C,A             ; Save converted char to C
         ld      A,B             ; Retrieve original value
         rrca                    ; and Rotate it right
@@ -6582,21 +6689,21 @@ ADD30	add     A,$30           ; And make ASCII
         cp      $0A             ; 0-9? < A hex?
         jr      C,ADD301        ; Skip Add 7
         add     A,$07           ; Bring it up to ASCII A-F
-ADD301	add     A,$30           ; And make it full ASCII
+ADD301: add     A,$30           ; And make it full ASCII
         ld      B,A             ; Store high order byte
         ret
 
 ; Convert "&Hnnnn" to FPREG
 ; Gets a character from (HL) checks for Hexadecimal ASCII numbers "&Hnnnn"
 ; Char is in A, NC if char is ;<=>?@ A-z, CY is set if 0-9
-HEXTFP  ex      DE,HL           ; Move code string pointer to DE
+HEXTFP: ex      DE,HL           ; Move code string pointer to DE
         ld      HL,$0000        ; Zero out the value
         call    GETHEX          ; Check the number for valid hex
         jp      C,HXERR         ; First value wasn't hex, HX error
         jr      HEXLP1          ; Convert first character
-HEXLP   call    GETHEX          ; Get second and addtional characters
+HEXLP:  call    GETHEX          ; Get second and addtional characters
         jr      C,HEXIT         ; Exit if not a hex character
-HEXLP1  add     HL,HL           ; Rotate 4 bits to the left
+HEXLP1: add     HL,HL           ; Rotate 4 bits to the left
         add     HL,HL
         add     HL,HL
         add     HL,HL
@@ -6604,7 +6711,7 @@ HEXLP1  add     HL,HL           ; Rotate 4 bits to the left
         ld      L,A             ; Save new value
         jr      HEXLP           ; And continue until all hex characters are in
 
-GETHEX  inc     DE              ; Next location
+GETHEX: inc     DE              ; Next location
         ld      A,(DE)          ; Load character at pointer
         cp      SPC
         jp      Z,GETHEX        ; Skip spaces
@@ -6615,11 +6722,11 @@ GETHEX  inc     DE              ; Next location
         sub     $07             ; Reduce to A-F
         cp      $0A             ; Value should be $0A-$0F at this point
         ret     C               ; CY set if was :            ; < = > ? @
-NOSUB7  cp      $10             ; > Greater than "F"?
+NOSUB7: cp      $10             ; > Greater than "F"?
         ccf
         ret                     ; CY set if it wasn't valid hex
 
-HEXIT   ex      DE,HL           ; Value into DE, Code string into HL
+HEXIT:  ex      DE,HL           ; Value into DE, Code string into HL
         ld      A,D             ; Load DE into AC
         ld      C,E             ; For prep to
         push    HL
@@ -6704,7 +6811,7 @@ RESET:  ld      A,(SERIALS_EN)
         call    NZ,RSTSERS      ; yes, reset serials
         call    DISNMI          ; disable NMI vector
         di                      ; disable INTs
-        jp      $0000           ; Restart
+        jp      ROM2RAM         ; Restart
 
 
 INITST: ld      A,$00           ; Clear break flag
