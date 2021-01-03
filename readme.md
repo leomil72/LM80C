@@ -3,7 +3,7 @@
 
 # LM80C Color Computer - A Z80-based homebrew computer
 
-> This is the official repo of the **LM80C Color Computer**, an 8-bit home computer based on the Z80 CPU entirely developed in 2019 by **Leonardo Miliani**. Here you can find schematics, code and other stuff that you can use to replicate this project and build your own homebrew computer as a sort of "back to the old, good, days of 8-bit systems".
+> This is the official repo of the **LM80C Color Computer**, an 8-bit home computer based on the Z80 CPU entirely developed from 2019 by **Leonardo Miliani**. Here you can find schematics, code and other stuff that you can use to replicate this project and build your own homebrew computer as a sort of "back to the old, good, days of 8-bit systems".
 >
 > Project main page: [LM80C](http://www.leonardomiliani.com/en/lm80c/)
 >
@@ -29,7 +29,12 @@
 
 The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with video and audio capabilities. It's a stand-alone system thanks to its integrated keyboard that permits to use it without the necessity of host computers, usually used as input/output devices in other similar projects. With the LM80C BASIC you can write your own games, programs, and much more.
 
+### Models
+Actually, there are two models of the computer: **LM80C Color Computer** and **LM80C 64K Color Computer**. There are a couple of differences between the two: the former only has 32KB of SRAM and an interface to SD cards based on an Atmega328P as a mass storage, while the latter has 64KB of SRAM and a new mass storage interface based on Compat Flash cards.
+
 ### Main features
+
+**LM80C Color Computer**
 
 - CPU: Zilog Z80B@3.68 MHz
 - Memory:
@@ -62,6 +67,43 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
 - More to come:
   - support for SD memory cards
 
+*IMPORTANT NOTE*: due to the release of the LM80C 64K model, the development of the LM80C has been halted. At the moment, only software improvements for the LM80C BASIC are still developed and ported from the bigger brother. Since this downgrade to a minor model, the support for SD cards is not developed anymore. The PCB is basically still printable but please don't populate the SD interface portion with any of the components since none of them will be used.
+
+  **LM80C 64K Color Computer**
+
+- CPU: Zilog Z80B@3.68 MHz
+- Memory:
+  - ROM: 32KB (with built-in firmware & BASIC)
+  - RAM: 64KB SRAM
+- Video:
+  - TMS9918A with 32KB of dedicated VRAM (2x 16K banks)
+  - composite output
+  - 256x192 pixels, 15 colors, 32 sprites
+- Audio:
+  - Yamaha YM2149F (or GI AY-3-8910)
+  - 3 analog channels with tone&noise generation
+  - envelope control
+  - 2x8-bit I/O ports
+- I/O capabilities:
+  - Z80 PIO:
+    - parallel input/output periphery
+    - 2x8-bit ports
+    - 4 operatin modes
+  - Z80 SIO:
+    - serial input/output periphery
+    - 2 serial ports
+    - higly configurable
+    - software-adjustable baude rates
+  - Z80 CTC:
+    - timer/counter with 4 channels
+   - generate system ticks and baud rates
+- Keyboard:
+  - external keyboard with 64 keys (I used a Commodore 16 keyboard, that has 66 keys but only 64 unique keys due to double connections for SHIFT and SHIFT/LOCK)
+- More to come:
+  - support for Compact Flash memory cards
+
+Thanks to the bank switching mechanism implemented into the computer, the machine can use the whole amount of 64KB of SRAM. The same mechanism is used to provide 2x 16K banks of VRAM to the VDP so that 2 entire video framebuffers can be loaded and stored into the VRAM.
+
 <img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_key_n_inside.jpg" title="LM80C motherboard inside its case" alt="LM80C motherboard inside its case">
 
 ### BASIC
@@ -79,10 +121,13 @@ Before to start building your own LM80C computer you need several things:
 - a CAD (to open schematics files and to generate Gerber files to make the PCB).
 - some skills (you may be able to assemble a prototype, program it, burn a ROM file, etc.).
 
-### Software
-Personally I'm using [Visual Studio Code](https://code.visualstudio.com/) to write the ASM files: it's free, based on an open source project, and multi-platform (do not confuse with Visual Studio IDE). The extension to highlight the assembly code is [Z80 ASM](https://github.com/Imanolea/z80asm-vscode). Visual Code is a very complete editor and you can use for every language you use. Another good editor is [ATOM editor](https://atom.io) to edit the code, with [Language-assembler-SJASMPLUS](https://atom.io/packages/language-assembler-sjasmplus) package to highlight the Z80 assembly code. I switched from ATOM to Visual Studio Code because the latter is lighter. 
+### Electronic parts
+Passive electronic components can be grabbed anywhere: there are a lot of difference sources, like auction sites, big resellers, and local shops, too. The main chips, the Z80 family chips, are also widely available since the manufacturer, Zilogs, still continue to produce and commercialize them. More effort is needed to find the video and audio chips. The VDP and PSG are still available from China but, while the video chip is very common (in the past there has been over-production so a lot of spare components are still available), the audio chip is more rare and it is easy to find counterfit parts that doesn't work.
 
-To compile binaries I use [ZASM Assembler](http://k1.spdns.de/Develop/Projects/zasm/Distributions/), a multi-platform Z80 assembler that has a lot of features, like macros, C files inclusion and much more. It runs on Linux and MacOS, but you can use it on a Windows-based system just by running a Linux instance inside a virtual machine: almost everyone can compile the code with it, and obtain the same binary files. However, for your commodity, the latest compiled binary file, ready to be burned into an EEPROM, is always available. 
+### Software
+Personally I'm using [Visual Studio Code](https://code.visualstudio.com/) to write the ASM files: it's free, based on an open source project, and multi-platform (do not confuse with Visual Studio IDE). The extension to highlight the assembly code is [Z80 ASM](https://github.com/Imanolea/z80asm-vscode). Visual Code is a very complete editor and you can use for every language you use. Another good editor is [ATOM editor](https://atom.io) to edit the code, with [Language-assembler-SJASMPLUS](https://atom.io/packages/language-assembler-sjasmplus) package to highlight the Z80 assembly code. I prefer the former because it's lighter. 
+
+To compile binaries I switched from ZASM to [SJASMPlus](https://github.com/z00m128/sjasmplus), because it's multi-platform (MacOS/Linux/Windows) and has a lot of features, like macros, support for in-source LUA scripting, and much more. But you may use the assembler you want. However, for your commodity, the latest precompiled binary file, ready to be burned into an EEPROM, is always available.
 
 To open/modify schematics you need a CAD: I used [KiCad](http://www.kicad-pcb.org/), that (IMHO) is the best choice, since it's free and doesn't have the limitations of the freeware version of [EagleCAD](https://www.autodesk.com/products/eagle/overview), that can't let you create a board bigger than 80 square cms., and the LM80C PCB is much bigger. However, I've also added PDF files if you just want to look at the schematics but don't want/need any additional software to open the schematics.
 
@@ -99,7 +144,7 @@ I strongly reccomend you to assemble a prototype on breadboards to be sure that 
 
 ## Files
 The files in this repo are organized in folders:
-- "12-Home Computer": this folder contains the main ASM file to compile the current firmware of the LM80C Color Computer.
+- "12-Home Computer": this folder contains the main ASM file to compile the latest firmwares of the LM80C/LM80C 64K Color Computer.
 - "BASIC examples": this folder contains BASIC programs that can be loaded and executed with the integrated LM80C BASIC interpreter. If the name contains a release version (i.e. R20), it means it's the minimum firmware release required to run such program, because it makes use of some statements not present in previous releases.
 -  "Legacy": old firmware are stored into this folder. Folders whose names start with "01-" through "09-" contain the first tests I made with the computer without the video section, that you can replicate to work solely through the serial line. Folders whose names start with "10-" and "11-" contain the releases that had preliminary support for video output. "Legacy cores" contains the old firmwares of the latest hardware version of the computer. Every release adds some functionality to the original BASIC. The greater the release number is, the newer the firmware is.
 - "Rom": this folder contains pre-compiled binary files, ready to be burned into the EEPROM chip.
@@ -111,8 +156,10 @@ The files in this repo are organized in folders:
 
 ## Compilation
 To compile the firmware, first download or clone the repo on your computer, than go into the "12-Home computer" folder and open a terminal in it, then give this command:
-`zasm -uwy --z80 ./LM80C-firmware-rXX.asm`
-where "XX" is the release you want to compile. After the compilation has finished, you'll find a file with extension `.rom` that you can burn into the EEPROM.
+`./sjasmplus --lst --lstlab LM80-firmware-rx.yy.asm`
+`./sjasmplus --lst --lstlab LM80C_64K-firmware-rx.yy.asm`
+
+where "X.YY" is the release you want to compile. After the compilation has finished, you'll find a file with extension `.bin` that you can burn into the EEPROM. Another file with extension `.lst` is created: this is useful to get addresses of entry point functions and memory registers.
 
 
 ---
@@ -121,6 +168,9 @@ where "XX" is the release you want to compile. After the compilation has finishe
 There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), written in Javascript by Antonino Porcino, that can be used to see how the real machine acts and works: you can test directly in your browser by opening [this link](https://nippur72.github.io/lm80c-emu/).
 
 ---
+
+## Z88DK Support ##
+The latest releases of [Z88DK](https://github.com/z88dk/z88dk) support the compilation of C programs for LM80C Color Computer. You need to grab one of the nightly build. After the compilation, a file with extesion `.prg` is basically a big file composed by a BASIC file that is just a simple loader that start the execution of a bigger machine language program. At the moment the compiled files only support the version R3.14 of the LM80C Color Computer and can be launched in the emulator by simply draggind them into the emulator window once launched it and then by typing RUN.
 
 ## FAQ
 
@@ -160,8 +210,8 @@ You can find more about me on my website at <a href="https://www.leonardomiliani
 - Some commercial names (like KiCAD, EagleCAD, Visual Studio Code) lead to the corresponding owners.
 - The rest of the stuff is my own work and is distribuited under the [Gnu GPL Licence 3.0](https://opensource.org/licenses/GPL-3.0).
 
-The names "LM80C", "LM80C Color Computer", and "LM80C BASIC", the "rainbow LM80C" logo, the LM80C schematics, the LM80C sources, and this work belong to Leonardo Miliani. 
+The names "LM80C", "LM80C 64K", "LM80C Color Computer", "LM80C 64K Color Computer", and "LM80C BASIC", the "rainbow LM80C" logo, the LM80C schematics, the LM80C sources, and this work belong to Leonardo Miliani. 
 
-The "rainbow LM80C" logo and the "LM80C/LM80C Color Computer" names can not be used in any work without my explicit permission. You are allowed to use the "LM80C" name only in reference to or to describe the LM80C Color Computer.
+The "rainbow LM80C" logo and the "LM80C/LM80C Color Computer/LM80C 64K/LM80C 64K Color Computer" names can not be used in any work without my explicit permission. You are allowed to use the "LM80C" and "LM80C 64K" names only in reference to or to describe the LM80C/LM80C 64K Color Computers.
 
-The LM80C schematics and source codes are released under the GNU GPL License 3.0 and in the form of "as is", without any kind of warranty: you can use them at your own risk. You are free to use them for any non-commercial use: you are only asked to maintain the copyright notices, to include this advice and, if you intend to re-distribute them, the note to the attribution of the original works to Leonardo Miliani. For any other use, please contact me by opening an issue.
+The LM80C/LM80C 64K schematics and source codes are released under the GNU GPL License 3.0 and in the form of "as is", without any kind of warranty: you can use them at your own risk. You are free to use them for any non-commercial use: you are only asked to maintain the copyright notices, to include this advice and, if you intend to re-distribute them, the note to the attribution of the original works to Leonardo Miliani. For any other use, please contact me by opening an issue.

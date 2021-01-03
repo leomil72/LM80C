@@ -15,6 +15,7 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 
 - Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
   of the video chip
+- Fixed again the cursor management routine so that the cursor is visible when being moved
 
 ---------------------------------------------------------------------------------------------
 
