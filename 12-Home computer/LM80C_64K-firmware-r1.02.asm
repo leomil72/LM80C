@@ -52,7 +52,7 @@
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
 ; output binary file
-    OUTPUT "LM80C-64K-firmware-1.02.bin"
+    OUTPUT "LM80C-64K-firmware-r1.02.bin"
 
 ; set computer model
     DEFINE  LM80C64K
