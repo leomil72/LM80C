@@ -169,8 +169,6 @@ There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), writ
 
 ---
 
----
-
 ## Z88DK Support ##
 The latest releases of [Z88DK](https://github.com/z88dk/z88dk) support the compilation of C programs for LM80C Color Computer. You need to grab one of the nightly build. After the compilation, a file with extesion `.prg` is basically a big file composed by a BASIC file that is just a simple loader that start the execution of a bigger machine language program. At the moment the compiled files only support the version R3.14 of the LM80C Color Computer and can be launched in the emulator by simply draggind them into the emulator window once launched it and then by typing RUN.
 
