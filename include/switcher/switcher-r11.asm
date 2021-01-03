@@ -62,6 +62,5 @@ CNTCP2RAM:      ld      A,%11001111     ; set mode 3 (mode control)
                 ldir                    ; copy!
                 jp      RAMRUN+TMP_FW_LOC; jump to execute code into RAM
 
-
 ;-------------------------------------------------------------------------------
-END_OF_FW       equ     $   ; this is the last cell of the firmware
+END_OF_FW:      equ     $   ; this is the last cell of the firmware
