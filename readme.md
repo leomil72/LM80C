@@ -157,6 +157,7 @@ The files in this repo are organized in folders:
 ## Compilation
 To compile the firmware, first download or clone the repo on your computer, than go into the "12-Home computer" folder, copy inside it the executable of SJAsmPlus specific for your OS, open a terminal in it, then give this command:
 `./sjasmplus --lst --lstlab LM80-firmware-rx.yy.asm`
+
 `./sjasmplus --lst --lstlab LM80C_64K-firmware-rx.yy.asm`
 
 where "X.YY" is the release you want to compile. After the compilation has finished, you'll find a file with extension `.bin` that you can burn into the EEPROM. Another file with extension `.lst` is created: this is useful to get addresses of entry point functions and memory registers.
