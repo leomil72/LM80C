@@ -475,8 +475,8 @@ MOVSHOWCRS:     call    POS_CURSOR      ; position cursor into new location
                 ld      A,(CRSR_STATE)  ; load status of cursor
                 and     A               ; is cursor off?
                 ret     Z               ; yes, return
-                ld      A,(LSTCSRSTA)   ; it's visible, so...
-                or      $20             ; ...set cursor on
+                ld      A,(TMRCNT)      ; it's visible, so...
+                and     $20             ; ...set cursor on
                 ld      (LSTCSRSTA),A   ; store the last cursor state
                 ld      A,$FF           ; set cursor visible after moved it
                 jp      WRITE_VIDEO_LOC ; write into video cell
@@ -511,7 +511,7 @@ LOAD_CRSR_POS:  ld      A,(SCR_CURS_Y)  ; load cursor Y
                 jr      Z,CONT_POS_CURS ; yes, jump over
                 ld      DE,POS_TB_CRS_32; no, load position table address of cursor for 32 cols
 CONT_POS_CURS:  add     HL,DE           ; the correct starting address of the required row is now into HL
-                                ld      E,(HL)         ; load starting address of the required row into DE
+                ld      E,(HL)          ; load starting address of the required row into DE
                 inc     HL
                 ld      D,(HL)   
                 ld      HL,(SCR_NAM_TB) ; load starting address of name table
