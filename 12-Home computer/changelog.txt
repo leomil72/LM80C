@@ -10,6 +10,14 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+3.17    - 20210104
+
+- Changed the special key to disable the I/O DOS buffer, now it's CTRL - AT THE MOMENT,
+  DISABLED BY DEFAULT INTO CODE
+- Unified the source files between 32K and 64K versions thanks to the support for compiler's
+  directives of the SJASMPlus assembler
+
+---------------------------------------------------------------------------------------------
 3.16    - 20210101
 
 - Code revision to comply with the assembler SJASMPLUS

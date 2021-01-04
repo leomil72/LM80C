@@ -11,11 +11,15 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 
 ---------------------------------------------------------------------------------------------
 
-1.03    - 2021xxxx
+1.03    - 20210104
 
-- Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
+- >> Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
   of the video chip
+- The change above also lead to a size reduction of the binary file
 - Fixed again the cursor management routine so that the cursor is visible when being moved
+- Changed the special key to disable the I/O DOS buffer, now it's CTRL
+- Unified the source files between 32K and 64K versions thanks to the support for compiler's
+  directives of the SJASMPlus assembler
 
 ---------------------------------------------------------------------------------------------
 
