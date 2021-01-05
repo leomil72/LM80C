@@ -10,6 +10,12 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+3.18    - 20210105
+
+- New behaviour for backspace (DEL) key: now chars that follow the cursor are moved 1 position
+  to the left while deleting the char immediately before the current cursor position
+
+---------------------------------------------------------------------------------------------
 3.17    - 20210104
 
 - Changed the special key to disable the I/O DOS buffer, now it's CTRL - AT THE MOMENT,

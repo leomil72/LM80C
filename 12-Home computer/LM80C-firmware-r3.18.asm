@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - FIRMWARE - R3.17
+; LM80C - FIRMWARE - R3.18
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -52,13 +52,13 @@
 ; Hackaday page: https://hackaday.io/project/165246-lm80c-color-computer
 ; ------------------------------------------------------------------------------
 ; output binary file
-    OUTPUT "LM80C-firmware-r3.17.bin"
+    OUTPUT "LM80C-firmware-r3.18.bin"
 
 ; set computer model
     DEFINE LM80C
 
 ; set firmware version
-    DEFINE VERSION "3.17"
+    DEFINE VERSION "3.18"
 
 ; define shorter VDP_DAT load instruction
     DEFINE LD_VDP_DAT ld      C,VDP_DAT
@@ -66,10 +66,10 @@
 ; ------------------------------------------------------------------------------
 ; include the latest version of the bootloader: this sets up the address aliases
 ; configure the hardware, checks if warm or cold startup and loads the BASIC interpreter
-    INCLUDE "../include/bootloader/bootloader-1.04.asm"
+    INCLUDE "../include/bootloader/bootloader-1.05.asm"
 
 ; incude the latest version of the VDP module
-    INCLUDE "../include/vdp/vdp-1.2.asm"
+    INCLUDE "../include/vdp/vdp-1.3.asm"
 
 ; incude the latest version of the PSG module
     INCLUDE "../include/psg/psg-1.1.asm"
