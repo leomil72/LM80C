@@ -167,6 +167,18 @@ where "X.YY" is the release you want to compile. After the compilation has finis
 
 ## Emulation
 There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), written in Javascript by Antonino Porcino, that can be used to see how the real machine acts and works: you can test directly in your browser by opening [this link](https://nippur72.github.io/lm80c-emu/). 
+These are the latest releases that can be launched:
+
+LM80C
+`https://nippur72.github.io/lm80c-emu/?rom=314` 
+(this is the version actually supported by Z88DK)
+
+`https://nippur72.github.io/lm80c-emu/?rom=317`
+
+
+LM80C 64K
+`https://nippur72.github.io/lm80c-emu/?rom=64K103`
+
 
 ---
 
