@@ -14,6 +14,8 @@ P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding ch
 
 - New behaviour for backspace (DEL) key: now chars that follow the cursor are moved 1 position
   to the left while deleting the char immediately before the current cursor position
+- New behaviour for INSERT key: now it inserts a SPACE char (ASCII 32) so that the space 
+  inserted is seen as part of the current line (in the past, the NULL char [ASCII 0] was used)
 
 ---------------------------------------------------------------------------------------------
 3.17    - 20210104
