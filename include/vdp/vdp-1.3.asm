@@ -691,8 +691,8 @@ NXTINST:        dec     BC              ; decrement number of chars to move
                 ld      A,C
                 or      B               ; finished?
                 jr      NZ,CHKHL        ; no, repeat
-ENDINSRT:       xor     A
-                ld      HL,(CUR_POS)
+ENDINSRT:       ld      A,SPC           ; load SPACE character
+                ld      HL,(CUR_POS)    ; get cursor position
                 ld      (SCR_ORG_CHR),A ; reset original char under the cursor
                 call    WRITE_VIDEO_LOC ; empty current video location
                 jp      MOVSHOWCRS      ; re-place cursor
