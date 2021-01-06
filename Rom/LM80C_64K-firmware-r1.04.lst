@@ -228,13 +228,13 @@
  150+ 00C4 61 72 64 6F
  151+ 00C8 20 4D 69 6C                  defb    $20,$4D,$69,$6C,$69,$61,$6E,$69
  151+ 00CC 69 61 6E 69
- 152+ 00D0 46 57 20 31  FWVER:          defm    "FW ","1.04",$20,"2021-01-05",$20,"18:23:20",$00
+ 152+ 00D0 46 57 20 31  FWVER:          defm    "FW ","1.04",$20,"2021-01-06",$20,"11:03:41",$00
  152+ 00D4 2E 30 34 20
  152+ 00D8 32 30 32 31
  152+ 00DC 2D 30 31 2D
- 152+ 00E0 30 35 20 31
- 152+ 00E4 38 3A 32 33
- 152+ 00E8 3A 32 30 00
+ 152+ 00E0 30 36 20 31
+ 152+ 00E4 31 3A 30 33
+ 152+ 00E8 3A 34 31 00
  153+ 00EC              FMVEREND:       equ     $
  154+ 00EC FF FF FF...                  BLOCK   $100-FMVEREND,$FF   ; filler
  155+ 0100              ;------------------------------------------------------------------------------
@@ -1424,8 +1424,8 @@
  691+ 080B 79                           ld      A,C
  692+ 080C B0                           or      B               ; finished?
  693+ 080D 20 EA                        jr      NZ,CHKHL        ; no, repeat
- 694+ 080F 3E 20        ENDINSRT:       ld      A,SPC           ; xor     A
- 695+ 0811 2A FD 52                     ld      HL,(CUR_POS)
+ 694+ 080F 3E 20        ENDINSRT:       ld      A,SPC           ; load SPACE character
+ 695+ 0811 2A FD 52                     ld      HL,(CUR_POS)    ; get cursor position
  696+ 0814 32 F6 52                     ld      (SCR_ORG_CHR),A ; reset original char under the cursor
  697+ 0817 CD 92 06                     call    WRITE_VIDEO_LOC ; empty current video location
  698+ 081A C3 C9 06                     jp      MOVSHOWCRS      ; re-place cursor
