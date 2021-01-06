@@ -5,10 +5,10 @@ $Descr A2 23386 16535
 encoding utf-8
 Sheet 1 1
 Title "LM80C Color Computer 64K"
-Date "2020-12-29"
-Rev "R1"
+Date "2021-01-03"
+Rev "R2"
 Comp "Leonardo Miliani"
-Comment1 "Compliant with firmware R1.0 and above"
+Comment1 "Compliant with firmware R1.03 and above"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -1146,8 +1146,6 @@ Entry Wire Line
 Entry Wire Line
 	5400 2650 5500 2550
 Wire Wire Line
-	7000 2750 6900 2750
-Wire Wire Line
 	7000 2850 6900 2850
 Wire Wire Line
 	7000 2950 6900 2950
@@ -1194,8 +1192,6 @@ Wire Wire Line
 	8500 2450 8850 2450
 Wire Wire Line
 	8850 2550 8500 2550
-Text GLabel 6900 2750 0    50   Input ~ 0
-A1
 Text GLabel 6100 3150 0    50   Output ~ 0
 VDP_INT
 Text GLabel 6900 3250 0    50   Input ~ 0
@@ -6561,6 +6557,10 @@ Wire Wire Line
 	2900 4850 3300 4850
 Text Notes 2350 5150 0    50   ~ 0
 CONNECT IF YOUR CF/IDE ADAPTOR DOES\nNOT HAVE A BUILT-IN ACTIVITY LED
+Wire Wire Line
+	7000 2750 6900 2750
+Text GLabel 6900 2750 0    50   Input ~ 0
+A0
 Wire Bus Line
 	3600 14300 3600 15000
 Wire Bus Line

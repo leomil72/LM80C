@@ -10,29 +10,37 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.04    - 20210105
 
-1.03    - 2021xxxx
-
-- Important HW modification: MODE pin of VDP is now connected to A0, to simplify the driving
-  of the video chip
-- Fixed again the cursor management routine so that the cursor is visible when being moved
+- New behaviour for backspace (DEL) key: now chars that follow the cursor are moved 1 position
+  to the left while deleting the char immediately before the current cursor position
+- New behaviour for INSERT key: now it inserts a SPACE char (ASCII 32) so that the space 
+  inserted is seen as part of the current line (in the past, the NULL char [ASCII 0] was used)
 
 ---------------------------------------------------------------------------------------------
+1.03    - 20210104
 
+- >> Important HW modification <<: MODE pin of VDP is now connected to A0, to simplify the
+  coding for the video chip (just a "DEC reg" to change the VDP port)
+- The change above also lead to a size reduction of the binary file
+- Fixed again the cursor management routine so that the cursor is visible when being moved
+- Changed the special key to disable the I/O DOS buffer, now it's CTRL
+- Unified the source files between 32K and 64K versions thanks to the support for compiler's
+  directives of the SJASMPlus assembler
+
+---------------------------------------------------------------------------------------------
 1.02    - 20201231
 
 - Fixed a bug into the serial code: the incoming chars were print on screen even if the
   cursor was off (i.e., in indirect mode)
 
 ---------------------------------------------------------------------------------------------
-
 1.01    - 20201231
 
 - Code revision to comply with the assembler SJASMPLUS
 - Moved equates for BASIC workspace area into a separated file
 
 ---------------------------------------------------------------------------------------------
-
 1.00    - 20201229 - The 64K edition
 
 - Hardware revision for memory expansion to 64K of RAM and bank switching mechanism to
@@ -50,3 +58,5 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 - Preliminary support for external mass storage (stubs for ERASE, FILES, LOAD, SAVE commands)
 - Mechanism to enable/disable the 512-byte buffer for mass storage I/O operations (by
   pressing SHIFT while logo is shown on startup)
+
+---------------------------------------------------------------------------------------------

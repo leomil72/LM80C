@@ -10,6 +10,22 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+3.18    - 20210105
+
+- New behaviour for backspace (DEL) key: now chars that follow the cursor are moved 1 position
+  to the left while deleting the char immediately before the current cursor position
+- New behaviour for INSERT key: now it inserts a SPACE char (ASCII 32) so that the space 
+  inserted is seen as part of the current line (in the past, the NULL char [ASCII 0] was used)
+
+---------------------------------------------------------------------------------------------
+3.17    - 20210104
+
+- Changed the special key to disable the I/O DOS buffer, now it's CTRL - AT THE MOMENT,
+  DISABLED BY DEFAULT INTO CODE
+- Unified the source files between 32K and 64K versions thanks to the support for compiler's
+  directives of the SJASMPlus assembler
+
+---------------------------------------------------------------------------------------------
 3.16    - 20210101
 
 - Code revision to comply with the assembler SJASMPLUS
