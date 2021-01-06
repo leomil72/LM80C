@@ -50,7 +50,7 @@ SIO_DB          equ %00100001
 
 ;label defining for VDP (Video Display Processor)
 VDP_DAT         equ %00110000
-    IFDEF LM8064K
+    IFDEF LM80C64K
 VDP_SET         equ %00110001
     ELSE
 VDP_SET         equ %00110010
