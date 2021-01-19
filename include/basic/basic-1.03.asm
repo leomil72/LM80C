@@ -6013,7 +6013,7 @@ GMERR:  ld      E,GM            ; load Graphics Mode Error flag
 ; DATA,PARITY, and STOP are optional: if nothing follows BPS,
 ; they are assumed to be 8,0,1 resp.
 PRTNUM  equ     VIDEOBUFF
-BPS     equ     VIDEOBUFF+$01
+BPS     equ     PRTNUM+$01
 DATABT  equ     BPS+$02
 PARBT   equ     DATABT+$01
 STPBT   equ     PARBT+$01
