@@ -13,8 +13,6 @@ P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding ch
 3.19    - 20210119
 
 - Better serial management with RTS-driven chars receiveing
-- Fixed a bug introduced in the previous releases that lead to chars that disappearing 
-  during text printing/scrolling
 
 ---------------------------------------------------------------------------------------------
 3.18    - 20210105
