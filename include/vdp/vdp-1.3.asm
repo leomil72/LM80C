@@ -432,7 +432,7 @@ READ_VIDEO_LOC: push    BC              ; store BC
                 nop                     ; ...a while
                 nop
     IFDEF LM80C64K
-                nop
+                nop                     ; add another delay to compensate the shortest instruction above
     ENDIF
                 in      A,(C)           ; read byte at current VRAM location
                 pop     BC              ; restore BC
@@ -452,7 +452,7 @@ WRITE_VIDEO_LOC:push    BC              ; store BC
                 nop                     ; ...a while
                 nop
     IFDEF LM80C64K
-                nop
+                nop                     ; add another delay to compensate the shortest instruction above
     ENDIF
                 out     (C),A           ; write byte into VRAM
                 pop     BC              ; restore BC

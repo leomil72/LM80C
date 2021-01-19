@@ -98,7 +98,7 @@ CTC3IV          equ     CTC2IV+$03      ; (3) CTC3 interrupt vector
 SCR_SIZE_W      equ     CTC3IV+$03      ; (1) screen width (it can be either 40 chars or 32 chars/bytes)
 SCR_SIZE_H      equ     SCR_SIZE_W+$01  ; (1) screen height (it can be 24/48/192: 24 for text, 48 for MC, 192 for graphics)
 SCR_MODE        equ     SCR_SIZE_H+$01  ; (1) screen mode (0=text, 1=G1, 2=G2, 3=MC, 4=ExG2)
-SCR_NAM_TB      equ     SCR_MODE+$02    ; (2) video name table address
+SCR_NAM_TB      equ     SCR_MODE+$01    ; (2) video name table address
 SCR_CURS_X      equ     SCR_NAM_TB+$02  ; (1) cursor X
 SCR_CURS_Y      equ     SCR_CURS_X+$01  ; (1) cursor Y
 SCR_CUR_NX      equ     SCR_CURS_Y+$01  ; (1) new cursor X position
