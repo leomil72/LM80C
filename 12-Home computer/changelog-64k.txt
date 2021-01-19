@@ -10,6 +10,12 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.05    - 20210119
+- Better serial management with RTS-driven chars receiveing
+- Fixed a bug introduced in the previous releases that lead to chars that disappearing 
+  during text printing/scrolling
+
+---------------------------------------------------------------------------------------------
 1.04    - 20210105
 
 - New behaviour for backspace (DEL) key: now chars that follow the cursor are moved 1 position
