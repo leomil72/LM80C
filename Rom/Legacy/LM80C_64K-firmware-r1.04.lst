@@ -121,10 +121,10 @@
   50+ 0000
   51+ 0000              ;label defining for VDP (Video Display Processor)
   52+ 0000              VDP_DAT         equ %00110000
-  53+ 0000                  IFDEF LM8064K
-  54+ 0000 ~            VDP_SET         equ %00110001
+  53+ 0000                  IFDEF LM80C64K
+  54+ 0000              VDP_SET         equ %00110001
   55+ 0000                  ELSE
-  56+ 0000              VDP_SET         equ %00110010
+  56+ 0000 ~            VDP_SET         equ %00110010
   57+ 0000                  ENDIF
   58+ 0000
   59+ 0000              ; label defining for PSG (Programmable Sound Generator)
@@ -228,13 +228,13 @@
  150+ 00C4 61 72 64 6F
  151+ 00C8 20 4D 69 6C                  defb    $20,$4D,$69,$6C,$69,$61,$6E,$69
  151+ 00CC 69 61 6E 69
- 152+ 00D0 46 57 20 31  FWVER:          defm    "FW ","1.04",$20,"2021-01-05",$20,"18:23:20",$00
+ 152+ 00D0 46 57 20 31  FWVER:          defm    "FW ","1.04",$20,"2021-01-06",$20,"11:18:57",$00
  152+ 00D4 2E 30 34 20
  152+ 00D8 32 30 32 31
  152+ 00DC 2D 30 31 2D
- 152+ 00E0 30 35 20 31
- 152+ 00E4 38 3A 32 33
- 152+ 00E8 3A 32 30 00
+ 152+ 00E0 30 36 20 31
+ 152+ 00E4 31 3A 31 38
+ 152+ 00E8 3A 35 37 00
  153+ 00EC              FMVEREND:       equ     $
  154+ 00EC FF FF FF...                  BLOCK   $100-FMVEREND,$FF   ; filler
  155+ 0100              ;------------------------------------------------------------------------------
@@ -1132,7 +1132,7 @@
  399+ 065C C9                           ret                     ; return to caller
  400+ 065D
  401+ 065D              ; set an address into VRAM: address is in HL - HL is changed after it
- 402+ 065D 0E 32        SETVDPADRS:     ld      C,VDP_SET       ; VDP address mode
+ 402+ 065D 0E 31        SETVDPADRS:     ld      C,VDP_SET       ; VDP address mode
  403+ 065F CB F4                        set     6,H             ; set bit #6 of address, to write to VRAM
  404+ 0661 ED 69                        out     (C),L           ; send low and...
  405+ 0663 ED 61                        out     (C),H           ; ...high byte of the first cell
@@ -1154,7 +1154,7 @@
  421+ 067D              ; load the char or byte at the VRAM position set by HL
  422+ 067D              ; value is returned into A
  423+ 067D C5           READ_VIDEO_LOC: push    BC              ; store BC
- 424+ 067E 0E 32                        ld      C,VDP_SET       ; VDP setting mode
+ 424+ 067E 0E 31                        ld      C,VDP_SET       ; VDP setting mode
  425+ 0680 44                           ld      B,H
  426+ 0681 CB B8                        res     7,B
  427+ 0683 CB B0                        res     6,B
@@ -1174,7 +1174,7 @@
  441+ 0692              ; write a byte at the VRAM position pointed by HL
  442+ 0692              ; value is in A
  443+ 0692 C5           WRITE_VIDEO_LOC:push    BC              ; store BC
- 444+ 0693 0E 32                        ld      C,VDP_SET       ; VDP setting mode
+ 444+ 0693 0E 31                        ld      C,VDP_SET       ; VDP setting mode
  445+ 0695 44                           ld      B,H             ; copy H into B
  446+ 0696 CB B8                        res     7,B
  447+ 0698 CB F0                        set     6,B             ; write to VRAM
@@ -1195,7 +1195,7 @@
  462+ 06A7              ; value is in E, register is in A
  463+ 06A7 C5           WRITE_VREG:     push    BC              ; store BC
  464+ 06A8 C6 80                        add     A,$80           ; set VDP to write to registers
- 465+ 06AA 0E 32                        ld      C,VDP_SET       ; VDP setting mode
+ 465+ 06AA 0E 31                        ld      C,VDP_SET       ; VDP setting mode
  466+ 06AC ED 59                        out     (C),E           ; send data to VDP
  467+ 06AE ED 79                        out     (C),A           ; select the destination register
  468+ 06B0 C1                           pop     BC              ; restore BC
@@ -1203,7 +1203,7 @@
  470+ 06B2
  471+ 06B2              ; read VDP status register and return value into A
  472+ 06B2 C5           READ_VSTAT:     push    BC              ; store BC
- 473+ 06B3 0E 32                        ld      C,VDP_SET       ; VDP register access
+ 473+ 06B3 0E 31                        ld      C,VDP_SET       ; VDP register access
  474+ 06B5 ED 78                        in      A,(C)           ; read status register
  475+ 06B7 C1                           pop     BC              ; restore BC
  476+ 06B8 C9                           ret                     ; return to caller
@@ -1424,8 +1424,8 @@
  691+ 080B 79                           ld      A,C
  692+ 080C B0                           or      B               ; finished?
  693+ 080D 20 EA                        jr      NZ,CHKHL        ; no, repeat
- 694+ 080F 3E 20        ENDINSRT:       ld      A,SPC           ; xor     A
- 695+ 0811 2A FD 52                     ld      HL,(CUR_POS)
+ 694+ 080F 3E 20        ENDINSRT:       ld      A,SPC           ; load SPACE character
+ 695+ 0811 2A FD 52                     ld      HL,(CUR_POS)    ; get cursor position
  696+ 0814 32 F6 52                     ld      (SCR_ORG_CHR),A ; reset original char under the cursor
  697+ 0817 CD 92 06                     call    WRITE_VIDEO_LOC ; empty current video location
  698+ 081A C3 C9 06                     jp      MOVSHOWCRS      ; re-place cursor
@@ -1607,7 +1607,7 @@
  874+ 094F 3A EC 52     SCROLLNXTRW:    ld      A,(SCR_SIZE_W)  ; (re)load the screen width
  875+ 0952 5F                           ld      E,A             ; move width into E
  876+ 0953 2A 2F 53                     ld      HL,(VIDTMP2)    ; load source address
- 877+ 0956 0E 32                        ld      C,VDP_SET       ; VDP setting mode
+ 877+ 0956 0E 31                        ld      C,VDP_SET       ; VDP setting mode
  878+ 0958 ED 69                        out     (C),L           ; low byte of source
  879+ 095A ED 61                        out     (C),H           ; high byte of source
  880+ 095C 21 05 53                     ld      HL,VIDEOBUFF    ; load address of the first cell of the video buffer
@@ -1628,7 +1628,7 @@
  895+ 0978 22 2F 53                     ld      (VIDTMP2),HL    ; source row
  896+ 097B E1                           pop     HL              ; restore address of current destination row
  897+ 097C CB F4                        set     6,H             ; writing mode
- 898+ 097E 0E 32                        ld      C,VDP_SET       ; VDP setting mode
+ 898+ 097E 0E 31                        ld      C,VDP_SET       ; VDP setting mode
  899+ 0980 ED 69                        out     (C),L           ; low byte
  900+ 0982 ED 61                        out     (C),H           ; high byte of address
  901+ 0984 21 05 53                     ld      HL,VIDEOBUFF    ; video buffer address
@@ -1642,7 +1642,7 @@
  909+ 0991 3A EC 52                     ld      A,(SCR_SIZE_W)  ; reload screen width
  910+ 0994 47                           ld      B,A             ; cells to empty into B
  911+ 0995 AF                           xor     A               ; null char
- 912+ 0996 0E 32                        ld      C,VDP_SET       ; VDP set mode
+ 912+ 0996 0E 31                        ld      C,VDP_SET       ; VDP set mode
  913+ 0998 2A 2D 53                     ld      HL,(VIDTMP1)    ; load address of the last row
  914+ 099B CB F4                        set     6,H             ; writing mode
  915+ 099D ED 69                        out     (C),L           ; low byte then..
@@ -1824,7 +1824,7 @@
 1073+ 0AE3 21 15 0B                     ld      HL,VDPMODESET   ; pointer to register settings | <= here points the SHOW_LOGO sub-routine
 1074+ 0AE6 19                           add     HL,DE           ; add offset to get the correct set of values for the required mode
 1075+ 0AE7 3E 80                        ld      A,$80           ; start with REG0 ($80+register number)
-1076+ 0AE9 0E 32                        ld      C,VDP_SET       ; VDP set
+1076+ 0AE9 0E 31                        ld      C,VDP_SET       ; VDP set
 1077+ 0AEB 56           LDREGVLS:       ld      D,(HL)          ; load register's value
 1078+ 0AEC ED 51                        out     (C),D           ; send data to VDP
 1079+ 0AEE ED 79                        out     (C),A           ; indicate the register to send data to
@@ -1838,7 +1838,7 @@
 1087+ 0AF5                              ; reg. HL contains address of pattern table into VRAM
 1088+ 0AF5 06 00                        ld      B,$00           ; 0=256 chars to load (complete charset)
 1089+ 0AF7 CB F4                        set     $06,H           ; add $4000 to address to indicate that we want to write into VRAM
-1090+ 0AF9 0E 32                        ld      C,VDP_SET       ; load VDP address into C
+1090+ 0AF9 0E 31                        ld      C,VDP_SET       ; load VDP address into C
 1091+ 0AFB ED 69                        out     (C),L           ; send low byte of address
 1092+ 0AFD ED 61                        out     (C),H           ; send high byte
 1093+ 0AFF 0D                           dec     C              ; VDP data mode
@@ -12211,7 +12211,7 @@ Value    Label
 0x0058   SER_BUFSIZE
 0x0041   PSG_DAT
 0x0040   PSG_REG
-0x0032   VDP_SET
+0x0031   VDP_SET
 0x0030   VDP_DAT
 0x0021   SIO_DB
 0x0020   SIO_DA

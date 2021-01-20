@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - VDP ROUTINES - 1.3
+; LM80C - VDP ROUTINES - 1.4
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -374,7 +374,7 @@ EMPTYMC:        ld      HL,$0800        ; MC name table
                 add     A,A             ; move to high nibble
                 or      D               ; set background color for high and low nibble
                 ld      D,$08           ; 2048 ($0800) cells to fill, so 8 pages ($08)
-STARTEMPTY:     ld      C,VDP_DAT       ; VDP address for passing data
+STARTEMPTY:     LD_VDP_DAT              ; VDP address for passing data
                 ld      B,$00           ; 256 bytes each page ($00=256)
 SNDCLRSET:      out     (C),A           ; send color setting
                 nop                     ; wait a while
@@ -428,12 +428,10 @@ READ_VIDEO_LOC: push    BC              ; store BC
                 out     (C),L           ; low byte then...
                 out     (C),B           ; high byte
                 LD_VDP_DAT              ; VDP data mode
+                LM64K_NOP               ; added to compensate shorter instruction
                 nop                     ; wait...
                 nop                     ; ...a while
                 nop
-    IFDEF LM80C64K
-                nop                     ; add another delay to compensate the shortest instruction above
-    ENDIF
                 in      A,(C)           ; read byte at current VRAM location
                 pop     BC              ; restore BC
                 ret                     ; return to caller
@@ -448,12 +446,10 @@ WRITE_VIDEO_LOC:push    BC              ; store BC
                 out     (C),L           ; low byte then...
                 out     (C),B           ; high byte of VRAM address
                 LD_VDP_DAT              ; VDP data mode
+                LM64K_NOP               ; added to compensate shorter instruction
                 nop                     ; wait...
                 nop                     ; ...a while
                 nop
-    IFDEF LM80C64K
-                nop                     ; add another delay to compensate the shortest instruction above
-    ENDIF
                 out     (C),A           ; write byte into VRAM
                 pop     BC              ; restore BC
                 ret                     ; return to caller
@@ -488,8 +484,8 @@ MOVSHOWCRS:     call    POS_CURSOR      ; position cursor into new location
                 ld      A,(CRSR_STATE)  ; load status of cursor
                 and     A               ; is cursor off?
                 ret     Z               ; yes, return
-                ld      A,(TMRCNT)      ; load timer
-                and     $20             ; check status of cursor flashing
+                ld      A,(LSTCSRSTA)   ; it's visible, so...
+                or      $20             ; ...set cursor on
                 ld      (LSTCSRSTA),A   ; store the last cursor state
                 ld      A,$FF           ; BTW, set cursor visible after moved it
                 jp      WRITE_VIDEO_LOC ; write into video cell
@@ -859,13 +855,13 @@ CURSOR_OFF:     push    AF              ; store AF
                 ret
 
 ; scroll the screen 1 row up
-SCROLLUP:       xor     A
-                ld      (PRNTVIDEO),A
+SCROLLUP:       xor     A               ; reset A
+                ld      D,A             ; reset D
+                ld      (PRNTVIDEO),A   ; no print on screen while scrolling
                 ld      HL,(SCR_NAM_TB) ; start address of the name table
                 ld      (VIDTMP1),HL    ; store address of the destination row (1st row of the screen)
                 ld      A,(SCR_SIZE_W)  ; load the screen width
                 ld      E,A             ; move width into E
-                ld      D,$00           ; reset D
                 add     HL,DE           ; HL now contains the address of the source row (2nd row of the screen)
                 ld      (VIDTMP2),HL    ; store address of source row
                 ld      A,(SCR_SIZE_H)  ; load the screen height
@@ -879,6 +875,7 @@ SCROLLNXTRW:    ld      A,(SCR_SIZE_W)  ; (re)load the screen width
                 out     (C),H           ; high byte of source
                 ld      HL,VIDEOBUFF    ; load address of the first cell of the video buffer
                 LD_VDP_DAT              ; VDP data mode
+                LM64K_NOP               ; added to compensate shorter instruction
 LOADNEXTCOL:    in      A,(C)           ; load char
                 ld      (HL),A          ; store char
                 inc     HL              ; next cell of the buffer
@@ -915,6 +912,7 @@ WRITEBUF:       ld      A,(HL)          ; load char
                 out     (C),L           ; low byte then..
                 out     (C),H           ; high byte of address
                 LD_VDP_DAT              ; VDP data mode
+                LM64K_NOP               ; delay
 RPTEMPTYROW:    out     (C),A           ; empty cell
                 nop                     ; delay
                 nop

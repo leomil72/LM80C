@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C BASIC (32K/64K) - R3.17
+; LM80C BASIC (32K/64K) - R3.18
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -250,7 +250,7 @@ BRKRET: call    CLREG           ; Clear registers and stack
 BLNSPC: defb    "        ",0    ; 8 empty cells to align the "XXXX Bytes free" message
 BFREE:  defb    " Bytes free",CR,CR,0
 
-SIGNON: defb    "LM80C BASIC 3.17 ",251,"2021 L.Miliani"
+SIGNON: defb    "LM80C BASIC 3.18 ",251,"2021 L.Miliani"
         defb    " Z80 BASIC 4.7  ",251,"1978 Microsoft",CR,0
 
 MEMMSG: defb    "Memory top",0
@@ -753,6 +753,9 @@ PRNTOK: xor     A               ; Output "Ok" and get command
         ld      HL,OKMSG        ; "Ok" message
         call    PRS             ; Output "Ok"
 GETCMD: call    CURSOR_ON       ; enable cursor
+        ld      A,(SERIALS_EN)  ; load serial state
+        xor     %00000101       ; check if serial 1 is open and RX enabled
+        call    Z,A_RTS_ON      ; yes, set RTS on
         ld      HL,-1           ; Flag direct mode
         ld      (LINEAT),HL     ; Save as current line
         call    GETLIN          ; Get an input line
@@ -765,6 +768,9 @@ GETCMD: call    CURSOR_ON       ; enable cursor
         dec     A               ; Without affecting Carry
         jp      Z,GETCMD        ; Nothing entered - Get another
         push    AF              ; Save Carry status
+        ld      A,(SERIALS_EN)  ; load serial state
+        xor     %00000101       ; check if serial 1 is open and RX enabled
+        call    Z,A_RTS_OFF      ; yes, set RTS on
         call    CURSOR_OFF      ; cursor disabled
         call    ATOH            ; Get line number into DE
         push    DE              ; Save line number
@@ -918,6 +924,9 @@ PROMPT: ld      A,'?'           ; '?'
         ld      A,NLLCR         ; null char
         call    OUTC            ; Output character
         call    CURSOR_ON       ; enable cursor
+        ld      A,(SERIALS_EN)  ; load serial state
+        xor     %00000101       ; check if serial 1 is open and RX enabled
+        call    Z,A_RTS_ON      ; yes, set RTS on
         jp      RINPUT          ; Get input line
 
 CRUNCH: xor     A               ; Tokenise line @ HL to BUFFER
@@ -1177,6 +1186,9 @@ CLOTST: call    GETINP          ; Get input character
         ld      (CTLOFG),A      ; Put it back
         and     A               ; is output enabled?
         call    Z,CURSOR_ON     ; yes, so cursor on
+        ld      A,(SERIALS_EN)  ; load serial state
+        xor     %00000101       ; check if serial 1 is open and RX enabled
+        call    Z,A_RTS_ON      ; yes, set RTS on
         xor     A               ; Null character
         ret
 
@@ -1915,6 +1927,9 @@ NOPMPT: push    HL              ; Save code string address
         or      A               ; End of line?
         dec     HL              ; Back again
         push    BC              ; Re-save code string address
+        ld      A,(SERIALS_EN)  ; load serial state
+        xor     %00000101       ; check if serial 1 is open and RX enabled
+        call    Z,A_RTS_OFF      ; yes, set RTS on
         call    CURSOR_OFF      ; disable cursor
         jp      Z,NXTDTA        ; Yes - Find next DATA stmt
         ld      (HL),','        ; Store comma as separator
@@ -5147,7 +5162,7 @@ LOADCLR:push    HL              ; store HL
         ld      HL,$2000        ; color table start: $2000
         di                      ; disable INTs
         call    SETVDPADRS
-        ld      C,VDP_DAT       ; VDP data mode
+        LD_VDP_DAT              ; VDP data mode
 RPTLDCL:out     (C),A           ; after first byte, the VDP autoincrements VRAM pointer
         nop
         nop
@@ -5283,7 +5298,7 @@ RPGPNT: dec     E               ; Count characters
 GPNTCOL:call    SETVDPADRS      ; set VRAM address for color cell
         ld      A,(MIXCOL)      ; load color settings
         ld      B,$08           ; repeat for 8 rows
-        LD_VDP_DAT              ; VDP data mode
+        ld      C,VDP_DAT       ; VDP data mode
 GPNTCO1:out     (C),A           ; send data (VRAM pointer auto-increments)
         nop                     ; wait...
         nop                     ; ...a...

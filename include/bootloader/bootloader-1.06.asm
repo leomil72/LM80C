@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - BOOTLOADER - 1.04
+; LM80C - BOOTLOADER - 1.06
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -112,7 +112,7 @@ RST08:          jp      TXA
 RST10:          jp      RXA
                 BLOCK   5,$FF   ; filler
 ;------------------------------------------------------------------------------
-; check serial status
+; check buffer state
 
                 ;$0018
 RST18:          jp      CKINCHAR
@@ -160,7 +160,7 @@ FMVEREND:       equ     $
 
 ;-------------------------------------------------------------------------------
 ; interrupt driven routine to get chars from Z80 SIO ch.A
-; this is the only channel that can print received chars onto the screen
+; this is the only serial channel that can print received chars onto the screen
                 ;$0100
 RX_CHA_AVAIL:   push    AF              ; store A
                 push    HL              ; and HL
@@ -178,9 +178,9 @@ RX_CHA_AVAIL:   push    AF              ; store A
 CNTRXCHA:       push    AF              ; store char
                 xor     A
                 ld      (KBDNPT),A      ; a char from serial is like a char printed by BASIC
-                ld      A,(CRSR_STATE)  ; check cursor state
-                or      A               ; is it on?
-                call    NZ,CHAR2VID     ; yes, print on screen
+                ld      A,(PRNTVIDEO)   ; load status of print-on-video
+                cp      $01             ; is the print on video on?
+                call    Z,CHAR2VID      ; yes, print on screen
                 pop     AF              ; retrieve char
                 call    TXA             ; send back to serial
 LVRXCHA:        pop     HL              ; retrieve HL
@@ -261,11 +261,13 @@ A_RTS_OFF:      push    BC              ; store BC
 B_RTS_OFF:      push    BC              ; store BC
                 ld      C,SIO_CB        ; select channel B
                 ld      A,(SERBBITS)    ; load data serial bits for ch.B
-SIO_RTS_OFF:    ld      B,A             ; store data bits
+SIO_RTS_OFF:    srl     A               ; position data bits in bits #5&6
+                and     %01100000       ; get only bits #5&6
+                ld      B,A             ; store data bits
                 ld      A,%00000101     ; write into WR0: select WR5
                 out     (C),A
-                ld      A,B             ; retrieve data bits
-                or      %00101000       ; TX enable; RTS disable
+                ld      A,%10001000     ; enable DTR (b7) and TX (b4), disable RTS (b1)
+                or      B               ; set data bits
                 out     (C),A           ; send setting
                 pop     BC              ; retrieve BC
                 ret                     ; exit
@@ -280,11 +282,13 @@ A_RTS_ON:       push    BC              ; store BC
 B_RTS_ON:       push    BC              ; store BC
                 ld      C,SIO_CB        ; select channel B
                 ld      A,(SERBBITS)    ; load data serial bits for ch.B
-SIO_RTS_ON:     ld      B,A             ; store data bits
+SIO_RTS_ON:     srl     A               ; position data bits in bits #5&6
+                and     %01100000       ; get only bits #5&6
+                ld      B,A             ; store data bits
                 ld      A,%00000101     ; write into WR0: select WR5
                 out     (C),A
-                ld      A,B             ; retrieve data bits
-                or      %00101010       ; TX enable; RTS enable
+                ld      A,%10001010     ; enable DTR (b7), TX (b4), and RTS (b1)
+                or      B               ; set data bits
                 out     (C),A           ; send setting
                 pop     BC              ; retrieve BC
                 ret                     ; return
@@ -341,17 +345,17 @@ NOTFULL:        ld      HL,(serInPtr)   ; buffer is not full, can store the char
                 jr      NZ,NOTWRAP      ; if not then continue
                 ld      HL,SERBUF_START ; else load the address of the first cell
 NOTWRAP:        ld      (serInPtr),HL   ; store the new pointer
-                pop     AF              ; then recover the char
-                ld      (HL),A          ; and store it in the appropriate cell
-                ld      A,(serBufUsed)  ; load the size of the input buffer
-                inc     A               ; increment it
-                ld      (serBufUsed),A  ; and store the new size
-                cp      SER_FULLSIZE    ; check if input buffer is full
+                pop     AF              ; then retrieve the char...
+                ld      (HL),A          ; ...and store it in the appropriate cell
+                ld      HL,serBufUsed   ; size of the input buffer
+                inc     (HL)            ; increment it
+                ld      A,SER_FULLSIZE  ; input buffer capacity
+                cp      (HL)            ; check if input buffer is full
                 ret     C               ; exit if buffer is not full
                 ld      A,(SERIALS_EN)  ; check if serial 1 is open
                 rra                     ; bit 0 into Carry: if Carry is 1 then serial 0 is open and...
-                call    C,A_RTS_OFF     ; ...stop receiving further chars
-                xor     A               ; clear Carry to set a buffer full condition
+                call    C,A_RTS_OFF     ; ...receiving further chars must be stopped
+                scf                     ; set Carry flag, because  we must inform that the char has been added before to disable RTS
                 ret
 
 
@@ -374,33 +378,26 @@ NOTRDWRAP:      ld      (serRdPtr),HL   ; store new pointer to the next char to 
                 ld      (serBufUsed),A  ; and store the new size
                 cp      SER_EMPTYSIZE   ; check if input buffer can be considered empty
                 jr      NC,RXA_EXIT     ; if not empty yet, then exit
-                call    A_RTS_ON        ; else re-enable receiving chars
+                ld      A,(SERIALS_EN)  ; load serial state
+                xor     %00000101       ; check if serial 1 is open and RX enabled
+                call    Z,A_RTS_ON      ; yes, set RTS on
 RXA_EXIT:       ld      A,(HL)          ; recover the char and return it into A
                 pop     HL              ; retrieve HL
                 ei                      ; re-enable interrupts
                 ret                     ; return
 
 ;------------------------------------------------------------------------------
-; sends a char over the serial (trick for INTs from WikiTI)
-; char is into A
+; sends a char over the serial - char is into A
 TXA:            push    AF              ; store AF
                 push    BC              ; store BC
                 ld      B,A             ; store char
-                ld      A,I             ; when loading I into A, P/V is set to the value of IFF (P/V is set if INTs enabled)
-                jp      PE,CNTTXA       ; if set, jump over
-                ld      A,I             ; if not set, test again to fix "false negative" from interrupt occurring at first test
-CNTTXA:         push    AF              ; store current P/V flag
-                di                      ; disable INTs
                 ld      A,(SERIALS_EN)  ; load serial status
-                cp      %00000101       ; check if serial 1 is open and RX/TX is enabled 
+                xor     %00000101       ; check if serial 1 is open and RX is enabled 
                 jr      NZ,TXA_EXIT     ; no, jump over
                 ld      A,B             ; retrieve char
                 out     (SIO_DA),A      ; send char to the SIO
                 call    TX_EMP          ; wait for outgoing char to be sent
-TXA_EXIT:       pop     AF              ; retrieve P/V flag
-                jp      PO,EXTXA        ; if P is reset, INTs were disabled so we can leave right now
-                ei                      ; INTs were enabled, so re-enable interrupts
-EXTXA:          pop     BC              ; retrieve BC
+TXA_EXIT:       pop     BC              ; retrieve BC
                 pop     AF              ; retrieve AF
                 ret                     ; return
 
@@ -417,7 +414,7 @@ TX_EMP:         sub     A               ; set A to 0
 
 ;------------------------------------------------------------------------------
 ; check if there is some chars into the buffer
-CKINCHAR:       ld      A,(serBufUsed)  ; load char in buffer
+CKINCHAR:       ld      A,(serBufUsed)  ; load buffer size
                 and     A               ; compare to 0
                 ret                     ; return
 
