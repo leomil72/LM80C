@@ -1,13 +1,14 @@
-3 rem by Antonino Porcino, 06/03/2021
-4 screen 1:color 1,14,14
-5 s=97*8
-10 for t=0 to 64
-20 vpoke s+t,0
-30 next
-40 s=s+7
-50 for t=0 to 7
-60 vpoke s,255
-70 s=s+7
-80 next
-100 print "aabcdefghhgfedcba";
-110 goto 100
+1 rem by Antonino Porcino
+2 rem 06/03/2021
+10 screen 1:color 1,14,14
+20 s=97*8
+30 for t=0 to 64
+40 vpoke s+t,0
+50 next
+60 s=s+7
+70 for t=0 to 7
+80 vpoke s,255
+90 s=s+7
+100 next
+110 print "aabcdefghhgfedcba";
+120 goto 110
