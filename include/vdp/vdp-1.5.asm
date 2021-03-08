@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - VDP ROUTINES - 1.4
+; LM80C - VDP ROUTINES - 1.5
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
