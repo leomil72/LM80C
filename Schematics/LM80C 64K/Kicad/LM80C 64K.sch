@@ -5,7 +5,7 @@ $Descr A2 23386 16535
 encoding utf-8
 Sheet 1 1
 Title "LM80C Color Computer 64K"
-Date "2021-01-03"
+Date "2021-03-08"
 Rev "R2"
 Comp "Leonardo Miliani"
 Comment1 "Compliant with firmware R1.03 and above"
@@ -6556,11 +6556,57 @@ Wire Wire Line
 Wire Wire Line
 	2900 4850 3300 4850
 Text Notes 2350 5150 0    50   ~ 0
-CONNECT IF YOUR CF/IDE ADAPTOR DOES\nNOT HAVE A BUILT-IN ACTIVITY LED
+CONNECT IF YOUR CF/IDE ADAPTER DOES\nNOT HAVE A BUILT-IN ACTIVITY LED
 Wire Wire Line
 	7000 2750 6900 2750
 Text GLabel 6900 2750 0    50   Input ~ 0
 A0
+$Comp
+L Connector:Conn_01x04_Male J?
+U 1 1 601FCA02
+P 2800 6050
+F 0 "J?" H 2772 6024 50  0000 R CNN
+F 1 "Conn_01x04_Male" H 2772 5933 50  0000 R CNN
+F 2 "" H 2800 6050 50  0001 C CNN
+F 3 "~" H 2800 6050 50  0001 C CNN
+	1    2800 6050
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 607A1427
+P 2300 6300
+F 0 "#PWR?" H 2300 6050 50  0001 C CNN
+F 1 "GND" H 2305 6127 50  0000 C CNN
+F 2 "" H 2300 6300 50  0001 C CNN
+F 3 "" H 2300 6300 50  0001 C CNN
+	1    2300 6300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR?
+U 1 1 607A1701
+P 2300 5700
+F 0 "#PWR?" H 2300 5550 50  0001 C CNN
+F 1 "+5V" H 2315 5873 50  0000 C CNN
+F 2 "" H 2300 5700 50  0001 C CNN
+F 3 "" H 2300 5700 50  0001 C CNN
+	1    2300 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2600 5950 2300 5950
+Wire Wire Line
+	2300 5950 2300 5700
+Wire Wire Line
+	2600 6050 2300 6050
+Wire Wire Line
+	2300 6050 2300 6150
+Wire Wire Line
+	2600 6150 2300 6150
+Connection ~ 2300 6150
+Wire Wire Line
+	2300 6150 2300 6300
 Wire Bus Line
 	3600 14300 3600 15000
 Wire Bus Line
@@ -6585,4 +6631,6 @@ Wire Bus Line
 	5400 1950 5400 15000
 Wire Bus Line
 	3600 6750 3600 14000
+Text Notes 1650 6100 0    50   ~ 0
+CF ADAPTER\nPOWER JACK
 $EndSCHEMATC

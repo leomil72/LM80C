@@ -10,6 +10,14 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+3.20    - 20210307
+
+- New cold reset: by pressing the RUN/STOP key during the boot sequence, the computer
+  restarts again and re-copy the firmware from ROM to RAM, to restore the original code
+  and fix FW modifications made with POKEs w/o the need to power off the computer;
+- Added support for LM80C DOS 1.0 and new commands DISK, FILES, LOAD, SAVE, ERASE.
+
+---------------------------------------------------------------------------------------------
 3.19    - 20210119
 
 - Better serial management with RTS-driven chars receiveing
