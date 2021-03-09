@@ -145,7 +145,7 @@ DOS_FT2:    push    HL              ; store size of directory
             xor     A               ; A=$0
             ld      (DE),A          ; marker at $1F
             inc     DE
-            call    CHKNMVAL;DOS_LDNAM       ; copy disk name into buffer
+            call    CHKNMVAL        ; copy disk name into buffer
             jp      C,D1ERR         ; disk name error
 DOS_FT5:    call    RND_ID          ; generate a semi-random disk ID
             ld      HL,(IOBUFF)     ; get starting address of I/O buffer
