@@ -9,6 +9,12 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
+
+---------------------------------------------------------------------------------------------
+1.12    - 20210310
+
+- New LM80C DOS 1.02: code size optimization; new "undelete file" feature for DISK
+
 ---------------------------------------------------------------------------------------------
 1.11    - 20210309
 

@@ -11,6 +11,11 @@ P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding ch
 
 
 ---------------------------------------------------------------------------------------------
+3.22    - 20210310
+
+- New LM80C DOS 1.02: code size optimization; new "undelete file" feature for DISK
+
+---------------------------------------------------------------------------------------------
 3.21    - 20210309
 
 - New LM80C DOS 1.01;
