@@ -10,7 +10,25 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.11    - 20210309
+
+- New LM80C DOS 1.01;
+- Better error managemenet for LM80C DOS routines;
+- new behaviour of ERASE command (now in full erase, il also wipes out the file entry);
+- code cleaning and optimization for LM80C DOS;
+- code cleaning and optimization for some LM80C DOS commands.
+
+---------------------------------------------------------------------------------------------
+1.10    - 20210307
+
+- New cold reset: by pressing the RUN/STOP key during the boot sequence, the computer
+  restarts again and re-copy the firmware from ROM to RAM, to restore the original code
+  and fix FW modifications made with POKEs w/o the need to power off the computer;
+- Added support for LM80C DOS 1.0 and new commands DISK, FILES, LOAD, SAVE, ERASE.
+
+---------------------------------------------------------------------------------------------
 1.05    - 20210119
+
 - Better serial management with RTS-driven chars receiveing
 - Fixed a bug introduced in the previous releases that lead to chars that disappearing 
   during text printing/scrolling
