@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - BIOS ROUTINES - R1.0
+; LM80C 64K - BIOS ROUTINES - R1.01
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -21,7 +21,7 @@
 ; ------------------------------------------------------------------------------
 ; Code Revision:
 ; R1.0  - 20210307 - first release
-; R1.01 - 2021xxxx - 
+; R1.01 - 20210310 - Code optimizing & better error handlingsì
 ;
 ;------------------------------------------------------------------------------
 
