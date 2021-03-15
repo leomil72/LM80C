@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - FIRMWARE - R3.21
+; LM80C - FIRMWARE - R3.22
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
