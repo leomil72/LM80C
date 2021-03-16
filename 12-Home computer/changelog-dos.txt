@@ -1,0 +1,39 @@
+---------------------------------------------------------------------------------------------
+
+                                 LM80C DOS - Changelog
+
+---------------------------------------------------------------------------------------------
+
+The following file reports the changelog of the LM80C DOS developed by Leonardo Miliani
+for the LM80C Color Computer series. More info at www DOT leonardomiliani DOT com
+
+P.S.: for the changelog of the LM80C firmwares see the corresponding changelog files
+
+---------------------------------------------------------------------------------------------
+1.03    - 20210316
+
+- SAVE now can be used to change the name to a file, too;
+- disk access speeded up by using OTIR & INIR statements;
+- code size optimization.
+
+---------------------------------------------------------------------------------------------
+1.02    - 20210310
+
+- Code size optimization; new "undelete file" feature for DISK
+
+---------------------------------------------------------------------------------------------
+1.01    - 20210309
+
+- Better error managemenet for LM80C DOS routines;
+- full erase mode for ERASE, to wipe out the file data & entry;
+- code cleaning and optimizations for LM80C DOS.
+
+---------------------------------------------------------------------------------------------
+1.00    - 20210307
+
+- Introduction of LM80C DOS with ability to access a Compact Flash memory card to be used
+  ad a mass storage device;
+- new commands: DISK, to format/rename the disk or rewrite the Master Sector; FILES, to list
+  files stored on disk; LOAD, to load a BASIC program, a binary file, or a single disk sector;
+  SAVE, to save a BASIC program, a binary file, or some data into a disk sector; ERASE, to 
+  erase a file.

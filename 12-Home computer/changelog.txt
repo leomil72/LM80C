@@ -8,7 +8,13 @@ The following file reports the changelog of the LM80C firmware developed by Leon
 for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
+P.S.: for the changelog of the LM80C DOS see the corresponding changelog files
 
+---------------------------------------------------------------------------------------------
+3.23    - 20210316
+
+- New LM80C DOS 1.03;
+- SAVE features expanded to add file renaming
 
 ---------------------------------------------------------------------------------------------
 3.22    - 20210310
