@@ -8,7 +8,13 @@ The following file reports the changelog of the firmware developed by Leonardo M
 for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
-P.S.: for the changelog of the LM80C DOS see the corresponding changelog files
+
+---------------------------------------------------------------------------------------------
+1.13    - 20210316
+
+- SAVE now can be used to change the name to a file, too;
+- disk access speeded up by using OTIR & INIR statements;
+- code size optimization.
 
 ---------------------------------------------------------------------------------------------
 1.12    - 20210310
