@@ -79,7 +79,7 @@ DOSBFR          equ     LSTRAM+$02      ; (2) Start of temporary buffer used by 
 IOBUFF          equ     DOSBFR+$02      ; (2) Start of I/O buffer used by DOS to store/retrieve disk sectors
 DOSER           equ     IOBUFF+$02      ; (1) Error from DOS
 TMPDBF          equ     DOSER+$01       ; (36) Secondary buffer for DOS 
-TMSTPT          equ     DOSER+$24       ; (2) Temporary string pointer
+TMSTPT          equ     TMPDBF+$24      ; (2) Temporary string pointer
 TMSTPL          equ     TMSTPT+$02      ; (12) Temporary string pool
 TMPSTR          equ     TMSTPL+$0C      ; (4) Temporary string
 STRBOT          equ     TMPSTR+$04      ; (2) Bottom of string space
