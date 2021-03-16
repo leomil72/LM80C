@@ -9,6 +9,13 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
+---------------------------------------------------------------------------------------------
+3.23    - 20210316
+
+- New LM80C DOS 1.03;
+- SAVE now can be used to change the name to a file, too;
+- disk access speeded up by using OTIR & INIR statements;
+- code size optimization.
 
 ---------------------------------------------------------------------------------------------
 3.22    - 20210310
