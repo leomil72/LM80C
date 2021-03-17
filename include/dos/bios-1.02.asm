@@ -22,7 +22,7 @@
 ; Code Revision:
 ; R1.0  - 20210307 - first release
 ; R1.01 - 20210310 - Code optimizing & better error handling
-; R1.02 - 2021xxxx - disk speed improvements with INIR and OTIR
+; R1.02 - 20210316 - disk speed improvements with INIR and OTIR
 ;
 ;------------------------------------------------------------------------------
 
