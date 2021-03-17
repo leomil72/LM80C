@@ -10,6 +10,11 @@ for the LM80C Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C 64K Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+3.24    - 20210317
+
+- Now LOAD & SAVE accept 4 arguments, to be able to load every sector in LBA mode;
+- changed the behaviour of DISK command: new option "W" to rewrite the Master Sector.
+---------------------------------------------------------------------------------------------
 3.23    - 20210316
 
 - New LM80C DOS 1.03;
