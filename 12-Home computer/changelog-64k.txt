@@ -10,6 +10,12 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.15    - 20210319
+
+- New boot mechanism to position DOS into the high-RAM of the system;
+- when disabling the DOS at boot, this frees up the RAM it occupied, too.
+
+---------------------------------------------------------------------------------------------
 1.14    - 20210317
 
 - Now LOAD & SAVE accept 4 arguments, to be able to load every sector in LBA mode;
