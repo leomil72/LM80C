@@ -32,7 +32,7 @@
 240 PRINT "You are thrown into the dungeons and"
 242 PRINT "told not to come back without the crown."
 250 PRINT "Here begins the adventure...."
-260 GOTO 80
+260 PRINT:PRINT "(please, wait a while..)":GOTO 80
 270 REM WHILE NOT g
 280 IF R<>X THEN GOSUB 640
 290 X=R
