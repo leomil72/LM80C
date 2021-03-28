@@ -127,7 +127,7 @@ CR_DV_RD_1: in      A,(C)           ; load status register (curiously, with no C
             cp      %01010000       ; busy=0, rdy=1, dsc=1
             jr      Z,CR_DV_RD_E    ; got a response, so leave
             djnz    CR_DV_RD_1      ; repeat until timeout (Carry=1 while HL<DE)
-CR_DV_ERR:  scf                     ; exit with Carry = 1 (device NOT ready)
+            scf                     ; exit with Carry = 1 (device NOT ready)
 CR_DV_RD_E: pop     BC              ; retrieve HL
             ret                     ; return to caller
 

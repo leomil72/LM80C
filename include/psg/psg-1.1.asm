@@ -309,7 +309,7 @@ PUTCHRBUF:      xor     A
 PNT2VD:         call    CHAR2VID        ; send char to video
 LVKBRDCHK2:     xor     A
                 ld      (CONTROLKEYS),A ; reset control key flags
-LVKBRDCHK:      ret                     ; return to caller: the current key code is into TMPKEYBFR
+                ret                     ; return to caller: the current key code is into TMPKEYBFR
                 ; manage FN keys          
 PRNTFNKEY:      ld      D,A             ; copy A into D
                 ld      HL,(LINEAT)     ; Get current line number
