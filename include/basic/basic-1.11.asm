@@ -80,7 +80,7 @@ ST      equ     $1E     ; String formula too complex
 CN      equ     $20     ; Can't continue
 UF      equ     $22     ; Undefined FN function
 MO      equ     $24     ; Missing operand
-HX      equ     $26     ; HEX error
+HE      equ     $26     ; HEX error
 BN      equ     $28     ; BIN error
 GM      equ     $2A     ; No Graphics Mode
 SC      equ     $2C     ; Serial configuration
@@ -123,7 +123,7 @@ STPTR:  defw    STMSG
 CNPTR:  defw    CNMSG
 UFPTR:  defw    UFMSG
 MOPTR:  defw    MOMSG
-HXPTR:  defw    HXMSG
+HEPTR:  defw    HEMSG
 BNPTR:  defw    BNMSG
 GMPRT:  defw    GMMSG
 SCPTR:  defw    SCMSG
@@ -166,7 +166,7 @@ STMSG:  defb    "String Formula Too Complex",0
 CNMSG:  defb    "Can't Continue",0
 UFMSG:  defb    "Undefined FN Function",0
 MOMSG:  defb    "Missing Operand",0
-HXMSG:  defb    "HEX Format",0
+HEMSG:  defb    "HEX Format",0
 BNMSG:  defb    "BIN Format",0
 GMMSG:  defb    "No Graphics Mode",0
 SCMSG:  defb    "Serial Configuration",0
@@ -6684,7 +6684,7 @@ ADD301: add     A,$30           ; And make it full ASCII
 HEXTFP: ex      DE,HL           ; Move code string pointer to DE
         ld      HL,$0000        ; Zero out the value
         call    GETHEX          ; Check the number for valid hex
-        jp      C,HXERR         ; First value wasn't hex, HX error
+        jp      C,HXERR         ; First value wasn't hex, HEX error
         jr      HEXLP1          ; Convert first character
 HEXLP:  call    GETHEX          ; Get second and addtional characters
         jr      C,HEXIT         ; Exit if not a hex character
@@ -6719,7 +6719,7 @@ HEXIT:  ex      DE,HL           ; Value into DE, Code string into HL
         pop     HL
         ret
 
-HXERR:  ld      E,HX            ; ?HEX Error
+HXERR:  ld      E,HE            ; ?HEX Error
         jp      ERROR
 
 ; BIN$(NN) Convert integer to a 1-16 char binary string
@@ -6758,7 +6758,7 @@ BITOUT2:ld      A,'0'           ; Char for '0'
 BINTFP: ex      DE,HL           ; Move code string pointer to DE
         ld      HL,$0000        ; Zero out the value
         call    CHKBIN          ; Check the number for valid bin
-        jp      C,BINERR        ; First value wasn't bin, HX error
+        jp      C,BINERR        ; First value wasn't bin, BIN error
 BINIT:  sub     '0'
         add     HL,HL           ; Rotate HL left
         or      L
