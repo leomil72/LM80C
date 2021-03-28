@@ -10,6 +10,11 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.16    - 20210327
+- New DOS 1.05 with support for sequential files;
+- new BASIC statements OPEN, CLOSE, PUT, GET, EOF to manage sequential files
+
+---------------------------------------------------------------------------------------------
 1.15    - 20210319
 
 - New boot mechanism to position DOS into the high-RAM of the system;
