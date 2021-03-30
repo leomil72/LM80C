@@ -23,7 +23,7 @@
 ; R1.0  - 20210306 - first release
 ; R1.01 - 20210309 - code cleaning & optimization - new behaviour for ERASE (full erase everything)
 ; R1.02 - 20210310 - code optimization - new UNDELETE feature for DISK statement
-; R1.03 - 2021xxxx - code size enhancements
+; R1.03 - 20210316 - code size enhancements
 ; R1.04 - 20210319 - code re-organization and new positioning into RAM
 ; R1.05 - 20210327 - added support for sequential files
 ;
