@@ -30,7 +30,7 @@
 ;------------------------------------------------------------------------------
 
 
-            org     $EE70
+            org     $EE68
 
 DOSSTART:   equ     $
 DSKHDR      defb    "LM80C DOS",$00,DOS_VER,$00     ; disk header
@@ -409,6 +409,7 @@ DSKUND: dec     HL              ; dec 'cause GETCHR increments
         push    HL              ; store code string pointer
         call    DSKUNDFL        ; undelete files
         pop     HL              ; retrieve code string pointer
+        jp      C,DOS_ERR       ; DOS error
         ret                     ; return to caller
 
 
@@ -651,7 +652,9 @@ DOS_FT8:    call    OUTC            ; print char
 ; *****************************************************************************
 ; D I S K    R E N A M E
 ;******************************************************************************
-DSK_RNM:    call    CLRIOBF         ; clear I/O buffer
+DSK_RNM:    call    CHKDSKVAL       ; check DOS version & load disk details
+            jp      C,DOSVERSERR    ; if Carry is set, raise DOS version error
+            call    CLRIOBF         ; clear I/O buffer
             call    CLRDOSBF        ; clear DOS buff.
             call    LDMSCT          ; load Master Sector
             ld      HL,IOBUFF       ; point to start of I/O buffer
