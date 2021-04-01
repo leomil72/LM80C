@@ -1003,14 +1003,14 @@ GET2:       ld      (SEQSCTL),BC    ; save LSW of sector address
             ld      DE,(SEQSCTM)    ; load MSW of sector address
             call    CF_SETSTR       ; set sector to read
             call    CF_RD_SEC       ; read next sector
-            call    CF_STANDBY
-GET1:       pop     HL
+            call    CF_STANDBY      ; set CF to standby
+GET1:       pop     HL              ; retrieve code string pointer
             ld      A,(TMPBFR1)
             jp      PASSA           ; return A and then return to caller
-GETER:      pop     HL
-            ld      E,A
+GETER:      pop     HL              ; retrieve code string pointer
+            ld      E,A             ; load error code
             call    CF_STANDBY      ; set CF into stand-by
-            jp      ERROR
+            jp      ERROR           ; raise error
 
 
 ; *****************************************************************************
@@ -1927,5 +1927,5 @@ CLRSEQBF:   push    AF              ; store AF
             push    BC              ; store BC
             push    HL              ; store HL
             ld 	    HL,SEQFL        ; load address of DOS buffer
-            ld      BC,$0B01
+            ld      BC,$0B01        ; B=11 iterations; C=repeat 1 time
             jp      CLRBUFF         ; continue to common part
