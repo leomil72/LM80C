@@ -30,11 +30,11 @@
 The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with video and audio capabilities. It's a stand-alone system thanks to its integrated keyboard that permits to use it without the necessity of host computers, usually used as input/output devices in other similar projects. With the LM80C BASIC you can write your own games, programs, and much more.
 
 ### Models
-Actually, there are two models of the computer: **LM80C Color Computer** and **LM80C 64K Color Computer**. There are a couple of differences between the two: the former only has 32KB of SRAM and an interface to SD cards based on an Atmega328P as a mass storage, while the latter has 64KB of SRAM and a new mass storage interface based on Compat Flash cards.
+Actually, there is only one model of the computer: the **LM80C 64K Color Computer**. Originally, there was also the **LM80C Color Computer** but it has been considered as DEPRECATED and its developmente and/or supporto has been cheased. There were a couple of differences between the two: the former only had 32KB of SRAM and an interface to SD cards based on an Atmega328P as a mass storage (never developed, my fault), while the latter has 64KB of SRAM and a new mass storage interface based on Compat Flash cards, perfectly supported.
 
 ### Main features
 
-**LM80C Color Computer**
+**LM80C Color Computer** (DEPRECATED)
 
 - CPU: Zilog Z80B@3.68 MHz
 - Memory:
@@ -99,8 +99,10 @@ Actually, there are two models of the computer: **LM80C Color Computer** and **L
    - generate system ticks and baud rates
 - Keyboard:
   - external keyboard with 64 keys (I used a Commodore 16 keyboard, that has 66 keys but only 64 unique keys due to double connections for SHIFT and SHIFT/LOCK)
-- More to come:
+- Mass storage:
   - support for Compact Flash memory cards
+    - disk formatting/renaming
+    - load/save/erase of BASIC, binary, and sequential files;
 
 Thanks to the bank switching mechanism implemented into the computer, the machine can use the whole amount of 64KB of SRAM. The same mechanism is used to provide 2x 16K banks of VRAM to the VDP so that 2 entire video framebuffers can be loaded and stored into the VRAM.
 

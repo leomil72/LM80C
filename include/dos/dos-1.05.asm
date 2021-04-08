@@ -23,14 +23,14 @@
 ; R1.0  - 20210306 - first release
 ; R1.01 - 20210309 - code cleaning & optimization - new behaviour for ERASE (full erase everything)
 ; R1.02 - 20210310 - code optimization - new UNDELETE feature for DISK statement
-; R1.03 - 2021xxxx - code size enhancements
+; R1.03 - 20210316 - code size enhancements
 ; R1.04 - 20210319 - code re-organization and new positioning into RAM
 ; R1.05 - 20210327 - added support for sequential files
 ;
 ;------------------------------------------------------------------------------
 
 
-            org     $EE70
+            org     $EE68
 
 DOSSTART:   equ     $
 DSKHDR      defb    "LM80C DOS",$00,DOS_VER,$00     ; disk header
@@ -313,11 +313,13 @@ ABRTXT: defb    CR,"Aborted",0
 ;                               D O S    R O U T I N E S
 ;***************************************************************************************
 
- ; DISK command -------
+; DISK command -------
 ; execute several operations on a disk:
 ; "F": format/rewrite Master Sector
 ; "R": rename disk
-; syntax: DISK "arg1"[,arg2][,1]
+; "W": rewrite Master Sector
+; "U": undelete deleted files
+; syntax: DISK "arg1"[,"arg2"]
 TPHL:   equ     TMPDBF          ; temp. buffer for code string pointer
 DISK:   call    DIRMOD          ; can be executed ONLY in direct mode
         jp      NZ,IMERR        ; raise error if in indirect mode
@@ -353,7 +355,7 @@ DISK:   call    DIRMOD          ; can be executed ONLY in direct mode
 ; syntax: DISK "F/W","disk name"
 ; "F" -> format disk, "W" -> rewrite master sector
 ; "disk name" is the name -> max 16 chars, allowed chars: "A" to "Z", "0" to "9","-", SPACE
-; Format: set up a fresh new file system, re-writing the Master sector and
+; Format: set up a fresh new file system, creating the Master Sector and
 ; initializing the directory
 ; Master Sector rewriting: re-initialize the Master Sector, writing a new disk name and
 ; re-calculating disk geometry
@@ -409,6 +411,7 @@ DSKUND: dec     HL              ; dec 'cause GETCHR increments
         push    HL              ; store code string pointer
         call    DSKUNDFL        ; undelete files
         pop     HL              ; retrieve code string pointer
+        jp      C,DOS_ERR       ; DOS error
         ret                     ; return to caller
 
 
@@ -443,10 +446,10 @@ CNFREQ: call    CURSOR_ON       ; enable cursor
         and     %11011111       ; only UPPERCASE char
         cp      'Y'             ; 'Y'?
         jr      NZ,CNFRQN       ; no, abort operation
-        ex      AF,AF'
+        ex      AF,AF'          ; store char into A'
         ld      A,$01           ; re-enable...
         ld      (PRNTVIDEO),A   ; ...print-on-video
-        ex      AF,AF'
+        ex      AF,AF'          ; retrieve char from A'
         call    ECHO_CHAR       ; yes, echoes the char
         call    CURSOR_OFF      ; disable cursor
         xor     A               ; reset Carry flag
@@ -488,8 +491,8 @@ DSK_INIT:   call    CHKSQFL         ; check if a seq. file is open
             out     (CF_LBA3),A     ; send configuration
             ld      A,$EC           ; select "drive ID" command
             out     (CF_CMD),A      ; send command
-            call	CF_DAT_RDY      ; wait until data is ready to be read
-            call	CF_RD_CMD       ; read data and store into I/O buffer
+            call    CF_DAT_RDY      ; wait until data is ready to be read
+            call    CF_RD_CMD       ; read data and store into I/O buffer
             ld      DE,DOSBFR       ; address of default conf. buffer
             ld 	    HL,IOBUFF       ; get starting address of I/O buffer
             ld      BC,$000E        ; position of current disk size in sectors
@@ -651,7 +654,9 @@ DOS_FT8:    call    OUTC            ; print char
 ; *****************************************************************************
 ; D I S K    R E N A M E
 ;******************************************************************************
-DSK_RNM:    call    CLRIOBF         ; clear I/O buffer
+DSK_RNM:    call    CHKDSKVAL       ; check DOS version & load disk details
+            jp      C,DOSVERSERR    ; if Carry is set, raise DOS version error
+            call    CLRIOBF         ; clear I/O buffer
             call    CLRDOSBF        ; clear DOS buff.
             call    LDMSCT          ; load Master Sector
             ld      HL,IOBUFF       ; point to start of I/O buffer
@@ -666,7 +671,6 @@ DSK_RNM:    call    CLRIOBF         ; clear I/O buffer
             call    CF_WR_SEC       ; write sector
             jp      C,WRT_ERR       ; error?
             ret                     ; no, return to caller
-
 
 
 ; *****************************************************************************
@@ -730,6 +734,7 @@ PUTNXSC:    ld      DE,$0200        ; max buffer size
             ld      (SEQSCTM),DE    ; save new MSW of sector address
 PUTFIL2:    ld      (SEQSCTL),BC    ; save new LSW of sector address
             jp      OPNFRD1         ; load sector and return
+
 
 ; *****************************************************************************
 ; OPEN A SEQUENTIAL FILE
@@ -800,7 +805,7 @@ OPNFRD2:    ld      (SEQPNT),HL     ; save pointer
             ld      HL,(SEQSCTL)    ; load LSW of sector address
             ld      DE,(SEQSCTM)    ; load MSW of sector address
             add     HL,BC           ; point to latest sector
-            ld      C,L
+            ld      C,L             ; copy HL into BC
             ld      B,H
             jr      NC,OPNFRD1      ; if LSW didn't overflow, jump over
             inc     DE              ; overflow, so increment MSW
@@ -928,6 +933,7 @@ EOF1:       push    DE              ; store value
 RETEOF:     ld      A,B             ; retrieve EOF
             jp      PASSA           ; return value
 
+
 ; *****************************************************************************
 ; P U T
 ; *****************************************************************************
@@ -997,14 +1003,14 @@ GET2:       ld      (SEQSCTL),BC    ; save LSW of sector address
             ld      DE,(SEQSCTM)    ; load MSW of sector address
             call    CF_SETSTR       ; set sector to read
             call    CF_RD_SEC       ; read next sector
-            call    CF_STANDBY
-GET1:       pop     HL
+            call    CF_STANDBY      ; set CF to standby
+GET1:       pop     HL              ; retrieve code string pointer
             ld      A,(TMPBFR1)
             jp      PASSA           ; return A and then return to caller
-GETER:      pop     HL
-            ld      E,A
+GETER:      pop     HL              ; retrieve code string pointer
+            ld      E,A             ; load error code
             call    CF_STANDBY      ; set CF into stand-by
-            jp      ERROR
+            jp      ERROR           ; raise error
 
 
 ; *****************************************************************************
@@ -1031,6 +1037,7 @@ RET_ERR:    ld      (DOSER),A       ; store DOS error
             call    CF_STANDBY      ; set CF into stand-by
             scf                     ; set Carry for error
             ret                     ; return to caller
+
 
 ; *****************************************************************************
 ; L I S T    F I L E S
@@ -1173,7 +1180,7 @@ PNTSTATS:   ld      HL,TLSCTTX      ; Point to message "Tot. sectors"
             ret                     ; return to caller
 FILETP:     defb    "BAS ",0        ; BASIC type
             defb    "BIN ",0        ; BINARY type
-            defb    "SEQ ",0
+            defb    "SEQ ",0        ; SEQUENTIAL type
             defb    "??? ",0        ; unkown
 
 
@@ -1256,6 +1263,7 @@ SAVFL12:    ld      (LSW_SCT),BC    ; store new LSW of sector
 SAVFLEXT:   call    CF_STANDBY      ; set CF into stand-by mode
             xor     A               ; clear Carry flag
             ret                     ; return to caller
+
 
 ; save entry on disk
 SVENTRY:    ld      DE,$0000        ; directory is always from sector 0000-0001
@@ -1667,6 +1675,7 @@ CKCREN:     ld      A,(IX)          ; load 1st char of entry name
             cp      $7F             ; is it $7F (deleted entry)?
             ret
 
+
 ; goto next entry
 GTNXTEN:    push    BC              ; store BC
             ld      BC,$0020        ; load BC with directory entry size (32 bytes)
@@ -1918,5 +1927,5 @@ CLRSEQBF:   push    AF              ; store AF
             push    BC              ; store BC
             push    HL              ; store HL
             ld 	    HL,SEQFL        ; load address of DOS buffer
-            ld      BC,$0B01
+            ld      BC,$0B01        ; B=11 iterations; C=repeat 1 time
             jp      CLRBUFF         ; continue to common part
