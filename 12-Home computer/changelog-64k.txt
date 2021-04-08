@@ -12,8 +12,8 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 ---------------------------------------------------------------------------------------------
 1.17    - 20210408
 
-- Fixed a bug into the code that [en|dis]able the DOS code at boot: now the state being set
-  is preserver over successive resets until a hard reset or a power-off takes place.
+- Fixed a bug into the code that [en|dis]ables the DOS code at boot: now the state being set
+  is preserved over successive resets until a hard reset or a power-off takes place.
 
 ---------------------------------------------------------------------------------------------
 1.16    - 20210327
