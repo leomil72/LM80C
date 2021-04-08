@@ -10,9 +10,16 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.17    - 20210408
+
+- Fixed a bug into the code that [en|dis]able the DOS code at boot: now the state being set
+  is preserver over successive resets until a hard reset or a power-off takes place.
+
+---------------------------------------------------------------------------------------------
 1.16    - 20210327
+
 - New DOS 1.05 with support for sequential files;
-- new BASIC statements OPEN, CLOSE, PUT, GET, EOF to manage sequential files
+- new BASIC statements OPEN, CLOSE, PUT, GET, EOF to manage sequential files.
 
 ---------------------------------------------------------------------------------------------
 1.15    - 20210319
