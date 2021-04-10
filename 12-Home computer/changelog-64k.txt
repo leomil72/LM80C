@@ -10,6 +10,14 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.18    - 20210409
+
+- New keyboard shortcut: when pressing "C=" (ALT) and "CTRL" keys together, the system resets
+  the BASIC environment, clears the variables, clears the system stack, set the screen to
+  graphic mode 1, re-initialize the PSG, close any seq. file still open, reset serial lines,
+  and returns to the BASIC prompt; the program into memory is NOT deleted.
+
+---------------------------------------------------------------------------------------------
 1.17    - 20210408
 
 - Fixed a bug into the code that [en|dis]ables the DOS code at boot: now the state being set
@@ -57,10 +65,10 @@ P.S.: for the changelog of the LM80C Color Computer see the corresponding change
 ---------------------------------------------------------------------------------------------
 1.10    - 20210307
 
+- New LM80C DOS 1.0 introduced, with new BASIC commands DISK, FILES, LOAD, SAVE, ERASE.
 - New cold reset: by pressing the RUN/STOP key during the boot sequence, the computer
   restarts again and re-copy the firmware from ROM to RAM, to restore the original code
   and fix FW modifications made with POKEs w/o the need to power off the computer;
-- Added support for LM80C DOS 1.0 and new commands DISK, FILES, LOAD, SAVE, ERASE.
 
 ---------------------------------------------------------------------------------------------
 1.05    - 20210119
