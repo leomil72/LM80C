@@ -254,7 +254,7 @@
 2520 GOTO 2720
 2530 REM ***HUNTING***
 2540 IF B>39 THEN 2570
-2550 PRINT "Tough --- You need more bullets to go":PRINT"huntinh"
+2550 PRINT "Tough --- You need more bullets to go":PRINT"hunting"
 2560 GOTO 2080
 2570 M=M-45
 2580 GOSUB 6140
