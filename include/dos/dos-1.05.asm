@@ -970,8 +970,8 @@ GET:        call    DEINT           ; get file number
             ; load byte pointed by seq. file pointer
             push    HL              ; store code string pointer
             call    CHKEOF          ; check if EOF
-            ld      E,DA
-            jp      C,ERROR         ; return EOF error
+            ld      A,DA
+            jp      C,GETER         ; return EOF error
             ld      HL,(SEQPNT)     ; reload pointer in bytes
             ld      A,H             ; copy into AC
             ld      C,L
@@ -985,22 +985,20 @@ GET:        call    DEINT           ; get file number
             inc     HL              ; increment pointer
             ld      (SEQPNT),HL
             ld      DE,$0200        ; sector size
-            ld      A,H             ; copy HL into AC
-            ld      C,L
-            call    DIV_16_16       ; calculate <pointer/$200>
-            ld      A,L
-            cp      H               ; check if remainder is 0 meaning that we read all the buffer ($200 chars)
-            jr      NZ,GET1         ; no, jump over
+            call    CMP16           ; check if pointer >= $200
+            jr      C,GET1          ; no, jump over
+            ld      HL,$0000        ; yes, reset pointer
+            ld      (SEQPNT),HL
             ld      BC,(SEQSCTL)    ; load LSW of sector address
             inc     BC              ; next sector
             ld      A,C             ; check if BC is rolled back to zero (overflow)
             or      B
             jr      NZ,GET2         ; no, jump over
-            ld      DE,(SEQSCTM)    ; load MSW of sector address
-            inc     DE              ; yes, increment MSW of sector address
+            ld      DE,(SEQSCTM)    ; yes, load MSW of sector address
+            inc     DE              ; increment MSW of sector address
             ld      (SEQSCTM),DE    ; save MSW of sector address
 GET2:       ld      (SEQSCTL),BC    ; save LSW of sector address
-            ld      DE,(SEQSCTM)    ; load MSW of sector address
+            ld      DE,(SEQSCTM)    ; (re)load MSW of sector address
             call    CF_SETSTR       ; set sector to read
             call    CF_RD_SEC       ; read next sector
             call    CF_STANDBY      ; set CF to standby
