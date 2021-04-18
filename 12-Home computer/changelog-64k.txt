@@ -10,6 +10,13 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.19    - 20210418
+
+- New function EXIST() to check if a file is already present into the directory;
+- introduction of GET(0) to roll back the internal pointer of a sequential file opened for
+  reading.
+
+---------------------------------------------------------------------------------------------
 1.18    - 20210409
 
 - New keyboard shortcut: when pressing "C=" (ALT) and "CTRL" keys together, the system resets
