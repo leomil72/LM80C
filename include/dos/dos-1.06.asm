@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C 64K - DOS ROUTINES - R1.05
+; LM80C 64K - DOS ROUTINES - R1.06
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -26,11 +26,12 @@
 ; R1.03 - 20210316 - code size enhancements
 ; R1.04 - 20210319 - code re-organization and new positioning into RAM
 ; R1.05 - 20210327 - added support for sequential files
+; R1.06 - 20210419 - added EXIST statement and EOF(0)
 ;
 ;------------------------------------------------------------------------------
 
 
-            org     $EE25
+            org     $EE1F
 
 DOSSTART:   equ     $
 DSKHDR      defb    "LM80C DOS",$00,DOS_VER,$00     ; disk header
@@ -273,17 +274,20 @@ CHK1AR: xor     A               ; reset A
         ret                     ; return to caller
 
 
-; ERASE "filename"
+; ERASE "filename"[,1]
 ; erase a file from disk
+; ,1 => full erase
 ERASE:  call    CHKFLNM         ; check for a disk name
         call    CHK1AR          ; check for ",1" argument
+        call    DIRMOD          ; check if in direct mode
+        jp      NZ,ERASE1       ; jump over if in indirect mode
         push    HL              ; store code string pointer
         ld      HL,ERSTX        ; Point to message
         call    PRS             ; print message for init confirmation
         pop     HL              ; retrieve HL
         call    CNFREQ          ; ask for confirmation
         jr      C,ABRTDS        ; if Carry set then abort
-        call    CF_INIT         ; init CF card
+ERASE1: call    CF_INIT         ; init CF card
         jp      C,DOS_ERR       ; error if device not available/ready
         push    HL              ; store code string pointer
         call    FIL_ERASE       ; deleted file
