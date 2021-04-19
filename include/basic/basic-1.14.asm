@@ -6778,15 +6778,15 @@ RESET2: call    DISNMI          ; disable NMI vector
         call    NZ,RSTSERS      ; yes, reset serials
         ld      A,(DOS_EN)      ; check DOS status
         and     A               ; DOS enabled?
-        jr      Z,RESETE        ; no, jump over
+        jr      Z,RESET3        ; no, jump over
         call    CF_STANDBY      ; yes, put CF into standby mode
         xor     A
         ld      (SEQFL),A       ; close any seq. file opened
-        ld      A,E
+RESET3: ld      A,E             ; check if soft or hard reset
         or      A
         ret     NZ              ; return if called from soft reset (C= + CTRL)
-RESETE: di                      ; disable INTs
-        jp      ROM2RAM         ; Restart
+RESETE: di                      ; hard reset - disable INTs...
+        jp      ROM2RAM         ; ...and restart
     
 
 INITST: xor     A              ; Clear break flag
