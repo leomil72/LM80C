@@ -26,12 +26,12 @@
 ; R1.03 - 20210316 - code size enhancements
 ; R1.04 - 20210319 - code re-organization and new positioning into RAM
 ; R1.05 - 20210327 - added support for sequential files
-; R1.06 - 20210419 - added EXIST statement and EOF(0)
+; R1.06 - 20210419 - added EXIST statement and EOF(0); bug fixing
 ;
 ;------------------------------------------------------------------------------
 
 
-            org     $EE1F
+            org     $EE1B
 
 DOSSTART:   equ     $
 DSKHDR      defb    "LM80C DOS",$00,DOS_VER,$00     ; disk header
@@ -1146,8 +1146,8 @@ LSTFILES20: dec     A               ; BIN type ($01)?
             jr      NZ,LSTFILES21   ; no, jump over
             ld      HL,FILETP+5     ; print "BIN"
             jr      LSTFILESPR
-LSTFILES21: dec     A
-            jr      NZ,LSTFILES22
+LSTFILES21: dec     A               ; SEQ type ($02)?
+            jr      NZ,LSTFILES22   ; no, jump over
             ld      HL,FILETP+10    ; print "SEQ"
             jr      LSTFILESPR
 LSTFILES22: ld      HL,FILETP+10    ; print "???"
@@ -1610,7 +1610,7 @@ DSKUNDFL:   call    CLRIOBF         ; clear I/O
             call    CHKDSKVAL       ; check DOS version & load disk details
             jp      C,DOSVERSERR    ; if Carry is set, raise DOS version error
             call    FNDFRENTR       ; find a free entry
-DSKUNDFL1:  ret     C               ; return if entries are finished
+DSKUNDFL1:  jr      C,DSKUNDFL3     ; return if entries are finished
             ld      A,(IX)          ; reload first char of entry
             cp      $7F             ; is it a deleted entry?
             jr      NZ,DSKUNDFL2    ; no, jump over
@@ -1637,6 +1637,8 @@ DSKUNDPR:   ld      A,(HL)          ; retrieve char from filename
             pop     HL              ; retrieve HL
 DSKUNDFL2:  call    FNDFRENTR4      ; goto next entry
             jr      DSKUNDFL1       ; repeat
+DSKUNDFL3:  xor     A               ; set no errors
+            ret                     ; return to caller
 DSKUNDTXT:  defb    "undeleted",CR,0
 
 
