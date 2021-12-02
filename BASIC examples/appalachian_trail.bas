@@ -6,7 +6,7 @@
 140 RN=RN+1:A=INKEY(10):IFA=0THEN140
 150 IFRN>32767THENRN=RN-65535:GOTO150
 155 A=RND(RN):CLS:GOSUB 5620
-160 DIM HZ(25),DLC(25),LC$(25)
+160 DIM HZ(25),DLC(25),LC$(25),TP(10)
 170 A=INKEY(10)
 175 A=INKEY(10):IFA=0THENRN=RN+1:GOTO175
 178 DB=300:REM New boot gives 300 extra mi
@@ -206,7 +206,7 @@
 1600 FOR I=1 TO 21:IF D>DLC(I)-17 AND D<DLC(I)+17 THEN 1620:REM Near anyplace?
 1610 NEXT I:PRINT:GOTO 1630
 1620 PRINT "You are near" LC$(I)
-1630 IF D>1466 THEN R(10)=.85:TO(10)=2007:REM Slow going in mountains
+1630 IF D>1466 THEN R(10)=.85:TP(10)=2007:REM Slow going in mountains
 1640 GOSUB 1710:REM Any mishaps recently?
 1650 IF T>12 THEN GOSUB 4030:REM Long stretch of rain?
 1660 IF D>1545 AND T>166 THEN GOSUB 4260:REM Snow in New England
@@ -248,7 +248,7 @@
 2000 GOSUB 3820:RETURN:REM Chance to change diet as trip progresses
 2010 REM 
 2020 REM Subroutine to alter hiking rate due to mishaps
-2030 RM=RT:FOR I=1 TO 10:IF TO(I)>T THEN RM=RM*R(I)
+2030 RM=RT:FOR I=1 TO 10:IF TP(I)>T THEN RM=RM*R(I)
 2040 NEXT I:RETURN
 2050 REM 
 2060 REM Subroutines for 35 assorted mishaps follow
@@ -333,12 +333,12 @@
 2550 RETURN
 2560 REM 
 2570 IF HZ(8)>3 THEN RETURN
-2575 HZ(8)=HZ(8)+1:R(1)=.9:TO(1)=T+14
+2575 HZ(8)=HZ(8)+1:R(1)=.9:TP(1)=T+14
 2580 PRINT "You have some nasty blisters that will"
 2585 PRINT "slow your pace.":RETURN
 2590 REM 
 2600 IF HZ(9)>2 THEN RETURN
-2605 HZ(9)=HZ(9)+1:R(2)=.7:TO(2)=T+3
+2605 HZ(9)=HZ(9)+1:R(2)=.7:TP(2)=T+3
 2610 PRINT "You have bad indigestion from an"
 2615 PRINT "unbalanced diet.":RETURN
 2620 REM 
@@ -349,7 +349,7 @@
 2650 PRINT "he wasn't hungry for human burgers.":RETURN
 2660 REM 
 2670 IF HZ(11)>1 THEN RETURN
-2675 HZ(11)=HZ(11)+1:R(3)=.75:TO(3)=T+6
+2675 HZ(11)=HZ(11)+1:R(3)=.75:TP(3)=T+6
 2680 PRINT "You twisted your ankle crossing a"
 2685 PRINT "stream. That will slow your pace"
 2690 PRINT "for a few days. Be more careful!":RETURN
@@ -423,7 +423,7 @@
 3135 HZ(21)=1:R(4)=.9:TM=.4
 3140 PRINT "Your walking stick breaks. You can get"
 3145 PRINT "a new one in the next town. Maybe they"
-3150 PRINT "make 'em better up here.":TO(4)=T+4:RETURN
+3150 PRINT "make 'em better up here.":TP(4)=T+4:RETURN
 3160 REM 
 3170 IF HZ(22)=1 THEN RETURN
 3175 HZ(22)=1:TM=.4
@@ -436,7 +436,7 @@
 3225 PRINT "marked on the map seem to have vanished"
 3230 PRINT "or dried up. Better take it easy for a"
 3235 PRINT "bit."
-3240 HZ(5)=1:R(5)=.9:TO(5)=T+3:RETURN
+3240 HZ(5)=1:R(5)=.9:TP(5)=T+3:RETURN
 3250 REM 
 3260 IF HZ(4)=3 THEN RETURN
 3265 HZ(4)=HZ(4)+1:DOC=4
@@ -450,7 +450,7 @@
 3305 PRINT "It itches like crazy but the calamine"
 3310 PRINT "seems to have it under control."
 3315 PRINT "It slows you down tho'."
-3320 R(6)=.9:TO(6)=T+7:TM=.4:RETURN
+3320 R(6)=.9:TP(6)=T+7:TM=.4:RETURN
 3330 REM 
 3340 PRINT "Walking...walking...walking...walking.":RETURN
 3350 REM 
@@ -466,14 +466,14 @@
 3430 PRINT "you're going to be out of commission for";
 3435 PRINT "a good 4 days-and even after that you'll"
 3440 PRINT "have to take it easy for a while.'"
-3450 TM=4:R(7)=.7:TO(7)=T+15:RETURN
+3450 TM=4:R(7)=.7:TP(7)=T+15:RETURN
 3460 REM 
 3470 REM Broken or sprained leg
 3480 PRINT "He examines your leg and says,":GOSUB 5510:IF RND(1)>.7 THEN 3520
 3490 PRINT "'That's a very nasty sprain. I'll tape"
 3495 PRINT "it up, but you'll have to take it easy"
 3500 PRINT "for at least a month.'"
-3510 TM=1.5:R(8)=.6:TO(8)=T+30:RETURN
+3510 TM=1.5:R(8)=.6:TP(8)=T+30:RETURN
 3520 PRINT "'Bad news, my young friend. Your leg is"
 3525 PRINT "broken. I'm surprised you got here under"
 3530 PRINT "your own power. But this is the end of"
@@ -509,7 +509,7 @@
 3745 PRINT "Also, I want you to consume at least as"
 3750 PRINT "many calories per day as your body is"
 3755 PRINT "using up.'"
-3760 WB=1.18*WB:TM=7:R(9)=.8:TO(9)=T+30:RETURN
+3760 WB=1.18*WB:TM=7:R(9)=.8:TP(9)=T+30:RETURN
 3770 PRINT "'Believe it or not, you are in an"
 3775 PRINT "advanced stage of starvation. You're"
 3780 PRINT "going to have to remain here for a few"

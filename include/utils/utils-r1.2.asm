@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - UTILITY ROUTINES - R1.1
+; LM80C - UTILITY ROUTINES - R1.2
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. More info at
@@ -17,7 +17,9 @@
 ; ------------------------------------------------------------------------------
 ; Code Revision:
 ; R1.0 - 20200110 - First release: 16-bit comparision/multiplication/negation
-; R1.1 - 20200413 - Second release: added ABS(HL) 
+; R1.1 - 20200413 - Second release: added ABS(HL)
+; R1.2 - 20200131 - Added 32/16 bit multiplication/division and converter to
+;                   transform a 32-bit value into ASCII representation
 ;
 ; ------------------------------------------------------------------------------
 
@@ -77,6 +79,34 @@ MLP1:   add     HL,HL       ; shift partial product left
 EXMUL16:pop     BC
         ret
 
+
+; ----------------------------------------------------------------------
+
+; multiply 2 unsigned 16-bit words and return a 32-bit unsigned product
+; inputs: BC (multiplicand); DE (multiplier)
+; destroys: A,F
+; operation: BC * DE
+; returns: DEHL (product)
+; Source: WKT
+
+MUL_U32:ld      HL,$0000        ; reset HL
+        sla     E		; optimised 1st iteration
+        rl      D
+        jr      NC,MU32_1       ; if no Carry then jump over
+        ld      H,B
+        ld      L,C
+MU32_1: ld      A,$0F
+MUL_32L:add     HL,HL           ; main loop
+        rl      E
+        rl      D
+        jr      NC,MU32_2
+        add     HL,BC
+        jr      NC,MU32_2
+        inc     DE
+MU32_2: dec     A
+        jr      NZ,MUL_32L
+        ret
+
 ; ----------------------------------------------------------------------
 ; absolute value of HL (same applies to other 16-bit register pairs)
 ; also, invert value of HL (or any other 16-bit register, just adjust the code)
@@ -121,7 +151,7 @@ DIV_8_8LOOP:sla     D
 ; (16/8 division)
 ;
 ; inputs: HL (Dividend), C (divisor)
-; destroys: A
+; destroys: A, B
 ; OPERATION: HL/C
 ; returns: HL (quotient), A (remainder)
 ; source: WKT
@@ -158,4 +188,91 @@ DV16_16_LP: sla     C
             add     HL,DE
             dec     C
             djnz    DV16_16_LP
+            ret
+
+
+; ----------------------------------------------------------------------
+; divide a 32-bit number by a 16 bit-number
+; (32/16 division)
+;
+; inputs: ACIX (Dividend), DE (divisor)
+; destroys: HL,IX,BC
+; OPERATION: ACIX/DE
+; returns: ACIX (quotient), HL (remainder)
+; source: WKT
+
+DIV_32_16:  ld      HL,0
+            ld      B,32
+DIV_32_16LP:add     IX,IX
+            rl      C
+            rla
+            adc     HL,HL
+            jr      C,DIV_32_16OF
+            sbc     HL,DE
+            jr      NC,DIV_32_16SB
+            add     HL,DE
+            djnz    DIV_32_16LP
+            ret
+DIV_32_16OF:or      A                   ; overflow
+            sbc     HL,DE
+DIV_32_16SB:inc     IX                  ; set bit
+            djnz    DIV_32_16LP
+            ret
+
+
+; ----------------------------------------------------------------------
+; convert a 32-bit number in ASCII string (terminated by '0')
+;
+; inputs: DEIX (Value), IY (dest. address in memory)
+; destroys: AF, BC, DE, HL, IX
+; outputs: IY (last char in dest. string)
+; source: MSX Forum
+
+CLCN32T:    defw    1,0,10,0,100,0,1000,0,10000,0
+            defw    $86A0,$1,$4240,$F,$9680,$98,$E100,$5F5,$CA00,$3B9A
+CLCN32Z:    defs    4
+
+CLCN32:     ld      (CLCN32Z),IX
+            ld      (CLCN32Z+$02),DE
+            ld      IX,CLCN32T+$24
+            ld      B,$09
+            ld      C,$00
+CLCN321:    ld      A,"0"
+            or      A
+CLCN322:    ld      E,(IX+$00)
+            ld      D,(IX+$01)
+            ld      HL,(CLCN32Z)
+            sbc     HL,DE
+            ld      (CLCN32Z),HL
+            ld      E,(IX+$02)
+            ld      D,(IX+$03)
+            ld      HL,(CLCN32Z+$02)
+            sbc     HL,DE
+            ld      (CLCN32Z+$02),HL
+            jr      C,CLCN325
+            inc     C
+            inc     A
+            jr      CLCN322
+CLCN325:    ld      E,(IX+$00)
+            ld      D,(IX+$01)
+            ld      HL,(CLCN32Z)
+            add     HL,DE
+            ld      (CLCN32Z),HL
+            ld      E,(IX+$02)
+            ld      D,(IX+$03)
+            ld      HL,(CLCN32Z+$02)
+            adc     HL,DE
+            ld      (CLCN32Z+$02),HL
+            ld      DE,-4
+            add     IX,DE
+            inc     C
+            dec     C
+            jr      Z,CLCN323
+            ld      (IY+$00),A
+            inc     IY
+CLCN323:    djnz    CLCN321
+            ld      A,(CLCN32Z)
+            add     "0"
+            ld      (IY+$00),A
+            ld      (IY+$01),0
             ret

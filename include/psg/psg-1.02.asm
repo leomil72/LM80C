@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------------
-; LM80C - PSG ROUTINES - 1.1
+; LM80C - PSG ROUTINES - 1.02
 ; ------------------------------------------------------------------------------
 ; The following code is intended to be used with LM80C Z80-based computer
 ; designed by Leonardo Miliani. Code and computer schematics are released under
@@ -151,8 +151,30 @@ KEYBOARD:       ld      C,PSG_REG       ; PSG register port
                 out     (C),B           ; set register #7
                 ld      C,PSG_DAT       ; PSG data port
                 out     (C),A           ; set I/O ports w/o altering the rest of the mixer
+                ; check for reset combination
+                ld      A,%11111110     ; first line of keyboard matrix
+                call    READKBLN
+                cp      %11011011       ; are C= and CTRL pressed?
+                jr      NZ,CHKSPCKS     ; no, jump over
+NOMRPRSS:       ld      A,%11111110     ; wait until the user...
+                call    READKBLN        ; ...releases the key combination...
+                cp      %11011011       ; ...to avoid multiple...
+                jr      Z,NOMRPRSS      ; ...calls of this code
+                call    initPSG         ; reset sounds
+                ld      E,$01           ; flag for soft reset and graphic mode 1
+                call    RESET2          ; reset serials, close seq. files and put disk into standby
+                call    initVDP         ; set video mode
+                call    RUNFST          ; clear BASIC pointers
+                pop     HL              ; remove HL from stack (put by RUNFST routine)
+                call    Z,CURSOR_ON     ; enable cursor
+                ld      A,$01           ; activate the...
+                ld      (PRNTVIDEO),A   ; ...video buffer...
+                ld      IX,PRNTOK       ; set return address
+                push    IX              ; store into stack
+                ei                      ; re-enable INTs
+                reti                    ; return from ISR and go to BASIC prompt
                 ; check special keys (SHIFT/ALT/CTRL)
-                ld      A,%11111101     ; select SHIFT row
+CHKSPCKS:       ld      A,%11111101     ; select SHIFT row
                 call    READKBLN        ; read row
                 bit     3,A             ; test if SHIFT key is pressed (4th bit is reset)
                 jr      NZ,CHECKALT     ; no, so go on
@@ -309,7 +331,7 @@ PUTCHRBUF:      xor     A
 PNT2VD:         call    CHAR2VID        ; send char to video
 LVKBRDCHK2:     xor     A
                 ld      (CONTROLKEYS),A ; reset control key flags
-LVKBRDCHK:      ret                     ; return to caller: the current key code is into TMPKEYBFR
+                ret                     ; return to caller: the current key code is into TMPKEYBFR
                 ; manage FN keys          
 PRNTFNKEY:      ld      D,A             ; copy A into D
                 ld      HL,(LINEAT)     ; Get current line number
