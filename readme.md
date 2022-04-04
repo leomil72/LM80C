@@ -15,7 +15,7 @@
 
 - [Overview](#overview)
 - [What you need](#what-you-need)
-- [Files](#files)
+- [Folder organization](#folder-organization)
 - [Compilation](#compilation)
 - [Emulation](#emulation)
 - [Z88DK Support](#Z88DK-Support)
@@ -145,7 +145,7 @@ I strongly reccomend you to assemble a prototype on breadboards to be sure that 
 
 ---
 
-## Files
+## Folder organization
 The files in this repo are organized in folders:
 - "12-Home Computer": this folder contains the main ASM file to compile the latest firmwares of the LM80C/LM80C 64K Color Computer.
 - "BASIC examples": this folder contains BASIC programs that can be loaded and executed with the integrated LM80C BASIC interpreter. If the name contains a release version (i.e. R20), it means it's the minimum firmware release required to run such program, because it makes use of some statements not present in previous releases.
