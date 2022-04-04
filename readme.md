@@ -18,6 +18,7 @@
 - [Files](#files)
 - [Compilation](#compilation)
 - [Emulation](#emulation)
+- [Z88DK Support](#Z88DK%20Support)
 - [FAQ](#faq)
 - [Support](#support)
 - [Donations](#donations)
@@ -33,41 +34,6 @@ The **LM80C** is an 8-bit home-computer built around the Zilog Z80 CPU with vide
 Actually, there is only one model of the computer: the **LM80C 64K Color Computer**. Originally, there was also the **LM80C Color Computer** but it has been considered as DEPRECATED and its developmente and/or supporto has been cheased. There were a couple of differences between the two: the former only had 32KB of SRAM and an interface to SD cards based on an Atmega328P as a mass storage (never developed, my fault), while the latter has 64KB of SRAM and a new mass storage interface based on Compat Flash cards, perfectly supported.
 
 ### Main features
-
-**LM80C Color Computer** (DEPRECATED)
-
-- CPU: Zilog Z80B@3.68 MHz
-- Memory:
-  - ROM: 32KB (with built-in firmware & BASIC)
-  - RAM: 32KB SRAM
-- Video:
-  - TMS9918A with 16KB of dedicated VRAM
-  - composite output
-  - 256x192 pixels, 15 colors, 32 sprites
-- Audio:
-  - Yamaha YM2149F (or GI AY-3-8910)
-  - 3 analog channels with tone&noise generation
-  - envelope control
-  - 2x8-bit I/O ports
-- I/O capabilities:
-  - Z80 PIO:
-    - parallel input/output periphery
-    - 2x8-bit ports
-    - 4 operatin modes
-  - Z80 SIO:
-    - serial input/output periphery
-    - 2 serial ports
-    - higly configurable
-    - software-adjustable baude rates
-  - Z80 CTC:
-    - timer/counter with 4 channels
-   - generate system ticks and baud rates
-- Keyboard:
-  - external keyboard with 64 keys (I used a Commodore 16 keyboard, that has 66 keys but only 64 unique keys due to double connections for SHIFT and SHIFT/LOCK)
-- More to come:
-  - support for SD memory cards
-
-*IMPORTANT NOTE*: due to the release of the LM80C 64K model, the development of the LM80C has been halted. At the moment, only software improvements for the LM80C BASIC are still developed and ported from the bigger brother. Since this downgrade to a minor model, the support for SD cards is not developed anymore. The PCB is basically still printable but please don't populate the SD interface portion with any of the components since none of them will be used.
 
   **LM80C 64K Color Computer**
 
@@ -105,6 +71,41 @@ Actually, there is only one model of the computer: the **LM80C 64K Color Compute
     - load/save/erase of BASIC, binary, and sequential files;
 
 Thanks to the bank switching mechanism implemented into the computer, the machine can use the whole amount of 64KB of SRAM. The same mechanism is used to provide 2x 16K banks of VRAM to the VDP so that 2 entire video framebuffers can be loaded and stored into the VRAM.
+
+**LM80C Color Computer** (DEPRECATED)
+
+- CPU: Zilog Z80B@3.68 MHz
+- Memory:
+  - ROM: 32KB (with built-in firmware & BASIC)
+  - RAM: 32KB SRAM
+- Video:
+  - TMS9918A with 16KB of dedicated VRAM
+  - composite output
+  - 256x192 pixels, 15 colors, 32 sprites
+- Audio:
+  - Yamaha YM2149F (or GI AY-3-8910)
+  - 3 analog channels with tone&noise generation
+  - envelope control
+  - 2x8-bit I/O ports
+- I/O capabilities:
+  - Z80 PIO:
+    - parallel input/output periphery
+    - 2x8-bit ports
+    - 4 operatin modes
+  - Z80 SIO:
+    - serial input/output periphery
+    - 2 serial ports
+    - higly configurable
+    - software-adjustable baude rates
+  - Z80 CTC:
+    - timer/counter with 4 channels
+   - generate system ticks and baud rates
+- Keyboard:
+  - external keyboard with 64 keys (I used a Commodore 16 keyboard, that has 66 keys but only 64 unique keys due to double connections for SHIFT and SHIFT/LOCK)
+- More to come:
+  - support for SD memory cards
+
+*IMPORTANT NOTE*: due to the release of the LM80C 64K model, the development of the LM80C has been halted. At the moment, only software improvements for the LM80C BASIC are still developed and ported from the bigger brother. Since this downgrade to a minor model, the support for SD cards is not developed anymore. The PCB is basically still printable but please don't populate the SD interface portion with any of the components since none of them will be used.
 
 <img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_key_n_inside.jpg" title="LM80C motherboard inside its case" alt="LM80C motherboard inside its case">
 
@@ -171,15 +172,11 @@ where "X.YY" is the release you want to compile. After the compilation has finis
 There is an [LM80C online emulator](https://github.com/nippur72/lm80c-emu), written in Javascript by Antonino Porcino, that can be used to see how the real machine acts and works: you can test directly in your browser by opening [this link](https://nippur72.github.io/lm80c-emu/). 
 These are the latest releases that can be launched:
 
-LM80C
-`https://nippur72.github.io/lm80c-emu/?rom=314` 
-(this is the version actually supported by Z88DK)
+[LM80C with Z88DK support](https://nippur72.github.io/lm80c-emu/?rom=314)
 
-`https://nippur72.github.io/lm80c-emu/?rom=317`
+[LM80C 3.19 (latest firmware for 32K model)](https://nippur72.github.io/lm80c-emu/?rom=319)
 
-
-LM80C 64K
-`https://nippur72.github.io/lm80c-emu/?rom=64K103`
+[LM80C 64K (with integrated DOS)](https://nippur72.github.io/lm80c-emu/?rom=64K119)
 
 
 ---
