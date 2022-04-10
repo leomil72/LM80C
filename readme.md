@@ -1,11 +1,11 @@
-<a href="https://www.leonardomiliani.com/en/lm80c/"><img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_inside.jpg" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
+<a href="https://www.leonardomiliani.com/?page_id=1534&lang=en"><img src="https://raw.githubusercontent.com/leomil72/LM80C/master/lm80c_inside.jpg" title="LM80C, a Z80-based computer" alt="LM80C, a Z80 -based computer"></a>
 
 
 # LM80C Color Computer - A Z80-based homebrew computer
 
 > This is the official repo of the **LM80C Color Computer**, an 8-bit home computer based on the Z80 CPU entirely developed since 2019 by **Leonardo Miliani**. Here you can find schematics, code and other stuff that you can use to replicate this project and build your own homebrew computer as a sort of "back to the old, good, days of 8-bit systems".
 >
-> Project main page: [LM80C](http://www.leonardomiliani.com/en/lm80c/)
+> Project main page: [LM80C](https://www.leonardomiliani.com/?page_id=1534&lang=en)
 >
 > Tags: z80, zilog, homebrew, 8-bits, computer, lm80c, ctc, pio, sio, tms9918a, ay-3-8910, ym2149f
 
@@ -138,7 +138,7 @@ To open/modify schematics you need a CAD: I use [KiCad](https://www.kicad.org/),
 To burn the binaries on the (E)EPROM chips I used a modified version of [TommyPROM](https://github.com/leomil72/TommyPROM) so that I can use 74HCT595 shift registers, but you can use any (E)EPROM programmer you have. If you want to replicate my programmer, you need an [Arduino/Genuino Uno](https://www.arduino.cc) board. Please buy a *genuine board*, not a counterfit one, to help the open-source project. 
 
 ### Prototyping
-I strongly reccomend you to assemble a prototype on breadboards to be sure that everything is working right. The pictures below represent the LM80C during its development:
+I strongly recommend you to assemble a prototype on breadboards to be sure that everything is working right. The pictures below represent the LM80C during its development:
 <img src="https://raw.githubusercontent.com/leomil72/LM80C/master/12-Home%20computer/LM80C.jpg" title="LM80C prototype, built upon breadboards" alt="LM80C prototype, built upon breadboards">
 
 <img src="https://raw.githubusercontent.com/leomil72/LM80C/master/keyboard.jpg" title="LM80C keyboard over the breaboards" alt="LM80C keyboard over the breaboards">
@@ -204,7 +204,7 @@ The latest releases of [Z88DK](https://github.com/z88dk/z88dk) support the compi
 
 ## Support
 
-You can find more about me on my website at <a href="https://www.leonardomiliani.com/en/" target="_blank">www.leonardomiliani.com</a>.
+You can find more about me on my website at <a href="https://www.leonardomiliani.com/?lang=en" target="_blank">www.leonardomiliani.com</a>.
 
 ---
 
