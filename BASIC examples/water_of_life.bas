@@ -750,7 +750,7 @@
 51475 DATA "Become","Sausage","Linctus"
 51480 DATA "Column","Becalm","Favour","Linseed","Collide","Beaver","Colonel"
 51485 DATA "Beauty"
-51500 CLS 15,8,8
+51500 CLS:COLOR 15,8,8
 51505 LOCATE 10,7:PRINT "Magic Fails!";
 51510 PAUSE 150
 51520 RETURN
