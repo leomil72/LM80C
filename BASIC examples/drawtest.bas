@@ -4,8 +4,6 @@
 40  REM *                       *
 50  REM *   WORKS WITH LM80C    *
 60  REM *    COLOR COMPUTER     *
-70  REM *   WITH FIRMARE 2.11   *
-80  REM *       AND ABOVE       *
 90  REM *************************
 100 SCREEN 2
 110 X1=0:Y1=96
