@@ -2,7 +2,6 @@
 20 REM  COPVRIGHT 1978 REV. GEORGE BLANK LEECHBURG, PA 15656
 30 REM  OCTOBER 16
 100 CLEAR 700:DEF FNRN(X)=INT(RND(1)*X)+1
-150 DEFINT A-J,M-Q,T,Y,W
 160 Y(0)=1400
 200 DATA "Sir ","Baron ","Count ","Marquis ","Duke ","Grand Duke ","Prince ","* H.R.H. King "
 210 DATA "Lady ","Baroness ","Countess ","Marquise ","Duchess ","Grand Duchess ","Princess ","* H.R.H. Queen "
@@ -14,7 +13,7 @@
 325 GOSUB 8400:PRINT KE:IF KE<ASC("1") OR KE>ASC("6") THEN 325
 330 PRINT CHR$(KE):F=KE-48:FOR A=1 TO F:READ T$(A)
 340 PRINT:PRINT "Who is the ruler of":PRINT T$(A);
-350 INPUT N$(A):IF NS$(A)="" THEN 340
+350 INPUT N$(A):IF N$(A)="" THEN 340
 360 N$(A)=N$(A)+" of "+T$(A)
 370 PRINT "Is ";N$(A):PRINT " a Man or a Woman? ";:V(A)=0
 380 GOSUB 8400:IF KE=ASC("W") THEN V(A)=8:PRINT "Wo";
