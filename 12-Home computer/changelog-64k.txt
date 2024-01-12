@@ -10,6 +10,12 @@ for the LM80C 64K Color Computer. More info at www DOT leonardomiliani DOT com
 P.S.: for the changelog of the LM80C Color Computer see the corresponding changelog file
 
 ---------------------------------------------------------------------------------------------
+1.20    - 20240112
+
+- Revised ERASE command: now, it recovers the original file name, by simply setting/unsetting
+  the MSBit of the file name when deleting/undeleting the file.
+
+---------------------------------------------------------------------------------------------
 1.19    - 20210418
 
 - New function EXIST() to check if a file is already present into the directory;
