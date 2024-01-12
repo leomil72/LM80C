@@ -1,0 +1,109 @@
+10 REM compactflash demo, www.smbaker.com
+20 REM This was intended to be a basic program that could read and write
+30 REM the compactflash card. Unfortunately, doing a sector write on a fuji
+40 REM card using basic appears to be too slow and aborts. 
+50 SCREEN 0:GOSUB 8000:REM configure
+100 PRINT:PRINT "1 - dump drive ID":PRINT "2 - read sector"
+110 PRINT "3 - write sector":PRINT "0 - EXIT"
+200 PRINT "Selection ";
+210 INPUT A$:IF A$="0" THEN END
+220 IF A$="1" THEN GOSUB 8400
+230 IF A$="2" THEN GOSUB 1000
+240 IF A$="3" THEN GOSUB 2000 
+300 GOTO 100
+1000 PRINT "Sector ";
+1010 INPUT S
+1020 GOSUB 8500
+1030 RETURN
+2000 PRINT "Sector ";
+2010 INPUT S
+2020 PRINT "Data ";
+2030 INPUT D$
+2040 GOSUB 9000
+2050 RETURN
+6990 REM wait until CF has executed the requested job
+7000 IF (INP(I7) AND 128)<>0 THEN 7000:REM wait for not busy
+7010 RETURN
+8000 REM setup constants for IDE port addresses
+8010 I0=80
+8020 I1=I0+1
+8030 I2=I0+2
+8040 I3=I0+3
+8050 I4=I0+4
+8060 I5=I0+5
+8070 I6=I0+6
+8080 I7=I0+7
+8090 GOSUB 7000:REM wait for not busy
+8100 OUT I1,1:GOSUB 7000:REM 8-bit mode
+8110 OUT I7,239:GOSUB 7000:REM set features command
+8120 OUT I1,130:GOSUB 7000:REM no-cache
+8130 OUT I7,239:GOSUB 7000:REM set features command 
+8190 RETURN
+8200 REM wait-for-ready
+8210 X=INP(I7)
+8220 IF (X AND 64)=0 THEN 8210:REM wait for ready=1
+8230 IF (X AND 128)<>0 THEN 8210:REM wait for busy=0
+8240 RETURN
+8300 REM wait-for-drq
+8310 X=INP(I7)
+8320 IF (X AND 8)=0 THEN 8310:REM wait for drq=1
+8330 IF (X AND 128)<>0 THEN 8310:REM wait for busy=0
+8340 RETURN
+8400 REM read drive status
+8410 GOSUB 8200:REM wait for ready
+8420 OUT I6,224:GOSUB 7000:REM select master 
+8430 OUT I7,236:GOSUB 7000:REM send drive id command
+8440 GOSUB 8300:REM wait for drq
+8450 CT=512
+8460 GOSUB 8600
+8470 RETURN
+8500 REM read sector
+8510 GOSUB 8200:REM wait for ready
+8515 OUT I2,1:GOSUB 7000
+8520 OUT I3,S-(INT(S/256)*256):GOSUB 7000
+8530 OUT I4,INT(S/256):GOSUB 7000
+8535 OUT I5,0:GOSUB 7000
+8540 OUT I6,224:GOSUB 7000:REM select master
+8550 OUT I7,32:GOSUB 7000:REM send drive read command
+8560 GOSUB 8300:REM wait for drq
+8570 CT=512
+8580 GOSUB 8600
+8590 RETURN
+8600 REM dump data from disk to screen
+8610 PRINT:FOR I=0 TO (CT/16)-1
+8620 X=I*16:GOSUB 8850:PRINT " ";:REM print offset
+8630 AS$=""
+8640 FOR J=1 TO 16
+8650 X=INP(I0)
+8660 GOSUB 8800
+8670 PRINT " ";
+8680 IF (X>32) THEN AS$=AS$+CHR$(X):GOTO 8700
+8690 AS$=AS$+"."
+8700 NEXT J
+8710 PRINT AS$
+8720 NEXT I
+8730 RETURN
+8800 REM print two hex digits
+8810 XH$=HEX$(X):IF LEN(XH$)<2 THEN XH$="0"+XH$
+8820 PRINT XH$;:RETURN
+8849 REM print four hex digits
+8850 ZH$=HEX$(X)
+8860 IF LEN(ZH$)=4 THEN 8880
+8870 LZ=LEN(ZH$):FOR HH=1 TO 4-LZ:ZH$="0"+ZH$:NEXT
+8880 PRINT ZH$;:RETURN 
+9000 REM write sector
+9010 GOSUB 8200:REM wait for ready
+9015 OUT I2,1:GOSUB 7000
+9020 OUT I3,S-(INT(S/256)*256):GOSUB 7000
+9030 OUT I4,INT(S/256):GOSUB 7000
+9035 OUT I5,0:GOSUB 7000
+9040 OUT I6,224:GOSUB 7000:REM select master
+9050 OUT I7,48:GOSUB 7000:REM send drive write command
+9060 GOSUB 8300:REM wait for drq
+9070 FOR I=1 TO LEN(D$)
+9080 OUT I0,ASC(MID$(D$,I,1)):GOSUB 7000
+9090 NEXT I
+9100 FOR I=1 TO 512-LEN(D$)
+9110 OUT I0,0:GOSUB 7000
+9120 NEXT I
+9130 RETURN
