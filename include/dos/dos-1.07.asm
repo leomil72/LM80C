@@ -1711,9 +1711,9 @@ PT2FSEN:    call    CF_SETSTR       ; set sector to read (BC-DE)
 CKCREN:     ld      A,(IX)          ; load 1st char of entry name
             or      A               ; is it $00 (empty entry)?
             ret     Z               ; yes, found an entry
-            cpl                     ; invert bits of A - so, if 7th was set, now it's unset
-            bit     7,A             ; is 7th bit set? (deleted entry)? if it was set
-            ret                     ; returns Z=1 if 7th bit was set
+            cpl                     ; no, invert bits of A and check the 7th bit (if it was set, now it's unset, and vice-versa)
+            bit     7,A             ; check if 7th bit is now unset (deleted entry) or set (regular/empty entry)
+            ret                     ; returns Z=1 for deleted entry (if 7th bit was originally set), and Z=0 otherwise
 
 
 ; goto next entry
